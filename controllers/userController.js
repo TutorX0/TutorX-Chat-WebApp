@@ -86,17 +86,16 @@ exports.verifyOTP = async (req, res) => {
 
 exports.getUserProfile = async (req, res) => {
     try {
-      const user = req.user; // comes from middleware
-      res.status(200).json({
-        status: "success",
-        user: {
-          id: user._id,
-          email: user.email,
-          isVerified: user.isVerified,
-        }
-      });
+        const user = req.user; // comes from middleware
+        res.status(200).json({
+            status: "success",
+            user: {
+                id: user._id,
+                email: user.email,
+                isVerified: user.isVerified
+            }
+        });
     } catch (error) {
-      res.status(500).json({ status: "error", message: error.message });
+        res.status(500).json({ status: "error", message: error.message });
     }
-  };
-  
+};

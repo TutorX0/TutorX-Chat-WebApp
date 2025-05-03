@@ -118,38 +118,38 @@ exports.sendMessage = async (req, res) => {
 };
 
 exports.createChat = async (req, res) => {
-  try {
-    const { name, phoneNumber } = req.body;
+    try {
+        const { name, phoneNumber } = req.body;
 
-    if (!name || !phoneNumber) {
-      return res.status(400).json({ status: "error", message: "name and phoneNumber are required" });
+        if (!name || !phoneNumber) {
+            return res.status(400).json({ status: "error", message: "name and phoneNumber are required" });
+        }
+
+        const chatId = generateChatId(phoneNumber);
+
+        // Check if chat already exists
+        const existingChat = await Chat.findOne({ chatId });
+        if (existingChat) {
+            return res.status(400).json({ status: "error", message: "Chat with this phone number already exists" });
+        }
+
+        const newChat = new Chat({
+            chatId,
+            name,
+            phoneNumber
+        });
+
+        await newChat.save();
+
+        res.status(201).json({
+            status: "success",
+            message: "Chat created successfully",
+            chat: newChat
+        });
+    } catch (err) {
+        console.error("Error creating chat:", err);
+        res.status(500).json({ status: "error", message: err.message });
     }
-
-    const chatId = generateChatId(phoneNumber);
-
-    // Check if chat already exists
-    const existingChat = await Chat.findOne({ chatId });
-    if (existingChat) {
-      return res.status(400).json({ status: "error", message: "Chat with this phone number already exists" });
-    }
-
-    const newChat = new Chat({
-      chatId,
-      name,
-      phoneNumber
-    });
-
-    await newChat.save();
-
-    res.status(201).json({
-      status: "success",
-      message: "Chat created successfully",
-      chat: newChat
-    });
-  } catch (err) {
-    console.error("Error creating chat:", err);
-    res.status(500).json({ status: "error", message: err.message });
-  }
 };
 
 exports.updateGuestName = async (req, res) => {
@@ -205,104 +205,100 @@ exports.updateGuestName = async (req, res) => {
 //   }
 // };
 
-
-
 exports.getChatHistory = async (req, res) => {
-  try {
-    const { chatId } = req.params;
+    try {
+        const { chatId } = req.params;
 
-    const chat = await Chat.findOne({ chatId });
-    if (!chat) {
-      return res.status(404).json({ status: "error", message: "Chat not found" });
+        const chat = await Chat.findOne({ chatId });
+        if (!chat) {
+            return res.status(404).json({ status: "error", message: "Chat not found" });
+        }
+
+        const messages = await Message.find({ chatId }).sort({ createdAt: 1 }); // Oldest first
+
+        // Group messages by day using moment
+        const groupedMessages = {};
+
+        messages.forEach((msg) => {
+            const dateLabel = getDateLabel(msg.createdAt);
+            if (!groupedMessages[dateLabel]) {
+                groupedMessages[dateLabel] = [];
+            }
+            groupedMessages[dateLabel].push({
+                _id: msg._id,
+                sender: msg.sender,
+                content: msg.content,
+                type: msg.type,
+                createdAt: msg.createdAt
+            });
+        });
+
+        res.status(200).json({
+            status: "success",
+            chat: {
+                chatId: chat.chatId,
+                name: chat.name,
+                phoneNumber: chat.phoneNumber,
+                groupedMessages
+            }
+        });
+    } catch (err) {
+        console.error("Error fetching chat history:", err);
+        res.status(500).json({ status: "error", message: err.message });
     }
-
-    const messages = await Message.find({ chatId })
-      .sort({ createdAt: 1 }); // Oldest first
-
-    // Group messages by day using moment
-    const groupedMessages = {};
-
-    messages.forEach(msg => {
-      const dateLabel = getDateLabel(msg.createdAt);
-      if (!groupedMessages[dateLabel]) {
-        groupedMessages[dateLabel] = [];
-      }
-      groupedMessages[dateLabel].push({
-        _id: msg._id,
-        sender: msg.sender,
-        content: msg.content,
-        type: msg.type,
-        createdAt: msg.createdAt,
-      });
-    });
-
-    res.status(200).json({
-      status: "success",
-      chat: {
-        chatId: chat.chatId,
-        name: chat.name,
-        phoneNumber: chat.phoneNumber,
-        groupedMessages
-      }
-    });
-  } catch (err) {
-    console.error("Error fetching chat history:", err);
-    res.status(500).json({ status: "error", message: err.message });
-  }
 };
 
 // Helper to format dates like WhatsApp: Today, Yesterday, or Weekday
 function getDateLabel(date) {
-  const now = moment();
-  const input = moment(date);
+    const now = moment();
+    const input = moment(date);
 
-  if (input.isSame(now, 'day')) {
-    return "Today";
-  } else if (input.isSame(now.clone().subtract(1, 'day'), 'day')) {
-    return "Yesterday";
-  } else if (input.isAfter(now.clone().subtract(7, 'days'))) {
-    return input.format("dddd"); // e.g., Tuesday
-  } else {
-    return input.format("DD MMM YYYY"); // e.g., 18 Apr 2025
-  }
+    if (input.isSame(now, "day")) {
+        return "Today";
+    } else if (input.isSame(now.clone().subtract(1, "day"), "day")) {
+        return "Yesterday";
+    } else if (input.isAfter(now.clone().subtract(7, "days"))) {
+        return input.format("dddd"); // e.g., Tuesday
+    } else {
+        return input.format("DD MMM YYYY"); // e.g., 18 Apr 2025
+    }
 }
 
-
 exports.getAllChats = async (req, res) => {
-  try {
-    // Fetch all chats
-    const chats = await Chat.find();
+    try {
+        // Fetch all chats
+        const chats = await Chat.find();
 
-    // Enrich each chat with the last message details
-    const enrichedChats = await Promise.all(
-      chats.map(async (chat) => {
-        const lastMessage = await Message.findOne({ chatId: chat.chatId })
-          .sort({ createdAt: -1 })
-          .select("content type createdAt")
-          .lean();
+        // Enrich each chat with the last message details
+        const enrichedChats = await Promise.all(
+            chats.map(async (chat) => {
+                const lastMessage = await Message.findOne({ chatId: chat.chatId })
+                    .sort({ createdAt: -1 })
+                    .select("content type createdAt")
+                    .lean();
 
-        return {
-          chatId: chat.chatId,
-          phoneNumber: chat.phoneNumber,
-          name: chat.name,
-          lastMessage: lastMessage?.content || "",
-          lastMessageType: lastMessage?.type || "",
-          lastMessageTime: lastMessage?.createdAt || chat.updatedAt,
-        };
-      })
-    );
+                return {
+                    chatId: chat.chatId,
+                    phoneNumber: chat.phoneNumber,
+                    name: chat.name,
+                    lastMessage: lastMessage?.content || "",
+                    lastMessageType: lastMessage?.type || "",
+                    lastMessageTime: lastMessage?.createdAt || chat.updatedAt
+                };
+            })
+        );
 
-    // Sort chats by last message time (descending)
-    enrichedChats.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
+        // Sort chats by last message time (descending)
+        enrichedChats.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
 
-    // Return all enriched chats
-    res.status(200).json({
-      status: "success",
-      totalChats: enrichedChats.length,
-      chats: enrichedChats
-    });
-  } catch (err) {
-    console.error("Error fetching chats:", err);
-    res.status(500).json({ status: "error", message: err.message });
-  }
+        // Return all enriched chats
+        res.status(200).json({
+            status: "success",
+            totalChats: enrichedChats.length,
+            chats: enrichedChats
+        });
+    } catch (err) {
+        console.error("Error fetching chats:", err);
+        res.status(500).json({ status: "error", message: err.message });
+    }
 };
