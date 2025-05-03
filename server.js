@@ -4,30 +4,52 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const chatRoutes = require("./routes/chatRoutes");
-const webhookRoutes = require("./routes/webhooks");
 const userRoutes = require("./routes/userRoutes");
-const Chat = require("./models/chatModel");
 const groupRoutes = require("./routes/groupRoutes");
 const path = require("path");
+const http = require("http");
+const socketIo = require("socket.io");
 
 dotenv.config();
 connectDB();
 
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+    cors: {
+      origin: "*"
+    }
+  });
+
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: true, credentials: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use(cors({ origin: true, credentials: true }));
-
+// Import webhookRoutes with socket.io passed in
+const webhookRoutes = require("./routes/webhooks")(io);
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+  });
+// Use Routes
+app.use("/webhook", webhookRoutes); // Webhook routes using io
 app.use("/api/chat", chatRoutes);
-app.use("/api", webhookRoutes);
-app.use("/api", userRoutes);
+app.use("/api/user", userRoutes);
 app.use("/api/group", groupRoutes);
-// Webhook verification endpoint
 
-// Start your server
-app.listen(3000, () => {
-    console.log("Webhook server is running on port 3000");
+// WebSocket logic
+io.on("connection", (socket) => {
+  console.log("User connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+  });
+});
+
+// Start server
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
