@@ -6,6 +6,7 @@ const chatRoutes = require("./routes/chatRoutes");
 const webhookRoutes = require("./routes/webhooks");
 const userRoutes = require("./routes/userRoutes");
 const Chat = require("./models/chatModel");
+const groupRoutes = require("./routes/groupRoutes");
 const path = require("path");
 
 dotenv.config();
@@ -20,6 +21,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/chat", chatRoutes);
 app.use("/", webhookRoutes);
 app.use("/",userRoutes);
+app.use("/api/group", groupRoutes);
+
 // Webhook verification endpoint
 
 

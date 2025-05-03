@@ -6,7 +6,8 @@ const userSchema = new mongoose.Schema({
     otp: {
         code: { type: String },
         createdAt: { type: Date }
-    }
+    },
+    about: { type: String, default: "" } // New "about" section
 });
 
 module.exports = mongoose.model("User", userSchema);

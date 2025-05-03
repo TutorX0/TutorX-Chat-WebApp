@@ -92,6 +92,7 @@ exports.getUserProfile = async (req, res) => {
         user: {
           id: user._id,
           email: user.email,
+          about : user.about,
           isVerified: user.isVerified,
         }
       });
@@ -100,3 +101,32 @@ exports.getUserProfile = async (req, res) => {
     }
   };
   
+  exports.updateAbout = async (req, res) => {
+    const { email, about } = req.body;
+  
+    if (!email || typeof about !== "string") {
+      return res.status(400).json({ status: "error", message: "Email and about are required." });
+    }
+  
+    try {
+      const user = await User.findOneAndUpdate(
+        { email },
+        { about },
+        { new: true }
+      );
+  
+      if (!user) {
+        return res.status(404).json({ status: "error", message: "User not found." });
+      }
+  
+      res.status(200).json({
+        status: "success",
+        message: "About section updated successfully.",
+        user
+      });
+  
+    } catch (error) {
+      console.error("Update about error:", error);
+      res.status(500).json({ status: "error", message: "Internal server error." });
+    }
+  };
