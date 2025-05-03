@@ -278,6 +278,7 @@ exports.getAllChats = async (req, res) => {
                     .lean();
 
                 return {
+                    _id: chat._id,
                     chatId: chat.chatId,
                     phoneNumber: chat.phoneNumber,
                     name: chat.name,
