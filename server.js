@@ -19,11 +19,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: true, credentials: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use("/api/chat", chatRoutes);
-app.use("/", webhookRoutes);
-app.use("/",userRoutes);
-app.use("/api/group", groupRoutes);
+app.use(cors({ origin: true, credentials: true }));
 
+app.use("/api/chat", chatRoutes);
+app.use("/api", webhookRoutes);
+app.use("/api", userRoutes);
+app.use("/api/group", groupRoutes);
 // Webhook verification endpoint
 
 // Start your server

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
 import { useStore } from "@/store";
+import { axiosClient } from "@/lib";
+import { userSchema } from "@/validations/user.validation";
 
 export function useFetchUser() {
     const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
@@ -10,15 +12,31 @@ export function useFetchUser() {
 
     useEffect(() => {
         async function getUser() {
+            if (user) {
+                setStatus("success");
+                return;
+            }
+
             setStatus("pending");
 
             const token = window.localStorage.getItem("tutor-x-auth-token");
+            if (!token) {
+                setStatus("error");
+                return;
+            }
+
             try {
-                // TODO: Make an API call here
-                // await Promise.reject(new Error("Some random error happened out of nowhere"));
+                const response = await axiosClient.get("/me", { headers: { Authorization: `Bearer ${token}` } });
+
+                const parsedResponse = userSchema.safeParse(response.data);
+                if (!parsedResponse.success) {
+                    setStatus("error");
+                    return;
+                }
+
                 setStatus("success");
+                setUser(parsedResponse.data.user);
             } catch (error: unknown) {
-                console.log("");
                 setStatus("error");
             }
         }

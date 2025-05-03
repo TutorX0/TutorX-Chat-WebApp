@@ -15,28 +15,23 @@ export const textMessageResponseSchema = z.object({
 export type TextMessage = z.infer<typeof textMessageResponseSchema>;
 
 export const chatMessage = z.object({
-    chatId: z.string(),
     content: z.string(),
     createdAt: z.string(),
-    mediaUrl: z.string().nullable().optional(),
-    messageType: z.string(),
-    phoneNumber: z.string(),
     sender: z.string(),
-    updatedAt: z.string(),
-    __v: z.number(),
     _id: z.string()
 });
 
 export type ChatMessage = z.infer<typeof chatMessage>;
 
+export const groupedMessages = z.record(z.array(chatMessage));
+
+export type GroupedMessages = z.infer<typeof groupedMessages>;
+
 export const fetchMessageResponseSchema = z.object({
-    totalPages: z.number(),
-    totalMessages: z.number(),
-    currentPage: z.number(),
     status: z.string(),
     chat: z.object({
         chatId: z.string(),
-        messages: z.array(chatMessage),
+        groupedMessages: groupedMessages,
         name: z.string(),
         phoneNumber: z.string()
     })

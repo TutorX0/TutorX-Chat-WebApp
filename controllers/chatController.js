@@ -16,128 +16,123 @@ const generateGuestName = async () => {
 };
 
 exports.sendMessage = async (req, res) => {
-  const { phoneNumber, message = "", type = "text" } = req.body;
-  let mediaUrl = req.body.mediaUrl || null;
+    const { phoneNumber, message = "", type = "text" } = req.body;
+    let mediaUrl = req.body.mediaUrl || null;
 
-  try {
-    if (!phoneNumber) {
-      return res.status(400).json({ status: "error", message: "Phone number is required" });
-    }
-    
-    // If a file is uploaded (handled by multer)
-    if (req.file) {
-      mediaUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-    }
-
-    let payload;
-
-    if (type === "template") {
-      payload = {
-        messaging_product: "whatsapp",
-        to: phoneNumber,
-        type: "template",
-        template: {
-          name: "hello_world",
-          language: { code: "en_US" }
+    try {
+        if (!phoneNumber) {
+            return res.status(400).json({ status: "error", message: "Phone number is required" });
         }
-      };
-    } else if (type === "text") {
-      if (!message || typeof message !== "string") {
-        return res.status(400).json({ status: "error", message: "Message is required" });
-      }
-      payload = {
-        messaging_product: "whatsapp",
-        to: phoneNumber,
-        type: "text",
-        text: { body: message.trim() }
-      };
-    } else if (type === "image") {
-      if (!mediaUrl) return res.status(400).json({ status: "error", message: "Image URL is required" });
-      payload = {
-        messaging_product: "whatsapp",
-        to: phoneNumber,
-        type: "image",
-        image: { link: mediaUrl, caption: message || "" }
-      };
-    } else if (type === "document") {
-      if (!mediaUrl) return res.status(400).json({ status: "error", message: "Document URL is required" });
-      payload = {
-        messaging_product: "whatsapp",
-        to: phoneNumber,
-        type: "document",
-        document: { link: mediaUrl, caption: message || "" }
-      };
-    } else if (type === "audio") {
-      if (!mediaUrl) return res.status(400).json({ status: "error", message: "Audio URL is required" });
-      payload = {
-        messaging_product: "whatsapp",
-        to: phoneNumber,
-        type: "audio",
-        audio: { link: mediaUrl }
-      };
-    } else if (type === "video") {
-      if (!mediaUrl) return res.status(400).json({ status: "error", message: "Video URL is required" });
-      payload = {
-        messaging_product: "whatsapp",
-        to: phoneNumber,
-        type: "video",
-        video: { link: mediaUrl, caption: message || "" }
-      };
-    } else {
-      return res.status(400).json({ status: "error", message: "Unsupported message type" });
-    }
 
-    // Send WhatsApp message
-    const response = await axios.post(
-      `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`,
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
-          "Content-Type": "application/json"
+        // If a file is uploaded (handled by multer)
+        if (req.file) {
+            mediaUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
         }
-      }
-    );
 
-    // Create Chat if not exist
-    let chat = await Chat.findOne({ phoneNumber });
-    if (!chat) {
-      const name = await generateGuestName();
-      chat = new Chat({
-        chatId: generateChatId(phoneNumber),
-        phoneNumber,
-        name
-      });
-      await chat.save();
+        let payload;
+
+        if (type === "template") {
+            payload = {
+                messaging_product: "whatsapp",
+                to: phoneNumber,
+                type: "template",
+                template: {
+                    name: "hello_world",
+                    language: { code: "en_US" }
+                }
+            };
+        } else if (type === "text") {
+            if (!message || typeof message !== "string") {
+                return res.status(400).json({ status: "error", message: "Message is required" });
+            }
+            payload = {
+                messaging_product: "whatsapp",
+                to: phoneNumber,
+                type: "text",
+                text: { body: message.trim() }
+            };
+        } else if (type === "image") {
+            if (!mediaUrl) return res.status(400).json({ status: "error", message: "Image URL is required" });
+            payload = {
+                messaging_product: "whatsapp",
+                to: phoneNumber,
+                type: "image",
+                image: { link: mediaUrl, caption: message || "" }
+            };
+        } else if (type === "document") {
+            if (!mediaUrl) return res.status(400).json({ status: "error", message: "Document URL is required" });
+            payload = {
+                messaging_product: "whatsapp",
+                to: phoneNumber,
+                type: "document",
+                document: { link: mediaUrl, caption: message || "" }
+            };
+        } else if (type === "audio") {
+            if (!mediaUrl) return res.status(400).json({ status: "error", message: "Audio URL is required" });
+            payload = {
+                messaging_product: "whatsapp",
+                to: phoneNumber,
+                type: "audio",
+                audio: { link: mediaUrl }
+            };
+        } else if (type === "video") {
+            if (!mediaUrl) return res.status(400).json({ status: "error", message: "Video URL is required" });
+            payload = {
+                messaging_product: "whatsapp",
+                to: phoneNumber,
+                type: "video",
+                video: { link: mediaUrl, caption: message || "" }
+            };
+        } else {
+            return res.status(400).json({ status: "error", message: "Unsupported message type" });
+        }
+
+        // Send WhatsApp message
+        const response = await axios.post(`https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`, payload, {
+            headers: {
+                Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        // Create Chat if not exist
+        let chat = await Chat.findOne({ phoneNumber });
+        if (!chat) {
+            const name = await generateGuestName();
+            chat = new Chat({
+                chatId: generateChatId(phoneNumber),
+                phoneNumber,
+                name
+            });
+            await chat.save();
+        }
+
+        // Save message in DB
+        const newMessage = new Message({
+            chatId: chat.chatId,
+            phoneNumber,
+            sender: "admin",
+            messageType: type,
+            content: message || "",
+            mediaUrl: mediaUrl || null,
+            fileName: req.file?.originalname || null
+        });
+
+        await newMessage.save();
+
+        res.status(200).json({
+            status: "success",
+            chatId: chat.chatId,
+            data: response.data
+        });
+    } catch (error) {
+        console.error("Error sending message:", error);
+        res.status(500).json({
+            status: "error",
+            message: error.response?.data?.error?.message || error.message,
+            details: error.response?.data || {}
+        });
     }
-
-    // Save message in DB
-    const newMessage = new Message({
-      chatId: chat.chatId,
-      phoneNumber,
-      sender: "admin",
-      messageType: type,
-      content: message || "",
-      mediaUrl: mediaUrl || null,
-      fileName: req.file?.originalname || null
-    });
-
-    await newMessage.save();
-
-    res.status(200).json({
-      status: "success",
-      chatId: chat.chatId,
-      data: response.data
-    });
-
-  } catch (error) {
-    console.error("Error sending message:", error);
-    res.status(500).json({
-      status: "error",
-      message: error.response?.data?.error?.message || error.message,
-      details: error.response?.data || {}
-    });
-  }
 };
 
 exports.createChat = async (req, res) => {
@@ -301,6 +296,7 @@ exports.getAllChats = async (req, res) => {
                     .lean();
 
                 return {
+                    _id: chat._id,
                     chatId: chat.chatId,
                     phoneNumber: chat.phoneNumber,
                     name: chat.name,
