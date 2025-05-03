@@ -9,6 +9,7 @@ export const router = createBrowserRouter(
         <Route path="/">
             <Route element={<Protect />}>
                 <Route path={routes.homeUrl} element={<Page.HomePage />} />
+                <Route path={routes.profileUrl} element={<Page.ProfilePage />} />
             </Route>
             <Route path={routes.loginUrl} element={<Page.LoginPage />} />
             <Route path="*" element={<Page.NotFoundPage />} />
