@@ -6,6 +6,7 @@ const chatRoutes = require("./routes/chatRoutes");
 const webhookRoutes = require("./routes/webhooks");
 const userRoutes = require("./routes/userRoutes");
 const Chat = require("./models/chatModel");
+const path = require("path");
 
 dotenv.config();
 connectDB();
@@ -14,6 +15,7 @@ connectDB();
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/chat", chatRoutes);
 app.use("/", webhookRoutes);
