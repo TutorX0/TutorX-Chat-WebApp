@@ -1,8 +1,5 @@
 export * from "./autosize-textarea";
-<<<<<<< HEAD
-=======
 export * from "./alert-dialog";
->>>>>>> main
 export * from "./scroll-area";
 export * from "./input-otp";
 export * from "./resizable";
