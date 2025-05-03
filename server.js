@@ -1,4 +1,5 @@
 const express = require("express");
+const cors = require("cors");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
@@ -12,10 +13,10 @@ const path = require("path");
 dotenv.config();
 connectDB();
 
-
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors({ origin: true, credentials: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use("/api/chat", chatRoutes);
@@ -24,7 +25,6 @@ app.use("/",userRoutes);
 app.use("/api/group", groupRoutes);
 
 // Webhook verification endpoint
-
 
 // Start your server
 app.listen(3000, () => {
