@@ -234,7 +234,6 @@ exports.getChatHistory = async (req, res) => {
 
         const messages = await Message.find({ chatId }).sort({ createdAt: 1 }); // Oldest first
 
-        // Group messages by day using moment
         const groupedMessages = {};
 
         messages.forEach((msg) => {
@@ -242,11 +241,14 @@ exports.getChatHistory = async (req, res) => {
             if (!groupedMessages[dateLabel]) {
                 groupedMessages[dateLabel] = [];
             }
+
             groupedMessages[dateLabel].push({
                 _id: msg._id,
                 sender: msg.sender,
                 content: msg.content,
-                type: msg.type,
+                type: msg.messageType,
+                mediaUrl: msg.mediaUrl || null,
+                fileName: msg.fileName || null,
                 createdAt: msg.createdAt
             });
         });
@@ -266,7 +268,7 @@ exports.getChatHistory = async (req, res) => {
     }
 };
 
-// Helper to format dates like WhatsApp: Today, Yesterday, or Weekday
+// Helper to format dates like WhatsApp
 function getDateLabel(date) {
     const now = moment();
     const input = moment(date);
@@ -319,5 +321,42 @@ exports.getAllChats = async (req, res) => {
     } catch (err) {
         console.error("Error fetching chats:", err);
         res.status(500).json({ status: "error", message: err.message });
+    }
+};
+
+exports.getFilesByChatId = async (req, res) => {
+    const { chatId } = req.params;
+
+    if (!chatId) {
+        return res.status(400).json({ status: "error", message: "Chat ID is required" });
+    }
+
+    try {
+        // Fetch all media messages for the chatId
+        const mediaMessages = await Message.find({
+            chatId,
+            messageType: { $in: ["document", "image", "audio", "video"] }
+        }).sort({ createdAt: -1 }); // latest first
+
+        const formatted = mediaMessages.map(msg => ({
+            fileName: msg.fileName,
+            messageType: msg.messageType,
+            mediaUrl: msg.mediaUrl,
+            caption: msg.content,
+            createdAt: msg.createdAt
+        }));
+
+        res.status(200).json({
+            status: "success",
+            chatId,
+            totalFiles: formatted.length,
+            files: formatted
+        });
+    } catch (error) {
+        console.error("Error fetching files by chatId:", error);
+        res.status(500).json({
+            status: "error",
+            message: error.message
+        });
     }
 };
