@@ -1,8 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { AxiosError } from "axios";
+import { useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from "@/components";
+import { axiosClient } from "@/lib";
 
 const formSchema = z.object({
     number: z
@@ -19,9 +23,28 @@ export function NumberForm() {
         resolver: zodResolver(formSchema),
         defaultValues: { name: "", number: "" }
     });
+    const [loading, setLoading] = useState(false);
 
-    function onSubmit(values: Form) {
-        console.log(values);
+    async function onSubmit(values: Form) {
+        if (loading) return;
+
+        setLoading(true);
+        try {
+            const response = await axiosClient.post("/chat/create", { name: values.name, phoneNumber: values.number });
+            console.log(response);
+
+            // const parsedResponse = emailResponseSchema.safeParse(response.data);
+            // if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
+
+            // toast.success(parsedResponse.data.message);
+            // setEmailSent(true);
+        } catch (error: unknown) {
+            let message = "An unexpected error was returned from the server";
+            if (error instanceof AxiosError) message = error?.response?.data?.message;
+            toast.error(message);
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (

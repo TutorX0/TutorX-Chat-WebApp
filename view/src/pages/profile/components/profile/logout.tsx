@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+
 import {
     AlertDialog,
     AlertDialogAction,
@@ -10,10 +12,17 @@ import {
     AlertDialogTrigger,
     Button
 } from "@/components";
+import { loginUrl } from "@/routing";
 import { useStore } from "@/store";
 
 export function Logout() {
     const logout = useStore((state) => state.logout);
+    const navigate = useNavigate();
+
+    function onLogout() {
+        logout();
+        navigate(loginUrl, { replace: true });
+    }
 
     return (
         <AlertDialog>
@@ -30,7 +39,7 @@ export function Logout() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={logout}>Logout</AlertDialogAction>
+                    <AlertDialogAction onClick={onLogout}>Logout</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
