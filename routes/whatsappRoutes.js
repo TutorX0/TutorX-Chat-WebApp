@@ -4,9 +4,9 @@ const whatsappController = require("../controllers/whatsappController");
 const upload = require("../middleware/upload");
 
 // Meta verification
-router.get("/", upload.single("mediaUrl"), whatsappController.verifyWebhook);
+router.get("/",  whatsappController.verifyWebhook);
 
 // Message receiving
-router.post("/", whatsappController.receiveMessage);
+router.post("/",upload.single("mediaUrl"), whatsappController.receiveMessage);
 
 module.exports = router;

@@ -2,7 +2,7 @@ const axios = require("axios");
 const Chat = require("../models/chatModel");
 const Message = require("../models/messageModel");
 const path = require("path");
-
+const { getIO } = require("../socket");
 const moment = require("moment"); // Make sure moment is installed
 require("dotenv").config();
 
@@ -120,6 +120,22 @@ exports.sendMessage = async (req, res) => {
 
         await newMessage.save();
 
+        console.log(newMessage);
+        const io = getIO();
+              if (io) {
+                io.emit("newMessage", {
+                  chatId: chat.chatId,
+                  phoneNumber,
+                  sender: "admin",
+                  messageType: type,
+                  content: message || "",
+                mediaUrl: mediaUrl || null,
+                fileName: req.file?.originalname || null,
+                  timestamp: newMessage.createdAt,
+                });
+              } else {
+                console.log("Socket.IO not initialized");
+              }
         res.status(200).json({
             status: "success",
             chatId: chat.chatId,

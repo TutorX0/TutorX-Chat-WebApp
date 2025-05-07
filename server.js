@@ -6,20 +6,20 @@ const connectDB = require("./config/db");
 const chatRoutes = require("./routes/chatRoutes");
 const userRoutes = require("./routes/userRoutes");
 const groupRoutes = require("./routes/groupRoutes");
+const whatsappRoutes = require("./routes/whatsappRoutes");
 const path = require("path");
 const http = require("http");
-const socketIo = require("socket.io");
+const socketModule = require('./socket');
+
 
 dotenv.config();
 connectDB();
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server, {
-    cors: {
-      origin: "*"
-    }
-  });
+
+// Initialize Socket.IO with HTTP server
+const io = socketModule.init(server);
 
 // Middleware
 app.use(express.json());
@@ -28,13 +28,13 @@ app.use(cors({ origin: true, credentials: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Import webhookRoutes with socket.io passed in
-const webhookRoutes = require("./routes/webhooks")(io);
-app.use((req, res, next) => {
-    req.io = io;
-    next();
-  });
+// const webhookRoutes = require("./routes/webhooks")(io);
+// app.use((req, res, next) => {
+//     req.io = io;
+//     next();
+//   });
 // Use Routes
-app.use("/webhook", webhookRoutes); // Webhook routes using io
+app.use("/webhook", whatsappRoutes); // Webhook routes using io
 app.use("/api/chat", chatRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/group", groupRoutes);
