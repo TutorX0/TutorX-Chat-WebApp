@@ -1,9 +1,10 @@
 import type { StateCreator } from "zustand";
 
-type Reply = {
+export type Reply = {
     messageId: string;
     content?: string;
     sentBy: string;
+    messageType: string;
 };
 
 export type ReplySlice = {

@@ -2,13 +2,16 @@ import type { StateCreator } from "zustand";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 
-import { fetchMessageResponseSchema, type GroupedMessages } from "@/validations";
+import { fetchMessageResponseSchema, type ChatMessage, type GroupedMessages } from "@/validations";
 import { axiosClient } from "@/lib";
 
+export type MessageRecord = Record<string, GroupedMessages>;
+
 export type MessageSlice = {
-    messages: Record<string, GroupedMessages>; // Key: chatId or phoneNumber
-    loading: Record<string, boolean>; // Track loading state per chat
+    messages: MessageRecord;
+    loading: Record<string, boolean>;
     fetchMessages: (chatId: string) => Promise<void>;
+    pushMessage: (chatId: string, newMessage: ChatMessage) => void;
 };
 
 export const createMessageSlice: StateCreator<MessageSlice> = (set, get) => ({
@@ -25,9 +28,7 @@ export const createMessageSlice: StateCreator<MessageSlice> = (set, get) => ({
         try {
             const response = await axiosClient(`/chat/history/${chatId}`);
 
-            console.log(response.data);
             const parsedResponse = fetchMessageResponseSchema.safeParse(response.data);
-            console.log(parsedResponse.error?.message);
             if (!parsedResponse.success) {
                 toast.error("Invalid data type sent from server");
                 return;
@@ -46,5 +47,26 @@ export const createMessageSlice: StateCreator<MessageSlice> = (set, get) => ({
                 loading: { ...state.loading, [chatId]: false }
             }));
         }
+    },
+
+    pushMessage: (chatId, newMessage) => {
+        set((state) => {
+            const existingMessages = state.messages[chatId] || {};
+
+            // Assume messages are grouped by some "type" (e.g., date or message type)
+            const groupKey = newMessage.type;
+
+            const updatedGroup = [...(existingMessages[groupKey] || []), newMessage];
+
+            return {
+                messages: {
+                    ...state.messages,
+                    [chatId]: {
+                        ...existingMessages,
+                        [groupKey]: updatedGroup
+                    }
+                }
+            };
+        });
     }
 });

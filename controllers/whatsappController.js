@@ -15,7 +15,6 @@ const generateGuestName = async () => {
 exports.receiveMessage = async (req, res) => {
     try {
         const body = req.body;
-        console.log("Entry");
 
         if (
             body.object &&
@@ -89,11 +88,10 @@ exports.receiveMessage = async (req, res) => {
             // Process message based on type
             switch (type) {
                 case "text":
-                    console.log("Inside case Text");
                     content = message.text.body;
                     break;
                 case "image":
-                    content = message.image.caption || "Image received";
+                    content = message.image.caption || "";
                     const imageData = await saveMedia(message.image.id);
                     mediaUrl = imageData.filePath;
                     fileName = imageData.fileName;
@@ -158,7 +156,6 @@ exports.receiveMessage = async (req, res) => {
             });
 
             await newMessage.save();
-            console.log(newMessage);
 
             // Emit event via Socket.IO
             const io = getIO();

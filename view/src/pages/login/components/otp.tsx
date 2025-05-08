@@ -30,7 +30,6 @@ export function Otp({ email }: OtpProps) {
         setLoading(true);
         try {
             const response = await axiosClient.post("/user/verify-otp", { email, otp: values.pin });
-            console.log(response.data);
 
             const parsedResponse = otpResponseSchema.safeParse(response.data);
             if (!parsedResponse.success) return toast.error("Invalid data type sent from server");

@@ -21,7 +21,9 @@ export const chatMessage = z.object({
     type: z.string(),
     mediaUrl: z.string().nullable(),
     fileName: z.string().nullable(),
-    createdAt: z.string()
+    createdAt: z.string(),
+    isForwarded: z.boolean(),
+    replyTo: z.string()
 });
 
 export type ChatMessage = z.infer<typeof chatMessage>;
@@ -39,3 +41,18 @@ export const fetchMessageResponseSchema = z.object({
         phoneNumber: z.string()
     })
 });
+
+export const socketData = z.object({
+    chatId: z.string(),
+    content: z.string(),
+    fileName: z.string().nullable(),
+    mediaUrl: z.string().nullable(),
+    messageType: z.string(),
+    phoneNumber: z.string(),
+    sender: z.string(),
+    timestamp: z.string(),
+    isForwarded: z.boolean(),
+    replyTo: z.string()
+});
+
+export type SocketData = z.infer<typeof socketData>;

@@ -9,9 +9,10 @@ type ContextProps = {
     messageId: string;
     sentBy: string;
     textToCopy?: string;
+    messageType: string;
 };
 
-export function MessageOptions({ messageId, sentBy, textToCopy }: ContextProps) {
+export function MessageOptions({ messageId, messageType, sentBy, textToCopy }: ContextProps) {
     const [open, setOpen] = useState(false);
 
     const setSelectMessageToggle = useStore((state) => state.setSelectMessageToggle);
@@ -29,7 +30,7 @@ export function MessageOptions({ messageId, sentBy, textToCopy }: ContextProps) 
     }
 
     function toggleReply() {
-        setReplyMessage({ content: textToCopy, messageId, sentBy: sentBy === "admin" ? "You" : "User" });
+        setReplyMessage({ content: textToCopy, messageId, sentBy: sentBy === "admin" ? "You" : "User", messageType });
         setOpen(false);
     }
 

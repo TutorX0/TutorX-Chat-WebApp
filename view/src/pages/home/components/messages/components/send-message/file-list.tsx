@@ -1,9 +1,9 @@
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { AxiosError } from "axios";
 import { X } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button } from "@/components";
+import { Button, Input } from "@/components";
 import { axiosClient } from "@/lib";
 
 type FileListProps = {
@@ -14,6 +14,7 @@ type FileListProps = {
 
 export function FileList({ files, setFiles, phoneNumber }: FileListProps) {
     const [loading, setLoading] = useState(false);
+    const inputRef = useRef<HTMLInputElement>(null);
 
     if (files.length < 1) return null;
 
@@ -21,43 +22,63 @@ export function FileList({ files, setFiles, phoneNumber }: FileListProps) {
         setFiles((files) => files.filter((_, index) => index !== indexToRemove));
     }
 
-    const toBase64 = (file: File): Promise<string> =>
-        new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.readAsDataURL(file);
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-        });
+    // const toBase64 = (file: File): Promise<string> =>
+    //     new Promise((resolve, reject) => {
+    //         const reader = new FileReader();
+    //         reader.readAsDataURL(file);
+    //         reader.onload = () => resolve(reader.result as string);
+    //         reader.onerror = reject;
+    //     });
 
     async function sendDocMessage() {
-        if (loading) return;
+        if (loading || !inputRef.current) return;
 
         setLoading(true);
         try {
-            const results = await Promise.allSettled(
-                files.map(async (file) => {
-                    const base64 = await toBase64(file);
+            const file = files[0];
 
-                    return axiosClient.post("/chat/send", {
-                        phoneNumber,
-                        message: "",
-                        mediaUrl: base64,
-                        type: file.type.includes("image")
-                            ? "image"
-                            : file.type.includes("video")
-                              ? "video"
-                              : file.type.includes("application")
-                                ? "document"
-                                : ""
-                    });
-                })
+            const formData = new FormData();
+            formData.append("mediaUrl", file);
+            formData.append("phoneNumber", phoneNumber);
+            formData.append("message", inputRef.current.value);
+            formData.append(
+                "type",
+                file.type.includes("image")
+                    ? "image"
+                    : file.type.includes("video")
+                      ? "video"
+                      : file.type.includes("application")
+                        ? "document"
+                        : ""
             );
 
-            results.forEach((result, index) => {
-                if (result.status !== "fulfilled") {
-                    toast.error(`File ${index + 1} failed`, result.reason);
-                }
-            });
+            await axiosClient.post("/chat/send", formData);
+
+            // const results = await Promise.allSettled(
+            //     files.map(async (file) => {
+            //         const base64 = await toBase64(file);
+
+            //         return axiosClient.post("/chat/send", {
+            //             phoneNumber,
+            //             message: "",
+            //             mediaUrl: base64,
+            //             type: file.type.includes("image")
+            //                 ? "image"
+            //                 : file.type.includes("video")
+            //                   ? "video"
+            //                   : file.type.includes("application")
+            //                     ? "document"
+            //                     : ""
+            //         });
+            //     })
+            // );
+
+            // results.forEach((result, index) => {
+            //     if (result.status !== "fulfilled") {
+            //         toast.error(`File ${index + 1} failed`, result.reason);
+            //     }
+            // });
+            setFiles([]);
         } catch (error: unknown) {
             let message = "An unexpected error was returned from the server";
             if (error instanceof AxiosError) message = error?.response?.data?.message;
@@ -68,7 +89,7 @@ export function FileList({ files, setFiles, phoneNumber }: FileListProps) {
     }
 
     return (
-        <div className="bg-background absolute z-50 bottom-4 max-h-[80vh] w-4/5 overflow-y-auto pt-4">
+        <div className="bg-background absolute bottom-4 z-50 max-h-[80vh] w-full max-w-96 overflow-y-auto rounded-md pt-4">
             <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] place-items-center gap-4 pb-4">
                 {files.map((file, index) => (
                     <div key={file.name} className="relative bg-neutral-800">
@@ -88,7 +109,10 @@ export function FileList({ files, setFiles, phoneNumber }: FileListProps) {
                     </div>
                 ))}
             </div>
-            <div className="sticky bottom-0 flex items-center justify-between bg-neutral-800 p-2">
+            <div className="mx-1 my-2">
+                <Input placeholder="Type a message ....." autoFocus ref={inputRef} />
+            </div>
+            <div className="sticky bottom-0 flex items-center justify-between rounded-md bg-neutral-800 p-2">
                 <Button disabled={loading} variant="outline" onClick={() => setFiles([])}>
                     Cancel
                 </Button>

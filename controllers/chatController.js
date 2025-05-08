@@ -111,6 +111,8 @@ exports.sendMessage = async (req, res) => {
         const newMessage = new Message({
             chatId: chat.chatId,
             phoneNumber,
+            isForwarded: req.body.isForwarded,
+            replyTo: req.body.replyTo,
             sender: "admin",
             messageType: type,
             content: message || "",
@@ -120,22 +122,23 @@ exports.sendMessage = async (req, res) => {
 
         await newMessage.save();
 
-        console.log(newMessage);
         const io = getIO();
-              if (io) {
-                io.emit("newMessage", {
-                  chatId: chat.chatId,
-                  phoneNumber,
-                  sender: "admin",
-                  messageType: type,
-                  content: message || "",
+        if (io) {
+            io.emit("newMessage", {
+                chatId: chat.chatId,
+                phoneNumber,
+                sender: "admin",
+                messageType: type,
+                isForwarded: newMessage.isForwarded,
+                replyTo: newMessage.replyTo,
+                content: message || "",
                 mediaUrl: mediaUrl || null,
                 fileName: req.file?.originalname || null,
-                  timestamp: newMessage.createdAt,
-                });
-              } else {
-                console.log("Socket.IO not initialized");
-              }
+                timestamp: newMessage.createdAt
+            });
+        } else {
+            console.log("Socket.IO not initialized");
+        }
         res.status(200).json({
             status: "success",
             chatId: chat.chatId,
@@ -265,7 +268,9 @@ exports.getChatHistory = async (req, res) => {
                 type: msg.messageType,
                 mediaUrl: msg.mediaUrl || null,
                 fileName: msg.fileName || null,
-                createdAt: msg.createdAt
+                createdAt: msg.createdAt,
+                isForwarded: msg.isForwarded,
+                replyTo: msg.replyTo
             });
         });
 
@@ -320,7 +325,9 @@ exports.getAllChats = async (req, res) => {
                     name: chat.name,
                     lastMessage: lastMessage?.content || "",
                     lastMessageType: lastMessage?.type || "",
-                    lastMessageTime: lastMessage?.createdAt || chat.updatedAt
+                    lastMessageTime: lastMessage?.createdAt || chat.updatedAt,
+                    isForwarded: lastMessage.isForwarded,
+                    replyTo: lastMessage.replyTo
                 };
             })
         );
@@ -354,9 +361,11 @@ exports.getFilesByChatId = async (req, res) => {
             messageType: { $in: ["document", "image", "audio", "video"] }
         }).sort({ createdAt: -1 }); // latest first
 
-        const formatted = mediaMessages.map(msg => ({
+        const formatted = mediaMessages.map((msg) => ({
             fileName: msg.fileName,
             messageType: msg.messageType,
+            isForwarded: msg.isForwarded,
+            replyTo: msg.replyTo,
             mediaUrl: msg.mediaUrl,
             caption: msg.content,
             createdAt: msg.createdAt

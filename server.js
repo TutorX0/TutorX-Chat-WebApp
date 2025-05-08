@@ -9,8 +9,7 @@ const groupRoutes = require("./routes/groupRoutes");
 const whatsappRoutes = require("./routes/whatsappRoutes");
 const path = require("path");
 const http = require("http");
-const socketModule = require('./socket');
-
+const socketModule = require("./socket");
 
 dotenv.config();
 connectDB();
@@ -41,15 +40,19 @@ app.use("/api/group", groupRoutes);
 
 // WebSocket logic
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
-
-  socket.on("disconnect", () => {
-    console.log("User disconnected:", socket.id);
-  });
+    socket.on("disconnect", () => {});
 });
+
+const { join } = require("path");
+if (process.env.NODE_ENV === "production") {
+    app.use(express.static(join(__dirname, "./view", "dist")));
+    app.get("*", (req, res) => {
+        res.sendFile(join(__dirname, "./view", "dist", "index.html"));
+    });
+}
 
 // Start server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });

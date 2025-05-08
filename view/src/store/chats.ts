@@ -7,6 +7,7 @@ export type ChatSlice = {
     setChats: (newChats: ChatItem[]) => void;
     addChat: (newChat: ChatItem) => void;
     updateChatName: (args: { newChatName: string; phoneNumber: string }) => void;
+    moveChatToTop: (phoneNumber: string) => void;
 };
 
 export const createChatSlice: StateCreator<ChatSlice> = (set) => ({
@@ -16,5 +17,13 @@ export const createChatSlice: StateCreator<ChatSlice> = (set) => ({
     updateChatName: ({ newChatName, phoneNumber }) =>
         set((state) => ({
             chats: state.chats.map((chat) => (chat.phoneNumber === phoneNumber ? { ...chat, name: newChatName } : chat))
-        }))
+        })),
+    moveChatToTop: (phoneNumber) =>
+        set((state) => {
+            const index = state.chats.findIndex((chat) => chat.phoneNumber === phoneNumber);
+            if (index === -1) return {}; // Chat not found, no update
+            const chatToMove = state.chats[index];
+            const updatedChats = [chatToMove, ...state.chats.filter((_, i) => i !== index)];
+            return { chats: updatedChats };
+        })
 });

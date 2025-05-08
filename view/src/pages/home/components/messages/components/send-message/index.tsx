@@ -1,5 +1,5 @@
 import { useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
-import { Send, X } from "lucide-react";
+import { Send } from "lucide-react";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 
@@ -9,6 +9,7 @@ import { FileMessage } from "./file-message";
 import { axiosClient, cn } from "@/lib";
 import { useStore } from "@/store";
 import { Emoji } from "./emoji";
+import { Reply } from "./reply";
 
 type SendMessageProps = {
     phoneNumber: string;
@@ -20,7 +21,6 @@ export function SendMessage({ phoneNumber, setFiles }: SendMessageProps) {
     const [message, setMessage] = useState("");
 
     const replyMessage = useStore((state) => state.replyMessage);
-    const setReplyMessage = useStore((state) => state.setReplyMessage);
 
     async function sendTextMessage(e: FormEvent<HTMLFormElement>) {
         e.preventDefault();
@@ -30,7 +30,6 @@ export function SendMessage({ phoneNumber, setFiles }: SendMessageProps) {
         setLoading(true);
         try {
             const response = await axiosClient.post("/chat/send", { phoneNumber, message });
-            console.log(response);
 
             const parsedResponse = textMessageResponseSchema.safeParse(response.data);
             if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
@@ -45,19 +44,16 @@ export function SendMessage({ phoneNumber, setFiles }: SendMessageProps) {
         }
     }
 
+    const onKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault(); // Prevents newline
+            sendTextMessage(e as unknown as FormEvent<HTMLFormElement>);
+        }
+    };
+
     return (
         <section className="px-4 pb-3">
-            {replyMessage ? (
-                <div className="bg-message-input flex items-center gap-1 rounded-t-2xl p-2">
-                    <div className="flex-1 rounded-lg bg-[#1d1e1e] p-2">
-                        <p className="text-xs text-[#06cf9c]">{replyMessage.sentBy}</p>
-                        <p className="line-clamp-1 text-sm">{replyMessage.content}</p>
-                    </div>
-                    <Button size="icon" variant="secondary" onClick={() => setReplyMessage(null)}>
-                        <X />
-                    </Button>
-                </div>
-            ) : null}
+            {replyMessage ? <Reply replyMessage={replyMessage} /> : null}
             <div
                 className={cn(
                     "bg-message-input flex items-end overflow-y-auto rounded-b-4xl px-2 pt-1 pb-2",
@@ -68,13 +64,14 @@ export function SendMessage({ phoneNumber, setFiles }: SendMessageProps) {
                 <FileMessage setFiles={setFiles} />
                 <form onSubmit={sendTextMessage} className="flex flex-1 items-end gap-2">
                     <AutosizeTextarea
-                        className="bg-message-input border-message-input outline-message-input ring-message-input ring-offset-message-input focus-visible:border-message-input focus-visible:outline-message-input focus-visible:ring-message-input focus-visible:ring-offset-message-input resize-none"
+                        className="bg-message-input border-message-input outline-message-input ring-message-input ring-offset-message-input focus-visible:border-message-input focus-visible:outline-message-input focus-visible:ring-message-input focus-visible:ring-offset-message-input custom-scroll resize-none"
                         placeholder="Type a message"
                         minHeight={10}
                         maxHeight={108}
                         autoFocus
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
+                        onKeyDown={onKeyDown}
                     />
                     <Button type="submit" variant="secondary" size="icon" className="hover:bg-input-buttons-hover rounded-full">
                         <Send />

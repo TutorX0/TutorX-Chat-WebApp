@@ -6,10 +6,12 @@ import { useStore } from "@/store";
 
 export function ForwardMessage({ children }: PropsWithChildren) {
     const [selectedChats, setSelectedChats] = useState<string[]>([]);
-    const [loading, setLoading] = useState(false);
+    const [loading] = useState(false);
     const [open, setOpen] = useState(false);
 
     const chats = useStore((state) => state.chats);
+    const messages = useStore((state) => state.messages);
+    const selectedMessages = useStore((state) => state.selectedMessages);
 
     function handleSelectChat(currentChatId: string) {
         if (loading) return;
@@ -22,7 +24,13 @@ export function ForwardMessage({ children }: PropsWithChildren) {
         setOpen(false);
     }
 
-    function forwardMessages() {}
+    async function forwardMessages() {
+        // for (const chatId of selectedChats) {
+        //     for (const messageId of selectedMessages) {
+        //         const message = messages;
+        //     }
+        // }
+    }
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
