@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
-import { useStore } from "@/store";
-import { axiosClient } from "@/lib";
 import { userSchema } from "@/validations/user.validation";
+import { axiosClient } from "@/lib";
+import { useStore } from "@/store";
 
 export function useFetchUser() {
     const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
@@ -26,7 +26,7 @@ export function useFetchUser() {
             }
 
             try {
-                const response = await axiosClient.get("/me", { headers: { Authorization: `Bearer ${token}` } });
+                const response = await axiosClient.get("/user/me", { headers: { Authorization: `Bearer ${token}` } });
 
                 const parsedResponse = userSchema.safeParse(response.data);
                 if (!parsedResponse.success) {

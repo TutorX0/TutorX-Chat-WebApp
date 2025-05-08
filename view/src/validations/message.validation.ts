@@ -15,10 +15,13 @@ export const textMessageResponseSchema = z.object({
 export type TextMessage = z.infer<typeof textMessageResponseSchema>;
 
 export const chatMessage = z.object({
-    content: z.string(),
-    createdAt: z.string(),
+    _id: z.string(),
     sender: z.string(),
-    _id: z.string()
+    content: z.string().optional(),
+    type: z.string(),
+    mediaUrl: z.string().nullable(),
+    fileName: z.string().nullable(),
+    createdAt: z.string()
 });
 
 export type ChatMessage = z.infer<typeof chatMessage>;

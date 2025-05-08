@@ -12,7 +12,9 @@ export const otpResponseSchema = z.object({
     user: z.object({
         email: z.string().email(),
         id: z.string(),
-        isVerified: z.boolean()
+        isVerified: z.boolean(),
+        name: z.string(),
+        about: z.string()
     })
 });
 

@@ -11,9 +11,9 @@ import { useStore } from "@/store";
 
 export function Messages() {
     const [files, setFiles] = useState<File[]>([]);
-    const deleteSearchParam = useDeleteSearchParam();
 
     const [searchParams] = useSearchParams();
+    const deleteSearchParam = useDeleteSearchParam();
     const openedChat = searchParams.get("open");
 
     const chats = useStore((state) => state.chats);

@@ -25,7 +25,9 @@ export const createMessageSlice: StateCreator<MessageSlice> = (set, get) => ({
         try {
             const response = await axiosClient(`/chat/history/${chatId}`);
 
+            console.log(response.data);
             const parsedResponse = fetchMessageResponseSchema.safeParse(response.data);
+            console.log(parsedResponse.error?.message);
             if (!parsedResponse.success) {
                 toast.error("Invalid data type sent from server");
                 return;

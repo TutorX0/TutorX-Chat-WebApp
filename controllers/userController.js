@@ -76,7 +76,9 @@ exports.verifyOTP = async (req, res) => {
             user: {
                 id: user._id,
                 email: user.email,
-                isVerified: user.isVerified
+                isVerified: user.isVerified,
+                name: user.name,
+                about: user.about
             }
         });
     } catch (error) {
@@ -91,7 +93,7 @@ exports.getUserProfile = async (req, res) => {
             status: "success",
             user: {
                 id: user._id,
-                name : user.name,
+                name: user.name,
                 email: user.email,
                 about: user.about,
                 isVerified: user.isVerified
@@ -110,11 +112,7 @@ exports.updateAbout = async (req, res) => {
     }
 
     try {
-        const user = await User.findOneAndUpdate(
-            { email },
-            { name, about },
-            { new: true }   
-        );
+        const user = await User.findOneAndUpdate({ email }, { name, about }, { new: true });
 
         if (!user) {
             return res.status(404).json({ status: "error", message: "User not found." });
@@ -130,4 +128,3 @@ exports.updateAbout = async (req, res) => {
         res.status(500).json({ status: "error", message: "Internal server error." });
     }
 };
-

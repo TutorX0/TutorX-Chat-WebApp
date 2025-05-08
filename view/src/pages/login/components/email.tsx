@@ -26,7 +26,7 @@ export function Email({ emailSent, setEmail, setEmailSent }: EmailProps) {
 
         setLoading(true);
         try {
-            const response = await axiosClient.post("/send-otp", values);
+            const response = await axiosClient.post("/user/send-otp", values);
 
             const parsedResponse = emailResponseSchema.safeParse(response.data);
             if (!parsedResponse.success) return toast.error("Invalid data type sent from server");

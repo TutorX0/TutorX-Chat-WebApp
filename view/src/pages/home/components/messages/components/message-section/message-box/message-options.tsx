@@ -1,19 +1,35 @@
-import { ChevronDown, Copy, Forward, Reply } from "lucide-react";
+import { ChevronDown, Copy, Forward, ListChecks, Reply } from "lucide-react";
 import { useState } from "react";
 
 import { Button, Popover, PopoverContent, PopoverTrigger } from "@/components";
+import { useStore } from "@/store";
 import { cn } from "@/lib";
 
 type ContextProps = {
+    messageId: string;
     sentBy: string;
-    textToCopy: string;
+    textToCopy?: string;
 };
 
-export function MessageOptions({ sentBy, textToCopy }: ContextProps) {
+export function MessageOptions({ messageId, sentBy, textToCopy }: ContextProps) {
     const [open, setOpen] = useState(false);
 
+    const setSelectMessageToggle = useStore((state) => state.setSelectMessageToggle);
+    const setReplyMessage = useStore((state) => state.setReplyMessage);
+
     function copyToClipboard() {
+        if (!textToCopy) return;
         window.navigator.clipboard.writeText(textToCopy);
+        setOpen(false);
+    }
+
+    function toggleSelect() {
+        setSelectMessageToggle(true);
+        setOpen(false);
+    }
+
+    function toggleReply() {
+        setReplyMessage({ content: textToCopy, messageId, sentBy: sentBy === "admin" ? "You" : "User" });
         setOpen(false);
     }
 
@@ -32,7 +48,7 @@ export function MessageOptions({ sentBy, textToCopy }: ContextProps) {
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="text-options w-full space-y-3">
-                <div className="flex cursor-pointer items-center gap-2">
+                <div className="flex cursor-pointer items-center gap-2" onClick={toggleReply}>
                     <Reply className="size-5" />
                     <span className="text-sm">Reply</span>
                 </div>
@@ -43,6 +59,10 @@ export function MessageOptions({ sentBy, textToCopy }: ContextProps) {
                 <div className="flex cursor-pointer items-center gap-2">
                     <Forward className="size-5" />
                     <span className="text-sm">Forward</span>
+                </div>
+                <div className="flex cursor-pointer items-center gap-2" onClick={toggleSelect}>
+                    <ListChecks className="size-5" />
+                    <span className="text-sm">Select</span>
                 </div>
             </PopoverContent>
         </Popover>

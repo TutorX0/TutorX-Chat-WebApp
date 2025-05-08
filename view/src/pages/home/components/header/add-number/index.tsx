@@ -1,11 +1,14 @@
 import { Plus } from "lucide-react";
+import { useState } from "react";
 
 import { Button, Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components";
 import { NumberForm } from "./number-form";
 
 export function AddNumber() {
+    const [open, setOpen] = useState(false);
+
     return (
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 <Button variant="outline" size="icon" className="rounded-full">
                     <Plus strokeWidth="1" className="size-6 cursor-pointer text-neutral-400" />
@@ -15,7 +18,7 @@ export function AddNumber() {
                 <DialogHeader>
                     <DialogTitle>New Contact</DialogTitle>
                 </DialogHeader>
-                <NumberForm />
+                <NumberForm setOpen={setOpen} />
             </DialogContent>
         </Dialog>
     );

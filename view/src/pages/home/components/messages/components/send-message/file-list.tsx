@@ -68,7 +68,7 @@ export function FileList({ files, setFiles, phoneNumber }: FileListProps) {
     }
 
     return (
-        <div className="bg-background absolute bottom-4 max-h-[80vh] w-4/5 overflow-y-auto pt-4">
+        <div className="bg-background absolute z-50 bottom-4 max-h-[80vh] w-4/5 overflow-y-auto pt-4">
             <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] place-items-center gap-4 pb-4">
                 {files.map((file, index) => (
                     <div key={file.name} className="relative bg-neutral-800">

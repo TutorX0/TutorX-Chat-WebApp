@@ -28,7 +28,6 @@ export function ProfileSidebar({ currentTab, setOpen, isResponsive = false }: Pr
         if (timeoutId.current) clearTimeout(timeoutId.current);
 
         timeoutId.current = setTimeout(() => {
-            console.log("Should not be running");
             if (!value) setFilteredOptions(options);
             else {
                 setFilteredOptions(() => {

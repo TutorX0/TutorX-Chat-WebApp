@@ -17,3 +17,17 @@ export const chatsResponseSchema = z.object({
 });
 
 export type ChatItem = z.infer<typeof chatSchema>;
+
+export const addChatResponseSchema = z.object({
+    status: z.string(),
+    message: z.string(),
+    chat: z.object({
+        chatId: z.string(),
+        createdAt: z.string(),
+        name: z.string(),
+        phoneNumber: z.string(),
+        updatedAt: z.string(),
+        __v: z.number(),
+        _id: z.string()
+    })
+});
