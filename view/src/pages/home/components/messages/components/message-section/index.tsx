@@ -83,7 +83,6 @@ export function MessageSection({ chatId, files, setFiles, phoneNumber }: Message
                                           messageId={message._id}
                                           sentBy={message.sender}
                                           isForwarded={message.isForwarded}
-                                          replyTo={message.replyTo}
                                       />
                                   );
                               else if (message.type === "image" || message.type === "video")
@@ -97,7 +96,6 @@ export function MessageSection({ chatId, files, setFiles, phoneNumber }: Message
                                           mediaUrl={message.mediaUrl}
                                           type={message.type}
                                           isForwarded={message.isForwarded}
-                                          replyTo={message.replyTo}
                                       />
                                   );
                               else if (message.type === "document")
@@ -111,7 +109,6 @@ export function MessageSection({ chatId, files, setFiles, phoneNumber }: Message
                                           mediaUrl={message.mediaUrl}
                                           type={message.type}
                                           isForwarded={message.isForwarded}
-                                          replyTo={message.replyTo}
                                       />
                                   );
                           })}
