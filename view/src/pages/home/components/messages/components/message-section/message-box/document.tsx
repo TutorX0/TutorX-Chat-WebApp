@@ -17,7 +17,7 @@ type DocumentMessageProps = {
     replyTo: string;
 };
 
-export function DocumentMessage({ date, isForwarded, mediaUrl, messageId, replyTo, sentBy, message }: DocumentMessageProps) {
+export function DocumentMessage({ date, isForwarded, mediaUrl, messageId, sentBy, message }: DocumentMessageProps) {
     const [meta, setMeta] = useState({
         type: "",
         size: "",

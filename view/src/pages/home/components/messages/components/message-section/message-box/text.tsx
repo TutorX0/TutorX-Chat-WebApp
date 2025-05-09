@@ -13,7 +13,7 @@ type TextMessageProps = {
     replyTo: string;
 };
 
-export function TextMessage({ date, isForwarded, messageId, replyTo, sentBy, message }: TextMessageProps) {
+export function TextMessage({ date, isForwarded, messageId, sentBy, message }: TextMessageProps) {
     const toggleSelectedMessage = useStore((state) => state.toggleSelectedMessage);
     const selectMessageToggle = useStore((state) => state.selectMessageToggle);
     const selectedMessages = useStore((state) => state.selectedMessages);
