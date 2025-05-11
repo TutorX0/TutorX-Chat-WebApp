@@ -10,8 +10,7 @@ export function ForwardMessage({ children }: PropsWithChildren) {
     const [open, setOpen] = useState(false);
 
     const chats = useStore((state) => state.chats);
-    const messages = useStore((state) => state.messages);
-    const selectedMessages = useStore((state) => state.selectedMessages);
+   
 
     function handleSelectChat(currentChatId: string) {
         if (loading) return;
