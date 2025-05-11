@@ -1,11 +1,11 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
 
+import { socketData, type ChatMessage } from "@/validations";
 import { DocumentMessage } from "./message-box/document";
 import { FileList } from "../send-message/file-list";
 import { PhotoMessage } from "./message-box/photos";
 import { TextMessage } from "./message-box/text";
-import { socketData, type ChatMessage } from "@/validations";
 import { ScrollArea } from "@/components";
 import { useSocket } from "@/context";
 import { useStore } from "@/store";

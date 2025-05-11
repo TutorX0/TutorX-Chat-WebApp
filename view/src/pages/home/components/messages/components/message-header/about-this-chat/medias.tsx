@@ -1,34 +1,26 @@
-import { File } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { File } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components";
-import type { MessageRecord } from "@/store/messages";
-import type { ChatMessage } from "@/validations";
-import { useStore } from "@/store";
 import { fetchMetadata, readableFileSize } from "@/lib";
+import type { MessageRecord } from "@/store/messages";
+import { useStore } from "@/store";
 
-function filterMessagesByTypes(data: MessageRecord, types: string[]) {
-    const result: ChatMessage[] = [];
-
-    Object.values(data).forEach((category) => {
-        Object.values(category).forEach((messages) => {
-            messages.forEach((message) => {
-                if (types.includes(message.type)) {
-                    result.push(message);
-                }
-            });
-        });
-    });
-
-    return result;
+function getFilteredMessagesByType(data: MessageRecord, chatId: string, allowedTypes: string[]) {
+    if (!data[chatId]) return [];
+    const allMessages = Object.values(data[chatId]).flat();
+    return allMessages.filter((msg) => allowedTypes.includes(msg.type));
 }
 
-export function Medias() {
+type MediasProps = {
+    chatId: string;
+};
+
+export function Medias({ chatId }: MediasProps) {
     const messages = useStore((state) => state.messages);
 
-    const mediaFiles = useMemo(() => filterMessagesByTypes(messages, ["image", "video"]), [messages]);
-
-    const documentFiles = useMemo(() => filterMessagesByTypes(messages, ["document"]), [messages]);
+    const mediaFiles = useMemo(() => getFilteredMessagesByType(messages, chatId, ["image", "video"]), [messages, chatId]);
+    const documentFiles = useMemo(() => getFilteredMessagesByType(messages, chatId, ["document"]), [messages, chatId]);
 
     return (
         <Tabs defaultValue="media" className="w-full">
@@ -48,22 +40,30 @@ export function Medias() {
             </TabsList>
             <TabsContent value="media">
                 <div className="mx-4 my-4 grid grid-cols-2 gap-4">
-                    {mediaFiles.map(({ _id, mediaUrl, type }) =>
-                        mediaUrl ? (
-                            <div key={`Media-${_id}`}>
-                                {type === "image" ? (
-                                    <img src={mediaUrl} alt="A random WhatsApp image" className="size-full" loading="lazy" />
-                                ) : type === "video" ? (
-                                    <video src={mediaUrl} className="size-full" controls />
-                                ) : null}
-                            </div>
-                        ) : null
+                    {mediaFiles.length ? (
+                        mediaFiles.map(({ _id, mediaUrl, type }) =>
+                            mediaUrl ? (
+                                <div key={`Media-${_id}`}>
+                                    {type === "image" ? (
+                                        <img src={mediaUrl} alt="A random WhatsApp image" className="size-full" loading="lazy" />
+                                    ) : type === "video" ? (
+                                        <video src={mediaUrl} className="size-full" controls />
+                                    ) : null}
+                                </div>
+                            ) : null
+                        )
+                    ) : (
+                        <p className="col-span-2 text-center text-neutral-400">There are no media files in this chat</p>
                     )}
                 </div>
             </TabsContent>
             <TabsContent value="docs">
                 <div className="mx-4 my-4 flex flex-col gap-4">
-                    {documentFiles.map(({ mediaUrl }) => (mediaUrl ? <MediaFile mediaUrl={mediaUrl} /> : null))}
+                    {documentFiles.length ? (
+                        documentFiles.map(({ mediaUrl }) => (mediaUrl ? <MediaFile mediaUrl={mediaUrl} /> : null))
+                    ) : (
+                        <p className="col-span-2 text-center text-neutral-400">There are no documents in this chat</p>
+                    )}
                 </div>
             </TabsContent>
         </Tabs>

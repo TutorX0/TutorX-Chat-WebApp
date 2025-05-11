@@ -52,10 +52,7 @@ export const createMessageSlice: StateCreator<MessageSlice> = (set, get) => ({
     pushMessage: (chatId, newMessage) => {
         set((state) => {
             const existingMessages = state.messages[chatId] || {};
-
-            // Assume messages are grouped by some "type" (e.g., date or message type)
-            const groupKey = newMessage.type;
-
+            const groupKey = "Today";
             const updatedGroup = [...(existingMessages[groupKey] || []), newMessage];
 
             return {

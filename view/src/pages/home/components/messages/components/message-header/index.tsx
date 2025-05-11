@@ -23,7 +23,7 @@ export function MessageHeader({ currentChat }: MessageHeaderProps) {
 
     return (
         <section className="bg-sidebar flex items-center justify-between px-4 py-2">
-            <AboutThisChat name={currentChat.name} phoneNumber={currentChat.phoneNumber} />
+            <AboutThisChat name={currentChat.name} phoneNumber={currentChat.phoneNumber} chatId={currentChat.chatId} />
             {selectMessageToggle ? (
                 <div className="flex items-center gap-x-4">
                     <ForwardMessage>
