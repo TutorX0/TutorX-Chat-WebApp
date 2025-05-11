@@ -14,7 +14,6 @@ type DocumentMessageProps = {
     mediaUrl: string | null;
     type: string;
     isForwarded: boolean;
-    replyTo: string;
 };
 
 export function DocumentMessage({ date, isForwarded, mediaUrl, messageId, sentBy, message }: DocumentMessageProps) {
