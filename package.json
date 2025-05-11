@@ -5,7 +5,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js",
-    "build": "npm i && cd view && npm i && npm run build"
+    "build": "bun i && cd view && bun i && bun run build"
   },
   "keywords": [],
   "author": "",
@@ -18,6 +18,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "form-data": "^4.0.2",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
     "mongoose": "^8.10.0",

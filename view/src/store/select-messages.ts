@@ -1,10 +1,17 @@
 import type { StateCreator } from "zustand";
 
+export type SelectedMessage = {
+    type: string;
+    content: string | undefined;
+    mediaUrl: string | null;
+    id: string;
+};
+
 export type SelectMessagesSlice = {
     selectMessageToggle: boolean;
-    selectedMessages: string[];
+    selectedMessages: SelectedMessage[];
     setSelectMessageToggle: (value: boolean) => void;
-    toggleSelectedMessage: (messageId: string) => void;
+    toggleSelectedMessage: (message: SelectedMessage) => void;
 };
 
 export const createSelectMessagesSlice: StateCreator<SelectMessagesSlice> = (set, get) => ({
@@ -18,12 +25,14 @@ export const createSelectMessagesSlice: StateCreator<SelectMessagesSlice> = (set
         }));
     },
 
-    toggleSelectedMessage: (messageId: string) => {
+    toggleSelectedMessage: (message) => {
         const { selectedMessages } = get();
-        const exists = selectedMessages.includes(messageId);
+        const exists = selectedMessages.find((selectedMessage) => selectedMessage.id === message.id);
 
         set({
-            selectedMessages: exists ? selectedMessages.filter((id) => id !== messageId) : [...selectedMessages, messageId]
+            selectedMessages: exists
+                ? selectedMessages.filter((element) => element.id !== message.id)
+                : [...selectedMessages, message]
         });
     }
 });

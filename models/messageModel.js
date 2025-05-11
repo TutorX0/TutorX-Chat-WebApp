@@ -9,7 +9,14 @@ const messageSchema = new mongoose.Schema(
         content: { type: String },
         mediaUrl: { type: String },
         isForwarded: { type: Boolean, default: false },
-        replyTo: { type: String, default: "" },
+        replyTo: {
+            type: {
+                sender: { type: String, default: "" },
+                content: { type: String, default: "" },
+                mediaType: { type: String, default: "" }
+            },
+            default: null
+        },
         fileName: { type: String } // Add this line
     },
     { timestamps: true }

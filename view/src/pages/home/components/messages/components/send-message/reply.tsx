@@ -1,6 +1,6 @@
 import { FileIcon, ImageIcon, VideoIcon, X } from "lucide-react";
 
-import type { Reply as ReplyType } from "@/store/reply";
+import type { Reply as ReplyType } from "@/validations";
 import { Button } from "@/components";
 import { useStore } from "@/store";
 
@@ -14,14 +14,14 @@ export const Reply = ({ replyMessage }: Props) => {
     return (
         <div className="bg-message-input flex items-center gap-1 rounded-t-2xl p-2">
             <div className="flex-1 rounded-lg bg-[#1d1e1e] p-2">
-                <p className="text-xs text-[#06cf9c]">{replyMessage.sentBy}</p>
-                {replyMessage.messageType === "text" ? (
+                <p className="text-xs text-[#06cf9c]">{replyMessage.sender}</p>
+                {replyMessage.mediaType === "text" ? (
                     <p className="line-clamp-1 text-sm">{replyMessage.content}</p>
-                ) : replyMessage.messageType === "image" ? (
+                ) : replyMessage.mediaType === "image" ? (
                     <ReplyType Icon={ImageIcon} title="Image" />
-                ) : replyMessage.messageType === "video" ? (
+                ) : replyMessage.mediaType === "video" ? (
                     <ReplyType Icon={VideoIcon} title="Video" />
-                ) : replyMessage.messageType === "document" ? (
+                ) : replyMessage.mediaType === "document" ? (
                     <ReplyType Icon={FileIcon} title="File" />
                 ) : null}
             </div>

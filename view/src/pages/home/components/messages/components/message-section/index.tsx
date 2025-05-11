@@ -1,11 +1,11 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
 import { toast } from "sonner";
 
+import { socketData, type ChatMessage } from "@/validations";
 import { DocumentMessage } from "./message-box/document";
 import { FileList } from "../send-message/file-list";
 import { PhotoMessage } from "./message-box/photos";
 import { TextMessage } from "./message-box/text";
-import { socketData, type ChatMessage } from "@/validations";
 import { ScrollArea } from "@/components";
 import { useSocket } from "@/context";
 import { useStore } from "@/store";
@@ -74,46 +74,14 @@ export function MessageSection({ chatId, files, setFiles, phoneNumber }: Message
                               <div className="bg-message-sent-by-user rounded-md border px-2 py-1 text-xs">{days}</div>
                           </div>
                           {messages[days].map((message) => {
-                              if (message.type === "text")
-                                  return (
-                                      <TextMessage
-                                          key={message._id}
-                                          date={message.createdAt}
-                                          message={message.content}
-                                          messageId={message._id}
-                                          sentBy={message.sender}
-                                          isForwarded={message.isForwarded}
-                                          replyTo={message.replyTo}
-                                      />
-                                  );
-                              else if (message.type === "image" || message.type === "video")
-                                  return (
-                                      <PhotoMessage
-                                          key={message._id}
-                                          date={message.createdAt}
-                                          message={message.content}
-                                          messageId={message._id}
-                                          sentBy={message.sender}
-                                          mediaUrl={message.mediaUrl}
-                                          type={message.type}
-                                          isForwarded={message.isForwarded}
-                                          replyTo={message.replyTo}
-                                      />
-                                  );
-                              else if (message.type === "document")
-                                  return (
-                                      <DocumentMessage
-                                          key={message._id}
-                                          date={message.createdAt}
-                                          message={message.content}
-                                          messageId={message._id}
-                                          sentBy={message.sender}
-                                          mediaUrl={message.mediaUrl}
-                                          type={message.type}
-                                          isForwarded={message.isForwarded}
-                                          replyTo={message.replyTo}
-                                      />
-                                  );
+                              const component = {
+                                  text: <TextMessage key={message._id} message={message} />,
+                                  image: <PhotoMessage key={message._id} message={message} />,
+                                  video: <PhotoMessage key={message._id} message={message} />,
+                                  document: <DocumentMessage key={message._id} message={message} />
+                              };
+
+                              return component[message.type as "text"];
                           })}
                       </section>
                   ))

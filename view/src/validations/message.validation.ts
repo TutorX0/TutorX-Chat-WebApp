@@ -14,6 +14,14 @@ export const textMessageResponseSchema = z.object({
 
 export type TextMessage = z.infer<typeof textMessageResponseSchema>;
 
+export const replySchema = z.object({
+    sender: z.string(),
+    content: z.string().optional().nullable(),
+    mediaType: z.string()
+});
+
+export type Reply = z.infer<typeof replySchema>;
+
 export const chatMessage = z.object({
     _id: z.string(),
     sender: z.string(),
@@ -23,7 +31,7 @@ export const chatMessage = z.object({
     fileName: z.string().nullable(),
     createdAt: z.string(),
     isForwarded: z.boolean(),
-    replyTo: z.string()
+    replyTo: replySchema.nullable()
 });
 
 export type ChatMessage = z.infer<typeof chatMessage>;
@@ -52,7 +60,7 @@ export const socketData = z.object({
     sender: z.string(),
     timestamp: z.string(),
     isForwarded: z.boolean(),
-    replyTo: z.string()
+    replyTo: replySchema.nullable()
 });
 
 export type SocketData = z.infer<typeof socketData>;

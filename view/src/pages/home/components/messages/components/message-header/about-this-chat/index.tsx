@@ -5,7 +5,7 @@ import { UpdateChatName } from "./update-chat-name";
 import type { ChatItem } from "@/validations";
 import { Medias } from "./medias";
 
-export function AboutThisChat({ phoneNumber, name }: Pick<ChatItem, "phoneNumber" | "name">) {
+export function AboutThisChat({ chatId, phoneNumber, name }: Pick<ChatItem, "phoneNumber" | "name" | "chatId">) {
     return (
         <Sheet>
             <SheetTrigger asChild>
@@ -19,7 +19,7 @@ export function AboutThisChat({ phoneNumber, name }: Pick<ChatItem, "phoneNumber
             <SheetContent className="w-10/12 px-4 py-8">
                 <ScrollArea className="h-full">
                     <UpdateChatName name={name} phoneNumber={phoneNumber} />
-                    <Medias />
+                    <Medias chatId={chatId} />
                 </ScrollArea>
             </SheetContent>
         </Sheet>

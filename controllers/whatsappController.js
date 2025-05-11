@@ -168,6 +168,8 @@ exports.receiveMessage = async (req, res) => {
                     content,
                     mediaUrl,
                     fileName,
+                    isForwarded: false,
+                    replyTo: null,
                     timestamp: newMessage.createdAt
                 });
             } else {

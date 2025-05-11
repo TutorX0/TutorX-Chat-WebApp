@@ -4,6 +4,7 @@ const Message = require("../models/messageModel");
 const path = require("path");
 const { getIO } = require("../socket");
 const moment = require("moment"); // Make sure moment is installed
+const uploadImageToWhatsapp = require("../utils/uploadImageToWhatsapp");
 require("dotenv").config();
 
 // Generate chatId based on phone number
@@ -53,46 +54,60 @@ exports.sendMessage = async (req, res) => {
             };
         } else if (type === "image") {
             if (!mediaUrl) return res.status(400).json({ status: "error", message: "Image URL is required" });
+
+            const imageWpId = await uploadImageToWhatsapp(req.file.filename);
+            console.log(imageWpId);
             payload = {
                 messaging_product: "whatsapp",
                 to: phoneNumber,
                 type: "image",
-                image: { link: mediaUrl, caption: message || "" }
+                image: { id: imageWpId, caption: message || "" }
             };
         } else if (type === "document") {
             if (!mediaUrl) return res.status(400).json({ status: "error", message: "Document URL is required" });
+
+            const documentWpId = await uploadImageToWhatsapp(req.file.filename);
             payload = {
                 messaging_product: "whatsapp",
                 to: phoneNumber,
                 type: "document",
-                document: { link: mediaUrl, caption: message || "" }
+                document: { id: documentWpId, caption: message || "" }
             };
         } else if (type === "audio") {
             if (!mediaUrl) return res.status(400).json({ status: "error", message: "Audio URL is required" });
+
+            const audioWpId = await uploadImageToWhatsapp(req.file.filename);
             payload = {
                 messaging_product: "whatsapp",
                 to: phoneNumber,
                 type: "audio",
-                audio: { link: mediaUrl }
+                audio: { id: audioWpId }
             };
         } else if (type === "video") {
             if (!mediaUrl) return res.status(400).json({ status: "error", message: "Video URL is required" });
+
+            const videoWpId = await uploadImageToWhatsapp(req.file.filename);
             payload = {
                 messaging_product: "whatsapp",
                 to: phoneNumber,
                 type: "video",
-                video: { link: mediaUrl, caption: message || "" }
+                video: { id: videoWpId, caption: message || "" }
             };
         } else {
             return res.status(400).json({ status: "error", message: "Unsupported message type" });
         }
 
+        const headers = {
+            Authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+        };
+
+        if (type === "template" || type === "text") {
+            headers["Content-Type"] = "application/json";
+        }
+
         // Send WhatsApp message
         const response = await axios.post(`https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`, payload, {
-            headers: {
-                Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
-                "Content-Type": "application/json"
-            }
+            headers
         });
 
         // Create Chat if not exist
@@ -112,7 +127,7 @@ exports.sendMessage = async (req, res) => {
             chatId: chat.chatId,
             phoneNumber,
             isForwarded: req.body.isForwarded,
-            replyTo: req.body.replyTo,
+            replyTo: req.body.replyTo ?? null,
             sender: "admin",
             messageType: type,
             content: message || "",
@@ -130,7 +145,7 @@ exports.sendMessage = async (req, res) => {
                 sender: "admin",
                 messageType: type,
                 isForwarded: newMessage.isForwarded,
-                replyTo: newMessage.replyTo,
+                replyTo: newMessage.replyTo ?? null,
                 content: message || "",
                 mediaUrl: mediaUrl || null,
                 fileName: req.file?.originalname || null,
@@ -152,6 +167,133 @@ exports.sendMessage = async (req, res) => {
             details: error.response?.data || {}
         });
     }
+};
+
+exports.forwardMessage = async (req, res) => {
+    const { phoneNumbers, messages } = req.body;
+
+    for (const phoneNumber of phoneNumbers) {
+        for (const message of messages) {
+            let payload;
+            const { type } = message;
+
+            if (type === "template") {
+                payload = {
+                    messaging_product: "whatsapp",
+                    to: phoneNumber,
+                    type: "template",
+                    template: {
+                        name: "hello_world",
+                        language: { code: "en_US" }
+                    }
+                };
+            } else if (type === "text") {
+                if (!message.content || typeof message.content !== "string") {
+                    return res.status(400).json({ status: "error", message: "Message is required" });
+                }
+                payload = {
+                    messaging_product: "whatsapp",
+                    to: phoneNumber,
+                    type: "text",
+                    text: { body: message.content.trim() }
+                };
+            } else if (type === "image") {
+                if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Image URL is required" });
+                payload = {
+                    messaging_product: "whatsapp",
+                    to: phoneNumber,
+                    type: "image",
+                    image: { link: message.mediaUrl, caption: message.content || "" }
+                };
+            } else if (type === "document") {
+                if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Document URL is required" });
+                payload = {
+                    messaging_product: "whatsapp",
+                    to: phoneNumber,
+                    type: "document",
+                    document: { link: message.mediaUrl, caption: message.content || "" }
+                };
+            } else if (type === "audio") {
+                if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Audio URL is required" });
+                payload = {
+                    messaging_product: "whatsapp",
+                    to: phoneNumber,
+                    type: "audio",
+                    audio: { link: message.mediaUrl }
+                };
+            } else if (type === "video") {
+                if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Video URL is required" });
+                payload = {
+                    messaging_product: "whatsapp",
+                    to: phoneNumber,
+                    type: "video",
+                    video: { link: message.mediaUrl, caption: message.content || "" }
+                };
+            } else {
+                return res.status(400).json({ status: "error", message: "Unsupported message type" });
+            }
+
+            try {
+                // Send WhatsApp message
+                const response = await axios.post(
+                    `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`,
+                    payload,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
+                            "Content-Type": "application/json"
+                        }
+                    }
+                );
+
+                // Create Chat if not exist
+                let chat = await Chat.findOne({ phoneNumber });
+                if (!chat) return res.status(404).json({ status: "error", message: "Chat not found" });
+
+                // Save message in DB
+                const newMessage = new Message({
+                    chatId: chat.chatId,
+                    phoneNumber,
+                    isForwarded: true,
+                    replyTo: null,
+                    sender: "admin",
+                    messageType: type,
+                    content: message.content || "",
+                    mediaUrl: message.mediaUrl || null,
+                    fileName: null
+                });
+
+                await newMessage.save();
+
+                const io = getIO();
+                if (io) {
+                    io.emit("newMessage", {
+                        chatId: chat.chatId,
+                        phoneNumber,
+                        sender: "admin",
+                        messageType: type,
+                        isForwarded: newMessage.isForwarded,
+                        replyTo: newMessage.replyTo,
+                        content: message.content || "",
+                        mediaUrl: message.mediaUrl || null,
+                        fileName: newMessage.fileName,
+                        timestamp: newMessage.createdAt
+                    });
+                } else {
+                    console.log("Socket.IO not initialized");
+                }
+            } catch (error) {
+                console.error("Error sending message:", error);
+                return res.status(500).json({
+                    status: "error",
+                    message: error.response?.data?.error?.message || error.message,
+                    details: error.response?.data || {}
+                });
+            }
+        }
+    }
+
+    res.status(200).json({ status: "success", message: "Messages forwarded successfully" });
 };
 
 exports.createChat = async (req, res) => {
@@ -270,7 +412,7 @@ exports.getChatHistory = async (req, res) => {
                 fileName: msg.fileName || null,
                 createdAt: msg.createdAt,
                 isForwarded: msg.isForwarded,
-                replyTo: msg.replyTo
+                replyTo: msg.replyTo ?? null
             });
         });
 
@@ -327,7 +469,7 @@ exports.getAllChats = async (req, res) => {
                     lastMessageType: lastMessage?.type || "",
                     lastMessageTime: lastMessage?.createdAt || chat.updatedAt,
                     isForwarded: lastMessage.isForwarded,
-                    replyTo: lastMessage.replyTo
+                    replyTo: lastMessage.replyTo ?? null
                 };
             })
         );
@@ -365,7 +507,7 @@ exports.getFilesByChatId = async (req, res) => {
             fileName: msg.fileName,
             messageType: msg.messageType,
             isForwarded: msg.isForwarded,
-            replyTo: msg.replyTo,
+            replyTo: msg.replyTo ?? null,
             mediaUrl: msg.mediaUrl,
             caption: msg.content,
             createdAt: msg.createdAt

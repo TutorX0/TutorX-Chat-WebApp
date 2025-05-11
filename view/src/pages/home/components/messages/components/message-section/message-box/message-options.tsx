@@ -1,26 +1,25 @@
 import { ChevronDown, Copy, Forward, ListChecks, Reply } from "lucide-react";
 import { useState } from "react";
 
-import { Button, Popover, PopoverContent, PopoverTrigger } from "@/components";
+import { Button, ForwardMessage, Popover, PopoverContent, PopoverTrigger } from "@/components";
+import type { ChatMessage } from "@/validations";
 import { useStore } from "@/store";
 import { cn } from "@/lib";
 
 type ContextProps = {
-    messageId: string;
-    sentBy: string;
-    textToCopy?: string;
+    message: ChatMessage;
     messageType: string;
 };
 
-export function MessageOptions({ messageId, messageType, sentBy, textToCopy }: ContextProps) {
+export function MessageOptions({ message, messageType }: ContextProps) {
     const [open, setOpen] = useState(false);
 
     const setSelectMessageToggle = useStore((state) => state.setSelectMessageToggle);
     const setReplyMessage = useStore((state) => state.setReplyMessage);
 
     function copyToClipboard() {
-        if (!textToCopy) return;
-        window.navigator.clipboard.writeText(textToCopy);
+        if (!message.content) return;
+        window.navigator.clipboard.writeText(message.content);
         setOpen(false);
     }
 
@@ -30,7 +29,11 @@ export function MessageOptions({ messageId, messageType, sentBy, textToCopy }: C
     }
 
     function toggleReply() {
-        setReplyMessage({ content: textToCopy, messageId, sentBy: sentBy === "admin" ? "You" : "User", messageType });
+        setReplyMessage({
+            content: message.content,
+            mediaType: message.type,
+            sender: message.sender
+        });
         setOpen(false);
     }
 
@@ -42,7 +45,7 @@ export function MessageOptions({ messageId, messageType, sentBy, textToCopy }: C
                     size="icon"
                     className={cn(
                         "invisible absolute top-1/2 -translate-y-1/2 rounded-full p-4 group-hover:visible hover:visible",
-                        sentBy === "admin" ? "-left-10" : "-right-10"
+                        message.sender === "admin" ? "-left-10" : "-right-10"
                     )}
                 >
                     <ChevronDown className="size-4" />
@@ -57,10 +60,14 @@ export function MessageOptions({ messageId, messageType, sentBy, textToCopy }: C
                     <Copy className="size-5" />
                     <span className="text-sm">Copy</span>
                 </div>
-                <div className="flex cursor-pointer items-center gap-2">
-                    <Forward className="size-5" />
-                    <span className="text-sm">Forward</span>
-                </div>
+                <ForwardMessage
+                    messages={[{ content: message.content, id: message._id, mediaUrl: message.mediaUrl, type: messageType }]}
+                >
+                    <div className="flex cursor-pointer items-center gap-2">
+                        <Forward className="size-5" />
+                        <span className="text-sm">Forward</span>
+                    </div>
+                </ForwardMessage>
                 <div className="flex cursor-pointer items-center gap-2" onClick={toggleSelect}>
                     <ListChecks className="size-5" />
                     <span className="text-sm">Select</span>
