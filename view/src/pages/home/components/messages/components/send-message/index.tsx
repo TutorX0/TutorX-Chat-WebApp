@@ -20,6 +20,7 @@ export function SendMessage({ phoneNumber, setFiles }: SendMessageProps) {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
+    const setReplyMessage = useStore((state) => state.setReplyMessage);
     const replyMessage = useStore((state) => state.replyMessage);
 
     async function sendTextMessage(e: FormEvent<HTMLFormElement>) {
@@ -29,12 +30,13 @@ export function SendMessage({ phoneNumber, setFiles }: SendMessageProps) {
 
         setLoading(true);
         try {
-            const response = await axiosClient.post("/chat/send", { phoneNumber, message });
+            const response = await axiosClient.post("/chat/send", { phoneNumber, message, replyTo: replyMessage });
 
             const parsedResponse = textMessageResponseSchema.safeParse(response.data);
             if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
 
             setMessage("");
+            setReplyMessage(null);
         } catch (error: unknown) {
             let message = "An unexpected error was returned from the server";
             if (error instanceof AxiosError) message = error?.response?.data?.message;

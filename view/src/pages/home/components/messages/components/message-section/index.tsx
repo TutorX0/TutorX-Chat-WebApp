@@ -32,6 +32,7 @@ export function MessageSection({ chatId, files, setFiles, phoneNumber }: Message
         if (!socket) return;
         socket.on("newMessage", (data) => {
             const parsedResponse = socketData.safeParse(data);
+            console.log(data);
             if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
 
             const chatId = parsedResponse.data.chatId;
@@ -74,43 +75,14 @@ export function MessageSection({ chatId, files, setFiles, phoneNumber }: Message
                               <div className="bg-message-sent-by-user rounded-md border px-2 py-1 text-xs">{days}</div>
                           </div>
                           {messages[days].map((message) => {
-                              if (message.type === "text")
-                                  return (
-                                      <TextMessage
-                                          key={message._id}
-                                          date={message.createdAt}
-                                          message={message.content}
-                                          messageId={message._id}
-                                          sentBy={message.sender}
-                                          isForwarded={message.isForwarded}
-                                      />
-                                  );
-                              else if (message.type === "image" || message.type === "video")
-                                  return (
-                                      <PhotoMessage
-                                          key={message._id}
-                                          date={message.createdAt}
-                                          message={message.content}
-                                          messageId={message._id}
-                                          sentBy={message.sender}
-                                          mediaUrl={message.mediaUrl}
-                                          type={message.type}
-                                          isForwarded={message.isForwarded}
-                                      />
-                                  );
-                              else if (message.type === "document")
-                                  return (
-                                      <DocumentMessage
-                                          key={message._id}
-                                          date={message.createdAt}
-                                          message={message.content}
-                                          messageId={message._id}
-                                          sentBy={message.sender}
-                                          mediaUrl={message.mediaUrl}
-                                          type={message.type}
-                                          isForwarded={message.isForwarded}
-                                      />
-                                  );
+                              const component = {
+                                  text: <TextMessage key={message._id} message={message} />,
+                                  image: <PhotoMessage key={message._id} message={message} />,
+                                  video: <PhotoMessage key={message._id} message={message} />,
+                                  document: <DocumentMessage key={message._id} message={message} />
+                              };
+
+                              return component[message.type as "text"];
                           })}
                       </section>
                   ))

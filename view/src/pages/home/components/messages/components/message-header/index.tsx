@@ -11,8 +11,9 @@ type MessageHeaderProps = {
 };
 
 export function MessageHeader({ currentChat }: MessageHeaderProps) {
-    const selectMessageToggle = useStore((state) => state.selectMessageToggle);
     const setSelectMessageToggle = useStore((state) => state.setSelectMessageToggle);
+    const selectMessageToggle = useStore((state) => state.selectMessageToggle);
+    const selectedMessages = useStore((state) => state.selectedMessages);
 
     const deleteSearchParam = useDeleteSearchParam();
 
@@ -26,7 +27,7 @@ export function MessageHeader({ currentChat }: MessageHeaderProps) {
             <AboutThisChat name={currentChat.name} phoneNumber={currentChat.phoneNumber} chatId={currentChat.chatId} />
             {selectMessageToggle ? (
                 <div className="flex items-center gap-x-4">
-                    <ForwardMessage>
+                    <ForwardMessage messages={selectedMessages}>
                         <Button variant="secondary" size="icon" className="rounded-full">
                             <Forward />
                         </Button>

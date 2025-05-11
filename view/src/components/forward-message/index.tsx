@@ -1,35 +1,53 @@
 import { useState, type PropsWithChildren } from "react";
 
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components";
+import type { SelectedMessage } from "@/store/select-messages";
 import { Button, Checkbox, ScrollArea } from "@/components";
 import { useStore } from "@/store";
+import { axiosClient } from "@/lib";
+import { AxiosError } from "axios";
+import { toast } from "sonner";
 
-export function ForwardMessage({ children }: PropsWithChildren) {
-    const [selectedChats, setSelectedChats] = useState<string[]>([]);
-    const [loading] = useState(false);
+type ForwardMessageProps = PropsWithChildren<{
+    messages: SelectedMessage[];
+}>;
+
+export function ForwardMessage({ messages, children }: ForwardMessageProps) {
+    const [selectedPhoneNumbers, setSelectedPhoneNumbers] = useState<string[]>([]);
     const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
 
+    const setSelectMessageToggle = useStore((state) => state.setSelectMessageToggle);
     const chats = useStore((state) => state.chats);
-    // const messages = useStore((state) => state.messages);
-    // const selectedMessages = useStore((state) => state.selectedMessages);
 
-    function handleSelectChat(currentChatId: string) {
+    function handleSelectChat(currentChatPhoneNumber: string) {
         if (loading) return;
-        else if (selectedChats.includes(currentChatId)) setSelectedChats((prev) => prev.filter((item) => item !== currentChatId));
-        else setSelectedChats((prev) => [...prev, currentChatId]);
+        else if (selectedPhoneNumbers.includes(currentChatPhoneNumber))
+            setSelectedPhoneNumbers((prev) => prev.filter((phoneNumber) => phoneNumber !== currentChatPhoneNumber));
+        else setSelectedPhoneNumbers((prev) => [...prev, currentChatPhoneNumber]);
     }
 
     function resetForwarding() {
-        setSelectedChats([]);
+        setSelectedPhoneNumbers([]);
         setOpen(false);
     }
 
     async function forwardMessages() {
-        // for (const chatId of selectedChats) {
-        //     for (const messageId of selectedMessages) {
-        //         const message = messages;
-        //     }
-        // }
+        if (!messages.length || !selectedPhoneNumbers.length || loading) return;
+
+        setLoading(true);
+        try {
+            await axiosClient.post("/chat/forward", { phoneNumbers: selectedPhoneNumbers, messages });
+            setSelectedPhoneNumbers([]);
+            setSelectMessageToggle(false);
+            setOpen(false);
+        } catch (error: unknown) {
+            let message = "An unexpected error was returned from the server";
+            if (error instanceof AxiosError) message = error?.response?.data?.message;
+            toast.error(message);
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -44,10 +62,10 @@ export function ForwardMessage({ children }: PropsWithChildren) {
                         <div
                             key={`Select-chat-id-${chat._id}`}
                             className="my-2 flex cursor-pointer items-start justify-between gap-x-4 rounded-md border px-4 py-3"
-                            onClick={() => handleSelectChat(chat.chatId)}
+                            onClick={() => handleSelectChat(chat.phoneNumber)}
                         >
                             <p>{chat.name}</p>
-                            <Checkbox checked={selectedChats.includes(chat.chatId)} />
+                            <Checkbox checked={selectedPhoneNumbers.includes(chat.phoneNumber)} />
                         </div>
                     ))}
                 </ScrollArea>

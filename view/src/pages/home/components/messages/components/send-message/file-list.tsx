@@ -5,6 +5,7 @@ import { toast } from "sonner";
 
 import { Button, Input } from "@/components";
 import { axiosClient } from "@/lib";
+import { useStore } from "@/store";
 
 type FileListProps = {
     files: File[];
@@ -15,6 +16,8 @@ type FileListProps = {
 export function FileList({ files, setFiles, phoneNumber }: FileListProps) {
     const [loading, setLoading] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
+
+    const setReplyMessage = useStore((state) => state.setReplyMessage);
 
     if (files.length < 1) return null;
 
@@ -79,6 +82,7 @@ export function FileList({ files, setFiles, phoneNumber }: FileListProps) {
             //     }
             // });
             setFiles([]);
+            setReplyMessage(null);
         } catch (error: unknown) {
             let message = "An unexpected error was returned from the server";
             if (error instanceof AxiosError) message = error?.response?.data?.message;

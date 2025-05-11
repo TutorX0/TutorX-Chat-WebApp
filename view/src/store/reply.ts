@@ -1,11 +1,6 @@
 import type { StateCreator } from "zustand";
 
-export type Reply = {
-    messageId: string;
-    content?: string;
-    sentBy: string;
-    messageType: string;
-};
+import type { Reply } from "@/validations";
 
 export type ReplySlice = {
     replyMessage: Reply | null;

@@ -1,29 +1,29 @@
+import { Forward } from "lucide-react";
 import { useState } from "react";
 
 import { MessageOptions } from "./message-options";
+import type { ChatMessage } from "@/validations";
 import { cn, readableTime } from "@/lib";
 import { Checkbox } from "@/components";
+import { ReplyBox } from "./reply-box";
 import { useStore } from "@/store";
-import { Forward } from "lucide-react";
 
 type PhotoMessageProps = {
-    date: string;
-    message?: string;
-    messageId: string;
-    sentBy: string;
-    mediaUrl: string | null;
-    type: string;
-    isForwarded: boolean;
+    message: ChatMessage;
 };
 
-export function PhotoMessage({ date, isForwarded, mediaUrl, messageId, sentBy, message, type }: PhotoMessageProps) {
+export function PhotoMessage({ message }: PhotoMessageProps) {
     const [showControls, setShowControls] = useState(false);
 
     const toggleSelectedMessage = useStore((state) => state.toggleSelectedMessage);
     const selectMessageToggle = useStore((state) => state.selectMessageToggle);
     const selectedMessages = useStore((state) => state.selectedMessages);
 
-    const messageSelected = selectedMessages.includes(messageId);
+    const messageSelected = selectedMessages.find((selectedMessage) => selectedMessage.id === message._id);
+
+    function onCheckedChange() {
+        toggleSelectedMessage({ content: message.content, id: message._id, mediaUrl: message.mediaUrl, type: message.type });
+    }
 
     return (
         <div
@@ -33,28 +33,27 @@ export function PhotoMessage({ date, isForwarded, mediaUrl, messageId, sentBy, m
                 messageSelected ? "bg-message-sent-by-me/40 hover:bg-message-sent-by-me/40" : ""
             )}
         >
-            {selectMessageToggle ? (
-                <Checkbox checked={messageSelected} onCheckedChange={() => toggleSelectedMessage(messageId)} />
-            ) : null}
+            {selectMessageToggle ? <Checkbox checked={messageSelected ? true : false} onCheckedChange={onCheckedChange} /> : null}
             <div
                 className={cn(
-                    "relative my-2 w-10/12 max-w-xs rounded-md p-3 shadow-md",
-                    sentBy === "admin" ? "bg-message-sent-by-me ml-auto" : "bg-message-sent-by-user"
+                    "relative my-2 w-10/12 max-w-xs rounded-md px-2 py-1.5 shadow-md",
+                    message.sender === "admin" ? "bg-message-sent-by-me ml-auto" : "bg-message-sent-by-user"
                 )}
             >
-                {isForwarded ? (
+                <ReplyBox replyTo={message.replyTo} />
+                {message.isForwarded ? (
                     <div className="mb-2 flex items-center gap-x-2 text-xs text-neutral-400">
                         <Forward className="size-4" />
                         <span>Forwarded</span>
                     </div>
                 ) : null}
-                {mediaUrl ? (
+                {message.mediaUrl ? (
                     <div className="mb-2.5 rounded-md bg-neutral-300 p-3">
-                        {type === "image" ? (
-                            <img src={mediaUrl} alt="A random WhatsApp image" className="size-full" loading="lazy" />
-                        ) : type === "video" ? (
+                        {message.type === "image" ? (
+                            <img src={message.mediaUrl} alt="A random WhatsApp image" className="size-full" loading="lazy" />
+                        ) : message.type === "video" ? (
                             <video
-                                src={mediaUrl}
+                                src={message.mediaUrl}
                                 className="size-full"
                                 onMouseEnter={() => setShowControls(true)}
                                 onMouseLeave={() => setShowControls(false)}
@@ -63,11 +62,11 @@ export function PhotoMessage({ date, isForwarded, mediaUrl, messageId, sentBy, m
                         ) : null}
                     </div>
                 ) : null}
-                <p>{message}</p>
+                <p>{message.content}</p>
                 <div className="flex items-center justify-end">
-                    <p className="text-xs text-neutral-400">{readableTime(date)}</p>
+                    <p className="text-xs text-neutral-400">{readableTime(message.createdAt)}</p>
                 </div>
-                <MessageOptions textToCopy={message} sentBy={sentBy} messageId={messageId} messageType={type} />
+                <MessageOptions message={message} messageType={message.type} />
             </div>
         </div>
     );

@@ -49,7 +49,11 @@ export const createMessageSlice: StateCreator<MessageSlice> = (set, get) => ({
         }
     },
 
-    pushMessage: (chatId, newMessage) => {
+    pushMessage: async (chatId, newMessage) => {
+        const { messages, fetchMessages } = get();
+
+        if (!messages[chatId] || Object.keys(messages[chatId]).length === 0) await fetchMessages(chatId);
+
         set((state) => {
             const existingMessages = state.messages[chatId] || {};
             const groupKey = "Today";
