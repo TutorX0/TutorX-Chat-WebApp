@@ -32,7 +32,6 @@ export function MessageSection({ chatId, files, setFiles, phoneNumber }: Message
         if (!socket) return;
         socket.on("newMessage", (data) => {
             const parsedResponse = socketData.safeParse(data);
-            console.log(data);
             if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
 
             const chatId = parsedResponse.data.chatId;
