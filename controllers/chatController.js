@@ -469,8 +469,8 @@ exports.getAllChats = async (req, res) => {
                     lastMessage: lastMessage?.content || "",
                     lastMessageType: lastMessage?.type || "",
                     lastMessageTime: lastMessage?.createdAt || chat.updatedAt,
-                    isForwarded: lastMessage.isForwarded,
-                    replyTo: lastMessage.replyTo ?? null
+                    // isForwarded: lastMessage.isForwarded ?? null,
+                    // replyTo: lastMessage.replyTo ?? null
                 };
             })
         );

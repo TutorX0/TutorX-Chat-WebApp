@@ -36,7 +36,7 @@ export function DocumentMessage({ message }: DocumentMessageProps) {
     useEffect(() => {
         if (!message.mediaUrl) return;
 
-        fetchMetadata(message.mediaUrl).then((meta) => {
+        fetchMetadata(message.mediaUrl, message.fileName).then((meta) => {
             setMeta({ type: meta.type ?? "", name: meta.name, size: readableFileSize(meta.size) });
         });
     }, []);
@@ -65,12 +65,12 @@ export function DocumentMessage({ message }: DocumentMessageProps) {
                 ) : null}
                 <div
                     className={cn(
-                        "mb-2.5 rounded-md px-2 py-3",
+                        "mb-2.5 rounded-md px-2 py-3 overflow-hidden",
                         message.sender === "admin" ? "bg-primary/20" : "bg-neutral-500/20"
                     )}
                 >
                     {message.mediaUrl ? (
-                        <a href={message.mediaUrl} download target="_blank">
+                        <a href={message.mediaUrl} download={message.fileName ?? message.mediaUrl} target="_blank">
                             <div className="rounded-md">
                                 <div className="flex items-center gap-x-2">
                                     <File className="size-8 shrink-0 whitespace-nowrap" />

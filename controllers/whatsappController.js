@@ -97,7 +97,7 @@ exports.receiveMessage = async (req, res) => {
                     fileName = imageData.fileName;
                     break;
                 case "document":
-                    content = message.document.caption || "Document received";
+                    content = message.document.caption || "";
                     const docData = await saveMedia(message.document.id);
                     mediaUrl = docData.filePath;
                     fileName = message.document.filename || docData.fileName;
@@ -109,7 +109,7 @@ exports.receiveMessage = async (req, res) => {
                     fileName = audioData.fileName;
                     break;
                 case "video":
-                    content = message.video.caption || "Video received";
+                    content = message.video.caption || "";
                     const videoData = await saveMedia(message.video.id);
                     mediaUrl = videoData.filePath;
                     fileName = videoData.fileName;
