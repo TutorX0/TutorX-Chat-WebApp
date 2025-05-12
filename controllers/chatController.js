@@ -1,4 +1,3 @@
-
 const axios = require("axios");
 const Chat = require("../models/chatModel");
 const Message = require("../models/messageModel");
@@ -107,7 +106,7 @@ exports.sendMessage = async (req, res) => {
         }
 
         // Send WhatsApp message
-        const response = await axios.post(`https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`, payload, {
+        const response = await axios.post(`https://graph.facebook.com/v22.0/${process.env.PHONE_NUMBER_ID}/messages`, payload, {
             headers
         });
 
@@ -321,16 +320,65 @@ exports.createChat = async (req, res) => {
 
         await newChat.save();
 
+        // ✅ Send "chat_initiations" template message
+        const payload = {
+            messaging_product: "whatsapp",
+            to: phoneNumber,
+            type: "template",
+            template: {
+                name: "chat_initiations",
+                language: { code: "en_US" }
+                // You can add `components` if your template uses variables
+            }
+        };
+
+        const headers = {
+            Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
+            "Content-Type": "application/json"
+        };
+
+        const response = await axios.post(
+            `https://graph.facebook.com/v22.0/${process.env.PHONE_NUMBER_ID}/messages`,
+            payload,
+            { headers }
+        );
+
+        // Optional: Save this template message in Message DB
+        const templateMessage = new Message({
+            chatId,
+            phoneNumber,
+            sender: "admin",
+            messageType: "template",
+            content: "Template: chat_initiations",
+            isForwarded: false
+        });
+        await templateMessage.save();
+
+        // Optional: Emit to socket
+        const io = getIO();
+        if (io) {
+            io.emit("newMessage", {
+                chatId,
+                phoneNumber,
+                sender: "admin",
+                messageType: "template",
+                content: "Template: chat_initiations",
+                timestamp: templateMessage.createdAt
+            });
+        }
+        console.log(response.data);
         res.status(201).json({
             status: "success",
-            message: "Chat created successfully",
-            chat: newChat
+            message: "Chat created and template message sent",
+            chat: newChat,
+            templateResponse: response.data
         });
     } catch (err) {
         console.error("Error creating chat:", err);
         res.status(500).json({ status: "error", message: err.message });
     }
 };
+
 
 exports.updateGuestName = async (req, res) => {
     const { phoneNumber, newName } = req.body;

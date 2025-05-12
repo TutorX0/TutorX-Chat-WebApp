@@ -15,24 +15,24 @@ const generateGuestName = async () => {
 exports.receiveMessage = async (req, res) => {
     try {
         const body = req.body;
+        const change = body?.entry?.[0]?.changes?.[0]?.value;
 
-        if (
-            body.object &&
-            body.entry &&
-            body.entry[0].changes &&
-            body.entry[0].changes[0].value.messages &&
-            body.entry[0].changes[0].value.messages[0]
-        ) {
-            const message = body.entry[0].changes[0].value.messages[0];
+        if (!change) {
+            return res.sendStatus(400);
+        }
+
+        // ✅ Case 1: Incoming message from user
+        if (change.messages && change.messages[0]) {
+            const message = change.messages[0];
             const phoneNumber = message.from;
             const type = message.type;
+
             let content = "";
             let mediaUrl = null;
             let fileName = null;
 
             const token = process.env.ACCESS_TOKEN;
 
-            // Inline media download logic (similar to Multer's file saving style)
             const saveMedia = async (mediaId) => {
                 const mediaInfoResponse = await axios.get(`https://graph.facebook.com/v17.0/${mediaId}`, {
                     headers: { Authorization: `Bearer ${token}` }
@@ -43,37 +43,23 @@ exports.receiveMessage = async (req, res) => {
                     responseType: "arraybuffer"
                 });
 
-                // Save to uploads folder
                 const uploadDir = path.join(__dirname, "../uploads");
                 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
                 let fileExt = ".bin";
                 const contentType = mediaResponse.headers["content-type"];
                 if (contentType) {
-                    switch (contentType.toLowerCase()) {
-                        case "image/jpeg":
-                            fileExt = ".jpg";
-                            break;
-                        case "image/png":
-                            fileExt = ".png";
-                            break;
-                        case "video/mp4":
-                            fileExt = ".mp4";
-                            break;
-                        case "audio/mpeg":
-                        case "audio/mp3":
-                            fileExt = ".mp3";
-                            break;
-                        case "application/pdf":
-                            fileExt = ".pdf";
-                            break;
-                        case "application/msword":
-                            fileExt = ".doc";
-                            break;
-                        case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
-                            fileExt = ".docx";
-                            break;
-                    }
+                    const extMap = {
+                        "image/jpeg": ".jpg",
+                        "image/png": ".png",
+                        "video/mp4": ".mp4",
+                        "audio/mpeg": ".mp3",
+                        "audio/mp3": ".mp3",
+                        "application/pdf": ".pdf",
+                        "application/msword": ".doc",
+                        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ".docx"
+                    };
+                    fileExt = extMap[contentType.toLowerCase()] || ".bin";
                 }
 
                 const savedFileName = `${Date.now()}-whatsapp-media${fileExt}`;
@@ -85,7 +71,7 @@ exports.receiveMessage = async (req, res) => {
                 };
             };
 
-            // Process message based on type
+            // Process message type
             switch (type) {
                 case "text":
                     content = message.text.body;
@@ -132,7 +118,6 @@ exports.receiveMessage = async (req, res) => {
                     content = "Unsupported message type";
             }
 
-            // Find or create chat
             let chat = await Chat.findOne({ phoneNumber });
             if (!chat) {
                 const name = await generateGuestName();
@@ -144,7 +129,6 @@ exports.receiveMessage = async (req, res) => {
                 await chat.save();
             }
 
-            // Create new message
             const newMessage = new Message({
                 chatId: chat.chatId,
                 phoneNumber,
@@ -157,7 +141,6 @@ exports.receiveMessage = async (req, res) => {
 
             await newMessage.save();
 
-            // Emit event via Socket.IO
             const io = getIO();
             if (io) {
                 io.emit("newMessage", {
@@ -176,15 +159,33 @@ exports.receiveMessage = async (req, res) => {
                 console.log("Socket.IO not initialized");
             }
 
-            res.status(200).send("EVENT_RECEIVED");
-        } else {
-            res.sendStatus(404);
+            return res.status(200).send("EVENT_RECEIVED");
         }
+
+        // 🚫 Case 2: Message status update (e.g., sent, delivered, failed)
+        if (change.statuses && change.statuses[0]) {
+            const statusObj = change.statuses[0];
+            const messageId = statusObj.id;
+            const status = statusObj.status;
+            const recipientId = statusObj.recipient_id;
+            const timestamp = statusObj.timestamp;
+            const errors = statusObj.errors || [];
+
+            console.log("📡 Status Update:");
+            console.log({ messageId, status, recipientId, timestamp, errors });
+
+            // You can optionally log to DB or emit to UI here
+
+            return res.status(200).send("STATUS_RECEIVED");
+        }
+
+        return res.status(200).send("NO_RELEVANT_EVENT");
     } catch (error) {
         console.error("Webhook error:", error);
         res.sendStatus(500);
     }
 };
+
 
 exports.verifyWebhook = (req, res) => {
     const VERIFY_TOKEN = process.env.WEBHOOK_VERIFY_TOKEN;
