@@ -17,7 +17,8 @@ const generateGuestName = async () => {
 };
 
 exports.sendMessage = async (req, res) => {
-    const { phoneNumber, message = "", type = "text" } = req.body;
+    const { message = "", type = "text" } = req.body;
+    const phoneNumber = req.body.phoneNumber.startsWith("+") ? req.body.phoneNumber.slice(1) : req.body.phoneNumber;
     let mediaUrl = req.body.mediaUrl || null;
 
     try {
@@ -298,7 +299,8 @@ exports.forwardMessage = async (req, res) => {
 
 exports.createChat = async (req, res) => {
     try {
-        const { name, phoneNumber } = req.body;
+        const { name } = req.body;
+        const phoneNumber = req.body.phoneNumber.startsWith("+") ? req.body.phoneNumber.slice(1) : req.body.phoneNumber;
 
         if (!name || !phoneNumber) {
             return res.status(400).json({ status: "error", message: "name and phoneNumber are required" });
@@ -467,9 +469,7 @@ exports.getAllChats = async (req, res) => {
                     name: chat.name,
                     lastMessage: lastMessage?.content || "",
                     lastMessageType: lastMessage?.type || "",
-                    lastMessageTime: lastMessage?.createdAt || chat.updatedAt,
-                    isForwarded: lastMessage.isForwarded,
-                    replyTo: lastMessage.replyTo ?? null
+                    lastMessageTime: lastMessage?.createdAt || chat.updatedAt
                 };
             })
         );

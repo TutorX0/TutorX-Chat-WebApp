@@ -16,12 +16,12 @@ exports.addUsersToGroup = async (req, res) => {
         }
 
         // Check if group exists
-        let group = await Group.findOne({ groupName });
+        let group = await Group.findOne({ groupName: new RegExp(`^${groupName}$`, "i") });
 
         if (group) {
             // Add new messages to existing group
             group = await Group.findOneAndUpdate(
-                { groupName, description },
+                { groupName: new RegExp(`^${groupName}$`, "i") },
                 { $addToSet: { messageIds: { $each: messageIds } } },
                 { new: true }
             );
@@ -46,16 +46,37 @@ exports.removeUserFromGroup = async (req, res) => {
 
     try {
         // Check if group exists
-        const group = await Group.findOne({ groupName });
+        const group = await Group.findOne({ groupName: new RegExp(`^${groupName}$`, "i") });
 
         if (!group) {
             return res.status(404).json({ message: "Group not found" });
         }
 
         // Remove the messageId from the group's messageIds
-        const updatedGroup = await Group.findOneAndUpdate({ groupName }, { $pull: { messageIds: messageId } }, { new: true });
+        const updatedGroup = await Group.findOneAndUpdate(
+            { groupName: new RegExp(`^${groupName}$`, "i") },
+            { $pull: { messageIds: messageId } },
+            { new: true }
+        );
 
         res.status(200).json({ message: "Message removed from group", group: updatedGroup });
+    } catch (error) {
+        console.error("Error removing message from group:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+exports.removeGroup = async (req, res) => {
+    const { groupName } = req.params;
+
+    if (!groupName) return res.status(400).json({ message: "groupName is required" });
+
+    try {
+        // Check if group exists
+        const group = await Group.findOneAndDelete({ groupName: new RegExp(`^${groupName}$`, "i") });
+        if (!group) return res.status(404).json({ message: "Group not found" });
+
+        res.status(200).json({ message: "Group removed successfully", groupId: group._id });
     } catch (error) {
         console.error("Error removing message from group:", error);
         res.status(500).json({ message: "Internal server error" });
@@ -78,11 +99,11 @@ exports.addUser = async (req, res) => {
             return res.status(404).json({ message: "Some message IDs are invalid" });
         }
 
-        let group = await Group.findOne({ groupName });
+        let group = await Group.findOne({ groupName: new RegExp(`^${groupName}$`, "i") });
 
         if (group) {
             group = await Group.findOneAndUpdate(
-                { groupName },
+                { groupName: new RegExp(`^${groupName}$`, "i") },
                 { $addToSet: { messageIds: { $each: validChatIds } } },
                 { new: true }
             );
