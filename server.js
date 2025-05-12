@@ -21,6 +21,7 @@ const server = http.createServer(app);
 const io = socketModule.init(server);
 
 // Middleware
+app.enable("trust proxy");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: true, credentials: true }));
