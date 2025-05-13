@@ -49,7 +49,7 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
                     </div>
                 ) : null}
                 {message.mediaUrl ? (
-                    <PhotoPopover fileName={message.fileName} mediaUrl={message.mediaUrl} type={message.type}>
+                    <PhotoPopover mediaUrl={message.mediaUrl} type={message.type}>
                         <div className="mb-2.5 rounded-md bg-neutral-300 p-3">
                             {message.type === "image" ? (
                                 <img src={message.mediaUrl} alt="A random WhatsApp image" className="size-full" loading="lazy" />

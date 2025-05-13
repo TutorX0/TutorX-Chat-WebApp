@@ -4,11 +4,10 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components";
 
 type PhotoPopover = PropsWithChildren<{
     mediaUrl: string;
-    fileName: string | null;
     type: string;
 }>;
 
-export function PhotoPopover({ fileName, mediaUrl, type, children }: PhotoPopover) {
+export function PhotoPopover({ mediaUrl, type, children }: PhotoPopover) {
     return (
         <Dialog>
             <DialogTrigger asChild>{children}</DialogTrigger>
