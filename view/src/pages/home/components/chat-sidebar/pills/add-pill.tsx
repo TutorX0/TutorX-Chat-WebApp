@@ -12,7 +12,6 @@ import { useStore } from "@/store";
 
 export function AddPill() {
     const [selectedChats, setSelectedChats] = useState<string[]>([]);
-    console.log(selectedChats);
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
 
@@ -36,7 +35,6 @@ export function AddPill() {
         setLoading(true);
         try {
             const response = await axiosClient.post("/group/addUsersToGroup", { groupName, messageIds: selectedChats });
-            console.log(response.data);
 
             const parsedResponse = groupCreationResponseSchema.safeParse(response.data);
             if (!parsedResponse.success) return toast.error("Invalid data type sent from server");

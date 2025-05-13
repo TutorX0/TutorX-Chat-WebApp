@@ -49,7 +49,6 @@ export function SelectChats({ alreadyAddedChats }: SelectChatsProps) {
         setLoading(true);
         try {
             const response = await axiosClient.patch("/group/add-user", { groupName: chatType, messageIds: selectedChats });
-            console.log(response.data);
 
             const parsedResponse = groupCreationResponseSchema.safeParse(response.data);
             if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
