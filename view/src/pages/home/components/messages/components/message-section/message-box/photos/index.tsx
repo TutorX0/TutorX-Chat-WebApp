@@ -1,11 +1,12 @@
 import { Forward } from "lucide-react";
 import { useState } from "react";
 
-import { MessageOptions } from "./message-options";
+import { MessageOptions } from "../message-options";
 import type { ChatMessage } from "@/validations";
+import { PhotoPopover } from "./photo-popover";
 import { cn, readableTime } from "@/lib";
 import { Checkbox } from "@/components";
-import { ReplyBox } from "./reply-box";
+import { ReplyBox } from "../reply-box";
 import { useStore } from "@/store";
 
 type PhotoMessageProps = {
@@ -52,19 +53,21 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
                     </div>
                 ) : null}
                 {message.mediaUrl ? (
-                    <div className="mb-2.5 rounded-md bg-neutral-300 p-3">
-                        {message.type === "image" ? (
-                            <img src={message.mediaUrl} alt="A random WhatsApp image" className="size-full" loading="lazy" />
-                        ) : message.type === "video" ? (
-                            <video
-                                src={message.mediaUrl}
-                                className="size-full"
-                                onMouseEnter={() => setShowControls(true)}
-                                onMouseLeave={() => setShowControls(false)}
-                                controls={showControls}
-                            />
-                        ) : null}
-                    </div>
+                    <PhotoPopover mediaUrl={message.mediaUrl} type={message.type}>
+                        <div className="mb-2.5 rounded-md bg-neutral-300 p-3">
+                            {message.type === "image" ? (
+                                <img src={message.mediaUrl} alt="A random WhatsApp image" className="size-full" loading="lazy" />
+                            ) : message.type === "video" ? (
+                                <video
+                                    src={message.mediaUrl}
+                                    className="size-full"
+                                    onMouseEnter={() => setShowControls(true)}
+                                    onMouseLeave={() => setShowControls(false)}
+                                    controls={showControls}
+                                />
+                            ) : null}
+                        </div>
+                    </PhotoPopover>
                 ) : null}
                 <p>{message.content}</p>
                 <div className="flex items-center justify-end">

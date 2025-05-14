@@ -24,7 +24,7 @@ exports.receiveMessage = async (req, res) => {
             body.entry[0].changes[0].value.messages[0]
         ) {
             const message = body.entry[0].changes[0].value.messages[0];
-            const phoneNumber = message.from;
+            const phoneNumber = message.from.startsWith("+") ? message.from.slice(1) : message.from;
             const type = message.type;
             let content = "";
             let mediaUrl = null;

@@ -1,26 +1,41 @@
-import { useRef, useState } from "react";
-import { Plus } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
 import { AxiosError } from "axios";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components";
-import { Button, Checkbox, Input, ScrollArea } from "@/components";
 import { groupCreationResponseSchema } from "@/validations";
-import { useUpdateSearchParam } from "@/hooks";
+import {
+    Button,
+    Checkbox,
+    Dialog,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    ScrollArea
+} from "@/components";
 import { axiosClient } from "@/lib";
 import { useStore } from "@/store";
 
-export function AddPill() {
-    const [selectedChats, setSelectedChats] = useState<string[]>([]);
+type SelectChatsProps = {
+    alreadyAddedChats: string[];
+};
+
+export function SelectChats({ alreadyAddedChats }: SelectChatsProps) {
+    const [selectedChats, setSelectedChats] = useState<string[]>(alreadyAddedChats);
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
 
-    const updateSearchParam = useUpdateSearchParam();
+    const [searchParams] = useSearchParams();
+    const chatType = searchParams.get("chat_type");
 
     const addGroup = useStore((state) => state.addGroup);
     const chats = useStore((state) => state.chats);
 
-    const inputRef = useRef<HTMLInputElement>(null);
+    useEffect(() => {
+        setSelectedChats(alreadyAddedChats);
+    }, [alreadyAddedChats]);
 
     function handleSelectChat(currentChatId: string) {
         if (loading) return;
@@ -28,22 +43,20 @@ export function AddPill() {
         else setSelectedChats((prev) => [...prev, currentChatId]);
     }
 
-    async function createNewGroup() {
-        if (loading || !inputRef.current?.value) return;
-        const groupName = inputRef.current.value;
+    async function addItemsToGroup() {
+        if (!chatType) return;
 
         setLoading(true);
         try {
-            const response = await axiosClient.post("/group/addUsersToGroup", { groupName, messageIds: selectedChats });
+            const response = await axiosClient.patch("/group/add-user", { groupName: chatType, messageIds: selectedChats });
 
             const parsedResponse = groupCreationResponseSchema.safeParse(response.data);
             if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
 
             addGroup(parsedResponse.data.group);
             toast.success(parsedResponse.data.message);
-            setOpen(false);
             setSelectedChats([]);
-            updateSearchParam("chat_type", groupName);
+            setOpen(false);
         } catch (error: unknown) {
             let message = "An unexpected error was returned from the server";
             if (error instanceof AxiosError) message = error?.response?.data?.message;
@@ -56,17 +69,13 @@ export function AddPill() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <div className="bg-secondary/30 border-secondary flex-1 shrink-0 cursor-pointer rounded-full border px-3 py-1">
-                    <Plus className="size-3.5" />
-                </div>
+                <Button>Add Members</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>New List</DialogTitle>
+                    <DialogTitle>Add Members</DialogTitle>
                 </DialogHeader>
                 <div>
-                    <Input placeholder="Example: Work, Friends" autoFocus ref={inputRef} />
-                    <p className="mt-4 mb-2 text-center sm:text-left">Add to list</p>
                     <ScrollArea className="h-full max-h-[40vh] pr-3">
                         {chats.map((chat) => (
                             <div
@@ -81,8 +90,8 @@ export function AddPill() {
                     </ScrollArea>
                 </div>
                 <DialogFooter className="z-10">
-                    <Button loading={loading} onClick={createNewGroup}>
-                        Save
+                    <Button loading={loading} onClick={addItemsToGroup}>
+                        Add
                     </Button>
                 </DialogFooter>
             </DialogContent>

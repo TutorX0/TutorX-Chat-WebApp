@@ -3,9 +3,12 @@ import { useEffect, useState } from "react";
 
 import type { ChatItem as ChatItemType } from "@/validations";
 import { ChatItemsLoading } from "../loading";
+import { DeleteGroup } from "./delete-group";
 import { ScrollArea } from "@/components";
 import { useStore } from "@/store";
 import { ChatItem } from "./item";
+import { cn } from "@/lib";
+import { SelectChats } from "@/components/select-chats";
 
 type ChatItemsProps = {
     chats: ChatItemType[];
@@ -48,12 +51,20 @@ export function ChatItems({ chats, loading, search }: ChatItemsProps) {
     }, [basefilteredChats, search]);
 
     return (
-        <ScrollArea className="h-[70vh] grow px-5 pb-4">
+        <ScrollArea className={cn("h-[70vh] grow px-5", chatType === "chats" ? "pb-4" : "")}>
             {loading ? (
                 <ChatItemsLoading />
             ) : (
-                filteredChats.map((chat) => <ChatItem name={chat.name} _id={chat._id} key={`Chat-${chat._id}`} />)
+                filteredChats.map((chat) => (
+                    <ChatItem name={chat.name} _id={chat._id} chatId={chat.chatId} key={`Chat-${chat._id}`} chatType={chatType} />
+                ))
             )}
+            {chatType !== "chats" ? (
+                <div className="bg-sidebar sticky bottom-0 mt-auto flex flex-col items-center justify-between gap-x-6 gap-y-4 border-t px-2 py-4 sm:flex-row md:flex-col lg:flex-row">
+                    <DeleteGroup chatType={chatType} />
+                    <SelectChats alreadyAddedChats={basefilteredChats.map((chat) => chat.chatId)} />
+                </div>
+            ) : null}
         </ScrollArea>
     );
 }

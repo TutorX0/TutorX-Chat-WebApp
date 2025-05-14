@@ -39,7 +39,7 @@ export function Medias({ chatId }: MediasProps) {
                 </TabsTrigger>
             </TabsList>
             <TabsContent value="media">
-                <div className="mx-4 my-4 grid grid-cols-2 gap-4">
+                <div className="m-4 grid grid-cols-2 gap-4">
                     {mediaFiles.length ? (
                         mediaFiles.map(({ _id, mediaUrl, type }) =>
                             mediaUrl ? (
@@ -58,11 +58,13 @@ export function Medias({ chatId }: MediasProps) {
                 </div>
             </TabsContent>
             <TabsContent value="docs">
-                <div className="mx-4 my-4 flex flex-col gap-4">
+                <div className="m-4 grid gap-4">
                     {documentFiles.length ? (
-                        documentFiles.map(({ mediaUrl, fileName }) => (mediaUrl ? <MediaFile mediaUrl={mediaUrl} fileName={fileName} /> : null))
+                        documentFiles.map(({ mediaUrl, fileName }) =>
+                            mediaUrl ? <MediaFile mediaUrl={mediaUrl} fileName={fileName} /> : null
+                        )
                     ) : (
-                        <p className="col-span-2 text-center text-neutral-400">There are no documents in this chat</p>
+                        <p className="text-center text-neutral-400">There are no documents in this chat</p>
                     )}
                 </div>
             </TabsContent>
@@ -70,7 +72,7 @@ export function Medias({ chatId }: MediasProps) {
     );
 }
 
-function MediaFile({ mediaUrl, fileName }: { mediaUrl: string, fileName: string | null }) {
+function MediaFile({ mediaUrl, fileName }: { mediaUrl: string; fileName: string | null }) {
     const [meta, setMeta] = useState({
         type: "",
         size: "",
@@ -86,8 +88,8 @@ function MediaFile({ mediaUrl, fileName }: { mediaUrl: string, fileName: string 
     }, []);
 
     return (
-        <a href={mediaUrl} download={fileName ?? mediaUrl} target="_blank">
-            <div className="rounded-md overflow-hidden">
+        <a href={mediaUrl} download={fileName ?? mediaUrl} target="_blank" className="overflow-hidden">
+            <div className="rounded-md">
                 <div className="flex items-center gap-x-2">
                     <File className="size-8 shrink-0 whitespace-nowrap text-neutral-400" />
                     <div>
