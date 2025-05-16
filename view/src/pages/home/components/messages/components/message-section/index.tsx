@@ -1,13 +1,10 @@
 import { useEffect, useRef, type Dispatch, type SetStateAction } from "react";
-import { toast } from "sonner";
 
-import { socketData, type ChatMessage } from "@/validations";
 import { DocumentMessage } from "./message-box/document";
 import { FileList } from "../send-message/file-list";
 import { PhotoMessage } from "./message-box/photos";
 import { TextMessage } from "./message-box/text";
 import { ScrollArea } from "@/components";
-import { useSocket } from "@/context";
 import { useStore } from "@/store";
 
 type MessageSectionProps = {
@@ -23,38 +20,6 @@ export function MessageSection({ chatId, files, setFiles, phoneNumber }: Message
 
     const messages = useStore((state) => state.messages)[chatId];
     const fetchMessages = useStore((state) => state.fetchMessages);
-    const pushMessage = useStore((state) => state.pushMessage);
-    const moveChatToTop = useStore((state) => state.moveChatToTop);
-
-    const { socket } = useSocket();
-
-    useEffect(() => {
-        if (!socket) return;
-        socket.on("newMessage", (data) => {
-            const parsedResponse = socketData.safeParse(data);
-            if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
-
-            const chatId = parsedResponse.data.chatId;
-            const newMessage: ChatMessage = {
-                _id: parsedResponse.data.chatId,
-                createdAt: parsedResponse.data.timestamp,
-                fileName: parsedResponse.data.fileName,
-                mediaUrl: parsedResponse.data.mediaUrl,
-                sender: parsedResponse.data.sender,
-                type: parsedResponse.data.messageType,
-                content: parsedResponse.data.content,
-                replyTo: parsedResponse.data.replyTo,
-                isForwarded: parsedResponse.data.isForwarded
-            };
-
-            pushMessage(chatId, newMessage);
-            moveChatToTop(parsedResponse.data.phoneNumber);
-        });
-
-        return () => {
-            socket.off("newMessage");
-        };
-    });
 
     useEffect(() => {
         fetchMessages(chatId);
@@ -75,10 +40,10 @@ export function MessageSection({ chatId, files, setFiles, phoneNumber }: Message
                           </div>
                           {messages[days].map((message) => {
                               const component = {
-                                  text: <TextMessage key={message._id} message={message} />,
-                                  image: <PhotoMessage key={message._id} message={message} />,
-                                  video: <PhotoMessage key={message._id} message={message} />,
-                                  document: <DocumentMessage key={message._id} message={message} />
+                                  text: <TextMessage key={message.createdAt} message={message} />,
+                                  image: <PhotoMessage key={message.createdAt} message={message} />,
+                                  video: <PhotoMessage key={message.createdAt} message={message} />,
+                                  document: <DocumentMessage key={message.createdAt} message={message} />
                               };
 
                               return component[message.type as "text"];

@@ -7,7 +7,7 @@ import { createReplySlice, type ReplySlice } from "./reply";
 import { createChatSlice, type ChatSlice } from "./chats";
 import { createUserSlice, type UserSlice } from "./user";
 
-type StoreType = ChatSlice & UserSlice & MessageSlice & GroupSlice & SelectMessagesSlice & ReplySlice;
+export type StoreType = ChatSlice & UserSlice & MessageSlice & GroupSlice & SelectMessagesSlice & ReplySlice;
 
 export const useStore = create<StoreType>()((...args) => ({
     ...createSelectMessagesSlice(...args),
