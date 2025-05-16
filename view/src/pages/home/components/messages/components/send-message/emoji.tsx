@@ -14,7 +14,7 @@ export function Emoji({ setMessage }: EmojiProps) {
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <Button variant="secondary" size="icon" className="hover:bg-input-buttons-hover rounded-full">
+                <Button variant="secondary" size="icon" className="hover:bg-input-buttons-hover mb-0.5 rounded-full">
                     <Smile />
                 </Button>
             </PopoverTrigger>
