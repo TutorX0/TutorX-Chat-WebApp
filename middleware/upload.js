@@ -1,21 +1,16 @@
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 
-// Define allowed MIME types by WhatsApp support
-const MIME_TYPES = {
-  "image/jpeg": "image",
-  "image/png": "image",
-  "video/mp4": "video",
-  "audio/mpeg": "audio",
-  "audio/mp3": "audio",
-  "application/pdf": "document",
-  "application/msword": "document",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "document"
-};
+// Ensure 'uploads/' directory exists
+const uploadDir = "uploads/";
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "uploads/");
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
@@ -24,14 +19,14 @@ const storage = multer.diskStorage({
   }
 });
 
+// No filtering - accept all file types
 const fileFilter = (req, file, cb) => {
-  if (MIME_TYPES[file.mimetype]) {
-    cb(null, true);
-  } else {
-    cb(new Error("Unsupported file type"), false);
-  }
+  cb(null, true);
 };
 
-const upload = multer({ storage, fileFilter });
+const upload = multer({
+  storage,
+  fileFilter
+});
 
 module.exports = upload;

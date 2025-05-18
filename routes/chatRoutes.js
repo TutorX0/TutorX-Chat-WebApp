@@ -11,7 +11,7 @@ const {
 const upload = require("../middleware/upload");
 const router = express.Router();
 
-router.post("/send", upload.single("mediaUrl"), sendMessage);
+router.post("/send", upload.array("mediaUrl", 10), sendMessage); // up to 10 files
 router.post("/forward", forwardMessage);
 router.post("/create", createChat);
 router.put("/update", updateGuestName);
