@@ -21,7 +21,7 @@ export function FileMessage({ setFiles }: FileMessageProps) {
     return (
         <Popover>
             <PopoverTrigger asChild>
-                <Button variant="secondary" size="icon" className="hover:bg-input-buttons-hover rounded-full">
+                <Button variant="secondary" size="icon" className="hover:bg-input-buttons-hover mb-0.5 rounded-full">
                     <Paperclip />
                 </Button>
             </PopoverTrigger>

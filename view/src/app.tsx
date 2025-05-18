@@ -1,17 +1,19 @@
 import { RouterProvider } from "react-router-dom";
 import { Suspense } from "react";
 
+import { useAddRealtimeMessage } from "./hooks";
 import { Loading, Toaster } from "@/components";
-import { SocketProvider } from "./context";
 import { router } from "@/routing";
 
 export function App() {
+    useAddRealtimeMessage();
+
     return (
-        <SocketProvider>
+        <>
             <Suspense fallback={<Loading />}>
                 <RouterProvider router={router} />
             </Suspense>
             <Toaster />
-        </SocketProvider>
+        </>
     );
 }

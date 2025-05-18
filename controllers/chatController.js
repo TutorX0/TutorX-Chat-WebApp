@@ -143,6 +143,8 @@ exports.sendMessage = async (req, res) => {
         if (io) {
             io.emit("newMessage", {
                 chatId: chat.chatId,
+                chatName: chat.name,
+                chat_id: chat._id,
                 phoneNumber,
                 sender: "admin",
                 messageType: type,
@@ -271,6 +273,8 @@ exports.forwardMessage = async (req, res) => {
                 if (io) {
                     io.emit("newMessage", {
                         chatId: chat.chatId,
+                        chatName: chat.name,
+                        chat_id: chat._id,
                         phoneNumber,
                         sender: "admin",
                         messageType: type,

@@ -4,17 +4,25 @@ import { toast } from "sonner";
 
 import { fetchMessageResponseSchema, type ChatMessage, type GroupedMessages } from "@/validations";
 import { axiosClient } from "@/lib";
+import type { StoreType } from ".";
 
 export type MessageRecord = Record<string, GroupedMessages>;
+
+type ChatDetails = {
+    chatId: string;
+    chatName: string;
+    phoneNumber: string;
+    chat_id: string;
+};
 
 export type MessageSlice = {
     messages: MessageRecord;
     loading: Record<string, boolean>;
     fetchMessages: (chatId: string) => Promise<void>;
-    pushMessage: (chatId: string, newMessage: ChatMessage) => void;
+    pushMessage: (chatDetails: ChatDetails, newMessage: ChatMessage) => void;
 };
 
-export const createMessageSlice: StateCreator<MessageSlice> = (set, get) => ({
+export const createMessageSlice: StateCreator<StoreType, [], [], MessageSlice> = (set, get) => ({
     messages: {},
     loading: {},
 
@@ -49,20 +57,34 @@ export const createMessageSlice: StateCreator<MessageSlice> = (set, get) => ({
         }
     },
 
-    pushMessage: async (chatId, newMessage) => {
-        const { messages, fetchMessages } = get();
+    pushMessage: async (chatDetails, newMessage) => {
+        const { addChat, messages, fetchMessages } = get();
 
-        if (!messages[chatId] || Object.keys(messages[chatId]).length === 0) await fetchMessages(chatId);
+        if (!messages[chatDetails.chatId] || Object.keys(messages[chatDetails.chatId]).length === 0)
+            await fetchMessages(chatDetails.chatId);
+
+        if (!messages[chatDetails.chatId]) {
+            addChat({
+                _id: chatDetails.chat_id,
+                chatId: chatDetails.chatId,
+                lastMessage: "",
+                lastMessageTime: "",
+                lastMessageType: "",
+                name: chatDetails.chatName,
+                phoneNumber: chatDetails.phoneNumber
+            });
+            return;
+        }
 
         set((state) => {
-            const existingMessages = state.messages[chatId] || {};
+            const existingMessages = state.messages[chatDetails.chatId] || {};
             const groupKey = "Today";
             const updatedGroup = [...(existingMessages[groupKey] || []), newMessage];
 
             return {
                 messages: {
                     ...state.messages,
-                    [chatId]: {
+                    [chatDetails.chatId]: {
                         ...existingMessages,
                         [groupKey]: updatedGroup
                     }

@@ -75,7 +75,12 @@ export function SendMessage({ phoneNumber, setFiles }: SendMessageProps) {
                         onChange={(e) => setMessage(e.target.value)}
                         onKeyDown={onKeyDown}
                     />
-                    <Button type="submit" variant="secondary" size="icon" className="hover:bg-input-buttons-hover rounded-full">
+                    <Button
+                        type="submit"
+                        variant="secondary"
+                        size="icon"
+                        className="hover:bg-input-buttons-hover mb-0.5 rounded-full"
+                    >
                         <Send />
                     </Button>
                 </form>
