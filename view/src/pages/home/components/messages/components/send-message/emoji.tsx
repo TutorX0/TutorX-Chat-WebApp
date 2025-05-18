@@ -18,7 +18,7 @@ export function Emoji({ setMessage }: EmojiProps) {
                     <Smile />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full max-w-sm p-0">
+            <PopoverContent align="start" className="w-full max-w-sm p-0">
                 <Suspense fallback={<Skeleton className="xs:w-sm h-[27.25rem] w-48" />}>
                     <Picker
                         data={data}

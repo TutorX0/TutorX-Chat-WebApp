@@ -14,7 +14,9 @@ export const Reply = ({ replyMessage }: Props) => {
     return (
         <div className="bg-message-input flex items-center gap-1 rounded-t-2xl p-2">
             <div className="flex-1 rounded-lg bg-[#1d1e1e] p-2">
-                <p className="text-xs text-[#06cf9c]">{replyMessage.sender}</p>
+                <p className="text-xs text-[#06cf9c] capitalize">
+                    {replyMessage.sender === "admin" ? "You" : replyMessage.sender}
+                </p>
                 {replyMessage.mediaType === "text" ? (
                     <p className="line-clamp-1 text-sm">{replyMessage.content}</p>
                 ) : replyMessage.mediaType === "image" ? (

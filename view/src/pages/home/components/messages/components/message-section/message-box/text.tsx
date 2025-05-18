@@ -19,9 +19,16 @@ export function TextMessage({ message }: TextMessageProps) {
 
     const messageSelected = selectedMessages.find((selectedMessage) => selectedMessage.id === message._id);
 
-    const textLines = message.content?.split("\n") ?? [];
     const [isExpanded, setIsExpanded] = useState(false);
-    const displayedLines = isExpanded ? textLines : textLines.slice(0, 5);
+
+    const fullContent = message.content ?? "";
+    const charLimit = 700;
+
+    const isLong = fullContent.length > charLimit;
+    const previewContent = fullContent.slice(0, charLimit);
+
+    const displayedContent = isExpanded || !isLong ? fullContent : previewContent;
+    const displayedLines = displayedContent.split("\n");
 
     function onCheckedChange() {
         toggleSelectedMessage({ content: message.content, id: message._id, mediaUrl: message.mediaUrl, type: message.type });
@@ -53,7 +60,7 @@ export function TextMessage({ message }: TextMessageProps) {
                     {displayedLines.map((line, index) => (
                         <p key={`${message._id}-line-${index + 1}`}>{line.trim() === "" ? "\u00A0" : line}</p>
                     ))}
-                    {textLines.length > 10 ? (
+                    {isLong ? (
                         <span onClick={() => setIsExpanded((prev) => !prev)} className="cursor-pointer text-sm text-blue-400">
                             {isExpanded ? "Read less" : "Read more"}
                         </span>

@@ -45,9 +45,14 @@ export function Medias({ chatId }: MediasProps) {
                             mediaUrl ? (
                                 <div key={`Media-${_id}`}>
                                     {type === "image" ? (
-                                        <img src={mediaUrl} alt="A random WhatsApp image" className="size-full" loading="lazy" />
+                                        <img
+                                            src={mediaUrl}
+                                            alt="A random WhatsApp image"
+                                            className="max-h-80 object-contain"
+                                            loading="lazy"
+                                        />
                                     ) : type === "video" ? (
-                                        <video src={mediaUrl} className="size-full" controls />
+                                        <video src={mediaUrl} className="max-h-80 object-contain" controls />
                                     ) : null}
                                 </div>
                             ) : null

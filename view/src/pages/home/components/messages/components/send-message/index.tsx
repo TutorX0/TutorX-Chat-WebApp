@@ -12,11 +12,13 @@ import { Emoji } from "./emoji";
 import { Reply } from "./reply";
 
 type SendMessageProps = {
+    files: File[];
     phoneNumber: string;
     setFiles: Dispatch<SetStateAction<File[]>>;
+    setFileDialogOpen: Dispatch<SetStateAction<boolean>>;
 };
 
-export function SendMessage({ phoneNumber, setFiles }: SendMessageProps) {
+export function SendMessage({ files, phoneNumber, setFiles, setFileDialogOpen }: SendMessageProps) {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
@@ -63,7 +65,7 @@ export function SendMessage({ phoneNumber, setFiles }: SendMessageProps) {
                 )}
             >
                 <Emoji setMessage={setMessage} />
-                <FileMessage setFiles={setFiles} />
+                <FileMessage files={files} setFiles={setFiles} setMessage={setMessage} setFileDialogOpen={setFileDialogOpen} />
                 <form onSubmit={sendTextMessage} className="flex flex-1 items-end gap-2">
                     <AutosizeTextarea
                         className="bg-message-input border-message-input outline-message-input focus-visible:border-message-input focus-visible:outline-message-input custom-scroll resize-none ring-0 ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"

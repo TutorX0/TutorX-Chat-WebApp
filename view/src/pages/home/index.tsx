@@ -17,7 +17,7 @@ export default function HomePage() {
     if (openedChat) currentChat = chats.find((chat) => chat._id === openedChat);
 
     return (
-        <div className="flex min-h-screen flex-col">
+        <div className="flex h-screen flex-col overflow-hidden">
             <Header />
             <main className="flex grow flex-col">
                 <ResizablePanelGroup direction="horizontal" className="grow">

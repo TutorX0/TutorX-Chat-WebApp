@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
 import { DocumentMessage } from "./message-box/document";
-import { FileList } from "../send-message/file-list";
 import { PhotoMessage } from "./message-box/photos";
 import { Button, ScrollArea } from "@/components";
 import { TextMessage } from "./message-box/text";
@@ -11,12 +10,9 @@ import { cn } from "@/lib";
 
 type MessageSectionProps = {
     chatId: string;
-    files: File[];
-    setFiles: Dispatch<SetStateAction<File[]>>;
-    phoneNumber: string;
 };
 
-export function MessageSection({ chatId, files, setFiles, phoneNumber }: MessageSectionProps) {
+export function MessageSection({ chatId }: MessageSectionProps) {
     const [showScrollButton, setShowScrollButton] = useState(false);
 
     const scrollToBottomRef = useRef<HTMLDivElement>(null);
@@ -52,7 +48,6 @@ export function MessageSection({ chatId, files, setFiles, phoneNumber }: Message
         <ScrollArea className="relative h-[70vh] grow px-4 pb-0">
             <section ref={scrollSectionRef} className="h-full overflow-y-auto pr-4" style={{ maxHeight: "100%" }}>
                 <div className="pt-3"></div> {/* Just to create some separation from the header */}
-                <FileList files={files} setFiles={setFiles} phoneNumber={phoneNumber} />
                 {messages
                     ? Object.keys(messages).map((days, index) => (
                           <section key={`Chat-${index + 1}`}>

@@ -1,9 +1,9 @@
-import { useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
+import { PlusIcon, X } from "lucide-react";
 import { AxiosError } from "axios";
-import { X } from "lucide-react";
 import { toast } from "sonner";
 
-import { Button, Input } from "@/components";
+import { Button, Dialog, DialogContent, DialogFooter, ScrollArea } from "@/components";
 import { axiosClient } from "@/lib";
 import { useStore } from "@/store";
 
@@ -11,15 +11,29 @@ type FileListProps = {
     files: File[];
     setFiles: Dispatch<SetStateAction<File[]>>;
     phoneNumber: string;
+    open: boolean;
+    setOpen: Dispatch<SetStateAction<boolean>>;
 };
 
-export function FileList({ files, setFiles, phoneNumber }: FileListProps) {
+export function FileList({ files, open, phoneNumber, setFiles, setOpen }: FileListProps) {
     const [loading, setLoading] = useState(false);
+
+    const documentRef = useRef<HTMLInputElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const setReplyMessage = useStore((state) => state.setReplyMessage);
 
+    useEffect(() => {
+        setOpen(files.length > 0);
+    }, [files]);
+
     if (files.length < 1) return null;
+
+    function addFile(e: ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setFiles((prev) => [...prev, file]);
+    }
 
     function removeIndex(indexToRemove: number) {
         setFiles((files) => files.filter((_, index) => index !== indexToRemove));
@@ -92,39 +106,82 @@ export function FileList({ files, setFiles, phoneNumber }: FileListProps) {
         }
     }
 
+    // return (
+    //     <div className="bg-background absolute bottom-4 z-50 max-h-[80vh] w-full max-w-96 overflow-y-auto rounded-md pt-4">
+    //         <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] place-items-center gap-4 pb-4">
+    //             {files.map((file, index) => (
+    //                 <div key={file.name} className="relative bg-neutral-800">
+    //                     <div
+    //                         className="absolute top-2 right-2 cursor-pointer rounded-full bg-black/40 p-1"
+    //                         onClick={() => removeIndex(index)}
+    //                     >
+    //                         <X className="size-4" />
+    //                     </div>
+    //                     {file.type.includes("image") ? (
+    //                         <Image file={file} />
+    //                     ) : file.type.includes("video") ? (
+    //                         <Video file={file} />
+    //                     ) : file.type.includes("application") ? (
+    //                         <Document file={file} />
+    //                     ) : null}
+    //                 </div>
+    //             ))}
+    //         </div>
+    //         <div className="mx-1 my-2">
+    //             <Input placeholder="Type a message ....." autoFocus ref={inputRef} />
+    //         </div>
+    //         <div className="sticky bottom-0 flex items-center justify-between rounded-md bg-neutral-800 p-2">
+    //             <Button variant="secondary" className="rounded-full" disabled={loading} onClick={() => setFiles([])}>
+    //                 Cancel
+    //             </Button>
+    //             <Button variant="outline" className="rounded-full" disabled={loading} onClick={sendDocMessage}>
+    //                 Send
+    //             </Button>
+    //         </div>
+    //     </div>
+    // );
+
     return (
-        <div className="bg-background absolute bottom-4 z-50 max-h-[80vh] w-full max-w-96 overflow-y-auto rounded-md pt-4">
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] place-items-center gap-4 pb-4">
-                {files.map((file, index) => (
-                    <div key={file.name} className="relative bg-neutral-800">
+        <Dialog open={open} onOpenChange={setOpen}>
+            <DialogContent className="max-h-[80vh] !w-full !max-w-[80vw]">
+                <ScrollArea className="h-[68vh] px-4">
+                    <section className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] place-items-center gap-8">
+                        {files.map((file, index) => (
+                            <div key={file.name} className="relative bg-neutral-800">
+                                <div
+                                    className="absolute top-2 right-2 cursor-pointer rounded-full bg-black/40 p-1"
+                                    onClick={() => removeIndex(index)}
+                                >
+                                    <X className="size-4" />
+                                </div>
+                                {file.type.includes("image") ? (
+                                    <Image file={file} />
+                                ) : file.type.includes("video") ? (
+                                    <Video file={file} />
+                                ) : file.type.includes("application") ? (
+                                    <Document file={file} />
+                                ) : null}
+                            </div>
+                        ))}
                         <div
-                            className="absolute top-2 right-2 cursor-pointer rounded-full bg-black/40 p-1"
-                            onClick={() => removeIndex(index)}
+                            className="flex h-60 w-full cursor-pointer items-center justify-center rounded-md border bg-neutral-900/50"
+                            onClick={() => documentRef.current?.click()}
                         >
-                            <X className="size-4" />
+                            <PlusIcon className="size-6 text-neutral-400" />
+                            <input type="file" ref={documentRef} className="hidden" onChange={addFile} />
                         </div>
-                        {file.type.includes("image") ? (
-                            <Image file={file} />
-                        ) : file.type.includes("video") ? (
-                            <Video file={file} />
-                        ) : file.type.includes("application") ? (
-                            <Document file={file} />
-                        ) : null}
-                    </div>
-                ))}
-            </div>
-            <div className="mx-1 my-2">
-                <Input placeholder="Type a message ....." autoFocus ref={inputRef} />
-            </div>
-            <div className="sticky bottom-0 flex items-center justify-between rounded-md bg-neutral-800 p-2">
-                <Button variant="secondary" className="rounded-full" disabled={loading} onClick={() => setFiles([])}>
-                    Cancel
-                </Button>
-                <Button variant="outline" className="rounded-full" disabled={loading} onClick={sendDocMessage}>
-                    Send
-                </Button>
-            </div>
-        </div>
+                    </section>
+                </ScrollArea>
+                <DialogFooter>
+                    <Button variant="outline" className="rounded-full" disabled={loading} onClick={() => setFiles([])}>
+                        Clear all
+                    </Button>
+                    <Button variant="secondary" className="rounded-full" disabled={loading} onClick={sendDocMessage}>
+                        Send
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     );
 }
 

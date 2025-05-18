@@ -1,48 +1,86 @@
-import { useRef, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
-import { FileIcon, ImageIcon, Paperclip } from "lucide-react";
+import { CreditCardIcon, FileIcon, FolderOpenIcon, ImageIcon, Paperclip, VideoIcon } from "lucide-react";
+import { useRef, useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
 
 import { Button, Popover, PopoverContent, PopoverTrigger } from "@/components";
+import { googleMeetMessage, paymentMessage } from "./constants";
 
 type FileMessageProps = {
+    files: File[];
     setFiles: Dispatch<SetStateAction<File[]>>;
+    setMessage: Dispatch<SetStateAction<string>>;
+    setFileDialogOpen: Dispatch<SetStateAction<boolean>>;
 };
 
-export function FileMessage({ setFiles }: FileMessageProps) {
+export function FileMessage({ files, setFiles, setMessage, setFileDialogOpen }: FileMessageProps) {
+    const [open, setOpen] = useState(false);
+
     const imageRef = useRef<HTMLInputElement>(null);
     const documentRef = useRef<HTMLInputElement>(null);
 
     function addFile(e: ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (!file) return;
-
         setFiles((prev) => [...prev, file]);
     }
 
+    function sendConstantTexts(type: "google_meet" | "payment") {
+        if (type === "google_meet") setMessage(googleMeetMessage);
+        else if (type === "payment") setMessage(paymentMessage);
+        setOpen(false);
+    }
+
     return (
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <Button variant="secondary" size="icon" className="hover:bg-input-buttons-hover mb-0.5 rounded-full">
                     <Paperclip />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full">
-                <div>
+            <PopoverContent align="start" className="w-full">
+                {files.length > 0 ? (
                     <div
                         className="flex cursor-pointer items-center gap-2 pt-1 pb-2 text-sm"
-                        onClick={() => imageRef.current?.click()}
+                        onClick={() => setFileDialogOpen(true)}
                     >
-                        <ImageIcon className="size-5" />
-                        <span>Photos & videos</span>
+                        <FolderOpenIcon className="size-5" />
+                        <span>File lobby</span>
+                        <span className="text-sm">
+                            {"("}
+                            {files.length}
+                            {")"}
+                        </span>
                         <input type="file" ref={imageRef} className="hidden" accept="image/*,video/*" onChange={addFile} />
                     </div>
-                    <div
-                        className="flex cursor-pointer items-center gap-2 pt-2 pb-2 text-sm"
-                        onClick={() => documentRef.current?.click()}
-                    >
-                        <FileIcon className="size-5" />
-                        <span>Document</span>
-                        <input type="file" ref={documentRef} className="hidden" onChange={addFile} />
-                    </div>
+                ) : null}
+                <div
+                    className="flex cursor-pointer items-center gap-2 pt-1 pb-2 text-sm"
+                    onClick={() => imageRef.current?.click()}
+                >
+                    <ImageIcon className="size-5" />
+                    <span>Photos & videos</span>
+                    <input type="file" ref={imageRef} className="hidden" accept="image/*,video/*" onChange={addFile} />
+                </div>
+                <div
+                    className="flex cursor-pointer items-center gap-2 pt-2 pb-2 text-sm"
+                    onClick={() => documentRef.current?.click()}
+                >
+                    <FileIcon className="size-5" />
+                    <span>Document</span>
+                    <input type="file" ref={documentRef} className="hidden" onChange={addFile} />
+                </div>
+                <div
+                    className="flex cursor-pointer items-center gap-2 pt-2 pb-2 text-sm"
+                    onClick={() => sendConstantTexts("google_meet")}
+                >
+                    <VideoIcon className="size-5" />
+                    <span>Google Meet</span>
+                </div>
+                <div
+                    className="flex cursor-pointer items-center gap-2 pt-2 pb-2 text-sm"
+                    onClick={() => sendConstantTexts("payment")}
+                >
+                    <CreditCardIcon className="size-5" />
+                    <span>Payment</span>
                 </div>
             </PopoverContent>
         </Popover>

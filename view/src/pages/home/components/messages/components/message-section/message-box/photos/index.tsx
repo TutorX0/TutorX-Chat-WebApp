@@ -1,5 +1,4 @@
-import { Forward } from "lucide-react";
-import { useState } from "react";
+import { Forward, PlayIcon } from "lucide-react";
 
 import { MessageOptions } from "../message-options";
 import type { ChatMessage } from "@/validations";
@@ -14,8 +13,6 @@ type PhotoMessageProps = {
 };
 
 export function PhotoMessage({ message }: PhotoMessageProps) {
-    const [showControls, setShowControls] = useState(false);
-
     const toggleSelectedMessage = useStore((state) => state.toggleSelectedMessage);
     const selectMessageToggle = useStore((state) => state.selectMessageToggle);
     const selectedMessages = useStore((state) => state.selectedMessages);
@@ -37,41 +34,55 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
             {selectMessageToggle ? <Checkbox checked={messageSelected ? true : false} onCheckedChange={onCheckedChange} /> : null}
             <div
                 className={cn(
-                    "relative my-2 w-10/12 max-w-xs rounded-md px-2 py-1.5 shadow-md",
-                    message.sender === "admin" ? "bg-message-sent-by-me ml-auto" : "bg-message-sent-by-user"
+                    "relative my-2 w-fit max-w-xs rounded-md shadow-md",
+                    message.sender === "admin" ? "bg-message-sent-by-me ml-auto" : "bg-message-sent-by-user",
+                    message.content ? "p-2" : ""
                 )}
             >
                 <ReplyBox replyTo={message.replyTo} />
                 {message.isForwarded ? (
-                    <div className="mb-2 flex items-center gap-x-2 text-xs text-neutral-400">
+                    <div
+                        className={cn(
+                            "flex items-center gap-x-2 text-xs text-neutral-400",
+                            message.content ? "mb-2" : "mx-2 my-1"
+                        )}
+                    >
                         <Forward className="size-4" />
                         <span>Forwarded</span>
                     </div>
                 ) : null}
                 {message.mediaUrl ? (
                     <PhotoPopover mediaUrl={message.mediaUrl} type={message.type}>
-                        <div className="mb-2.5 flex items-center justify-center rounded-md bg-neutral-300 p-3">
+                        <div
+                            className={cn(
+                                "flex items-center justify-center rounded-md",
+                                message.content ? "bg-neutral-400 p-2" : "p-1"
+                            )}
+                        >
                             {message.type === "image" ? (
                                 <img
                                     src={message.mediaUrl}
                                     alt="A random WhatsApp image"
-                                    className="max-h-96 object-contain"
+                                    className="max-h-96 rounded-md object-contain"
                                     loading="lazy"
                                 />
                             ) : message.type === "video" ? (
-                                <video
-                                    src={message.mediaUrl}
-                                    className="max-h-96 object-contain"
-                                    onMouseEnter={() => setShowControls(true)}
-                                    onMouseLeave={() => setShowControls(false)}
-                                    controls={showControls}
-                                />
+                                <div className="relative isolate before:absolute before:inset-0 before:bg-black/50">
+                                    <video
+                                        src={message.mediaUrl}
+                                        className="max-h-96 rounded-md object-contain"
+                                        controls={false}
+                                    />
+                                    <div className="absolute top-1/2 left-1/2 -translate-1/2 rounded-full border bg-white/20 p-4">
+                                        <PlayIcon className="size-6 stroke-3" />
+                                    </div>
+                                </div>
                             ) : null}
                         </div>
                     </PhotoPopover>
                 ) : null}
                 <p>{message.content}</p>
-                <div className="flex items-center justify-end">
+                <div className="m-1 flex items-center justify-end">
                     <p className="text-xs text-neutral-400">{readableTime(message.createdAt)}</p>
                 </div>
                 <MessageOptions message={message} messageType={message.type} />
