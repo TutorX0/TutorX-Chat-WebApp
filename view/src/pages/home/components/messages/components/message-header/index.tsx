@@ -32,7 +32,7 @@ export function MessageHeader({ currentChat }: MessageHeaderProps) {
                             <Forward />
                         </Button>
                     </ForwardMessage>
-                    <Button variant="secondary" onClick={() => setSelectMessageToggle(false)}>
+                    <Button variant="secondary" className="rounded-full" onClick={() => setSelectMessageToggle(false)}>
                         Cancel
                     </Button>
                 </div>

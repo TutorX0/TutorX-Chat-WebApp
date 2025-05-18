@@ -66,7 +66,7 @@ export function SendMessage({ phoneNumber, setFiles }: SendMessageProps) {
                 <FileMessage setFiles={setFiles} />
                 <form onSubmit={sendTextMessage} className="flex flex-1 items-end gap-2">
                     <AutosizeTextarea
-                        className="bg-message-input border-message-input outline-message-input ring-message-input ring-offset-message-input focus-visible:border-message-input focus-visible:outline-message-input focus-visible:ring-message-input focus-visible:ring-offset-message-input custom-scroll resize-none"
+                        className="bg-message-input border-message-input outline-message-input focus-visible:border-message-input focus-visible:outline-message-input custom-scroll resize-none ring-0 ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                         placeholder="Type a message"
                         minHeight={10}
                         maxHeight={108}

@@ -56,7 +56,7 @@ export function AddPill() {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <div className="bg-secondary/30 border-secondary flex-1 shrink-0 cursor-pointer rounded-full border px-3 py-1">
+                <div className="bg-secondary/30 border-secondary flex h-8 w-full min-w-16 flex-1 shrink-0 cursor-pointer items-center justify-center rounded-full border px-3 py-1">
                     <Plus className="size-3.5" />
                 </div>
             </DialogTrigger>
@@ -81,7 +81,7 @@ export function AddPill() {
                     </ScrollArea>
                 </div>
                 <DialogFooter className="z-10">
-                    <Button loading={loading} onClick={createNewGroup}>
+                    <Button variant="secondary" className="rounded-full" loading={loading} onClick={createNewGroup}>
                         Save
                     </Button>
                 </DialogFooter>

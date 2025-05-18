@@ -56,10 +56,16 @@ export function About() {
                         onChange={(e) => setAbout(e.target.value)}
                     />
                     <div className="mt-4 flex justify-end gap-x-4">
-                        <Button variant="outline" type="button" onClick={() => setEdit(false)}>
+                        <Button variant="outline" className="rounded-full" onClick={() => setEdit(false)}>
                             Cancel
                         </Button>
-                        <Button type="submit" loading={loading} disabled={about.length < 1}>
+                        <Button
+                            type="submit"
+                            variant="secondary"
+                            className="rounded-full"
+                            loading={loading}
+                            disabled={about.length < 1}
+                        >
                             Update
                         </Button>
                     </div>

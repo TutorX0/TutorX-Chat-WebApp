@@ -117,7 +117,9 @@ export function NumberForm({ setOpen }: NumberFormProps) {
                     )}
                 />
                 <div className="flex justify-end">
-                    <Button type="submit">Submit</Button>
+                    <Button variant="secondary" type="submit" className="rounded-full">
+                        Submit
+                    </Button>
                 </div>
             </form>
         </Form>

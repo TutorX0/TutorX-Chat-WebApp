@@ -11,8 +11,7 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
-    Button
+    AlertDialogTrigger
 } from "@/components";
 import { useUpdateSearchParam } from "@/hooks";
 import { axiosClient } from "@/lib";
@@ -49,9 +48,10 @@ export function DeleteGroup({ chatType }: DeleteGroupProps) {
     return (
         <AlertDialog>
             <AlertDialogTrigger asChild>
-                <Button variant="ghost" className="text-red-500 hover:text-red-500">
-                    Delete this group
-                </Button>
+                <p className="max-w-[30ch] text-center text-sm">
+                    <span className="text-neutral-400">If this group has served its purpose, delete it from </span>
+                    <span className="cursor-pointer text-green-500">here</span>
+                </p>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>

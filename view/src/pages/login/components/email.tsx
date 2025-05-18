@@ -68,7 +68,11 @@ export function Email({ emailSent, setEmail, setEmailSent }: EmailProps) {
                 />
                 {emailSent ? null : (
                     <div className="flex items-center justify-end">
-                        <Button type="submit" loading={loading} className="bg-login-primary hover:bg-login-primary/90 text-white">
+                        <Button
+                            type="submit"
+                            loading={loading}
+                            className="bg-login-primary hover:bg-login-primary/90 rounded-full text-white"
+                        >
                             Login
                         </Button>
                     </div>

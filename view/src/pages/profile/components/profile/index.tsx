@@ -4,7 +4,7 @@ import { About } from "./about";
 import { Name } from "./name";
 
 export function Profile() {
-    const phoneNumber = "+918876690053";
+    const phoneNumber = "+917903375044";
 
     function formatPhoneNumber(input: string) {
         const cleaned = input.replace(/[^\d+]/g, "");

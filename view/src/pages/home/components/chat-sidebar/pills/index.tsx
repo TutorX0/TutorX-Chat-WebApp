@@ -25,7 +25,7 @@ export function Pills({ pillTitles }: PillsProps) {
                 {pillTitles.map((title) => (
                     <div
                         key={title}
-                        className="bg-secondary/30 border-secondary data-[active=true]:bg-primary/20 data-[active=true]:border-primary/80 shrink-0 cursor-pointer rounded-full border px-3 py-1 text-sm"
+                        className="bg-secondary/30 border-secondary data-[active=true]:bg-primary/20 data-[active=true]:border-primary/80 flex h-8 min-w-16 shrink-0 cursor-pointer items-center justify-center rounded-full border px-3 py-1 text-sm"
                         data-active={searchParams.get("chat_type")?.toLowerCase() === title.toLowerCase()}
                         onClick={() => updateSearchParam("chat_type", title.toLowerCase())}
                     >

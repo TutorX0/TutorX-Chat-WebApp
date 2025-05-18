@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { User } from "lucide-react";
 
 import { homeUrl, profileUrl } from "@/routing";
@@ -7,9 +7,12 @@ import { Button } from "@/components";
 import logo from "@/assets/logo.webp";
 
 export function Header() {
+    const [searchParams] = useSearchParams();
+    const chatType = searchParams.get("chat_type") ?? "chats";
+
     return (
         <header className="bg-header flex items-center justify-between px-4 py-2">
-            <Link to={homeUrl} className="flex items-center gap-4">
+            <Link to={`${homeUrl}?chat_type=${chatType}`} className="flex items-center gap-4">
                 <img src={logo} alt="TutorX Logo" loading="lazy" className="size-8" />
                 <span className="text-sm">TutorX</span>
             </Link>

@@ -64,7 +64,6 @@ export function MessageOptions({ message, messageType }: ContextProps) {
 
             URL.revokeObjectURL(blobUrl);
         } catch (error) {
-            console.error("Image download failed:", error);
             toast.error("Image download failed");
         }
     }
@@ -76,7 +75,7 @@ export function MessageOptions({ message, messageType }: ContextProps) {
                     variant="outline"
                     size="icon"
                     className={cn(
-                        "invisible absolute top-1/2 -translate-y-1/2 rounded-full p-4 group-hover:visible hover:visible",
+                        "absolute top-1/2 -translate-y-1/2 scale-75 rounded-full p-4 md:invisible md:group-hover:visible md:hover:visible",
                         message.sender === "admin" ? "-left-10" : "-right-10"
                     )}
                 >

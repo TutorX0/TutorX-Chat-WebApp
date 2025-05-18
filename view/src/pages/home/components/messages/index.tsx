@@ -32,7 +32,7 @@ export function Messages() {
     return (
         <section className="flex grow flex-col">
             <MessageHeader currentChat={currentChat} />
-            <div className="after:bg-sidebar/70 relative isolate flex grow flex-col bg-[url(/bg-phone.jpg)] bg-cover bg-center bg-no-repeat after:absolute after:inset-0 after:-z-10 md:bg-[url(/bg-desktop.jpg)]">
+            <div className="after:bg-sidebar/90 relative isolate flex grow flex-col bg-[url(/chat-bg.png)] after:absolute after:inset-0 after:-z-10">
                 <MessageSection
                     files={files}
                     setFiles={setFiles}

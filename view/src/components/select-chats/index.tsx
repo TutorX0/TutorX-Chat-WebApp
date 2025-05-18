@@ -69,7 +69,9 @@ export function SelectChats({ alreadyAddedChats }: SelectChatsProps) {
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button>Add Members</Button>
+                <Button variant="secondary" className="rounded-full">
+                    Add Members
+                </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
@@ -90,7 +92,7 @@ export function SelectChats({ alreadyAddedChats }: SelectChatsProps) {
                     </ScrollArea>
                 </div>
                 <DialogFooter className="z-10">
-                    <Button loading={loading} onClick={addItemsToGroup}>
+                    <Button variant="secondary" className="rounded-full" loading={loading} onClick={addItemsToGroup}>
                         Add
                     </Button>
                 </DialogFooter>

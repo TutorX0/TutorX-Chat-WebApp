@@ -8,7 +8,9 @@ export default function NotFoundPage() {
         <main className="bg-background flex min-h-screen flex-col items-center justify-center space-y-6 text-center">
             <h1 className="text-4xl font-semibold">Page Not Found</h1>
             <Link to={homeUrl} replace>
-                <Button>Back to home</Button>
+                <Button variant="secondary" className="rounded-full">
+                    Back to home
+                </Button>
             </Link>
         </main>
     );

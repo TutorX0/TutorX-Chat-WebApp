@@ -117,10 +117,10 @@ export function FileList({ files, setFiles, phoneNumber }: FileListProps) {
                 <Input placeholder="Type a message ....." autoFocus ref={inputRef} />
             </div>
             <div className="sticky bottom-0 flex items-center justify-between rounded-md bg-neutral-800 p-2">
-                <Button disabled={loading} variant="outline" onClick={() => setFiles([])}>
+                <Button variant="secondary" className="rounded-full" disabled={loading} onClick={() => setFiles([])}>
                     Cancel
                 </Button>
-                <Button disabled={loading} onClick={sendDocMessage}>
+                <Button variant="outline" className="rounded-full" disabled={loading} onClick={sendDocMessage}>
                     Send
                 </Button>
             </div>

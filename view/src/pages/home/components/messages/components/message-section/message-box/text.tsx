@@ -1,4 +1,5 @@
 import { Forward } from "lucide-react";
+import { useState } from "react";
 
 import type { ChatMessage } from "@/validations";
 import { MessageOptions } from "./message-options";
@@ -17,6 +18,10 @@ export function TextMessage({ message }: TextMessageProps) {
     const selectedMessages = useStore((state) => state.selectedMessages);
 
     const messageSelected = selectedMessages.find((selectedMessage) => selectedMessage.id === message._id);
+
+    const textLines = message.content?.split("\n") ?? [];
+    const [isExpanded, setIsExpanded] = useState(false);
+    const displayedLines = isExpanded ? textLines : textLines.slice(0, 5);
 
     function onCheckedChange() {
         toggleSelectedMessage({ content: message.content, id: message._id, mediaUrl: message.mediaUrl, type: message.type });
@@ -44,7 +49,16 @@ export function TextMessage({ message }: TextMessageProps) {
                         <span>Forwarded</span>
                     </div>
                 ) : null}
-                <p>{message.content}</p>
+                <div>
+                    {displayedLines.map((line, index) => (
+                        <p key={`${message._id}-line-${index + 1}`}>{line.trim() === "" ? "\u00A0" : line}</p>
+                    ))}
+                    {textLines.length > 10 ? (
+                        <span onClick={() => setIsExpanded((prev) => !prev)} className="cursor-pointer text-sm text-blue-400">
+                            {isExpanded ? "Read less" : "Read more"}
+                        </span>
+                    ) : null}
+                </div>
                 <div className="mt-1 flex items-center justify-end">
                     <p className="text-xs text-neutral-400">{readableTime(message.createdAt)}</p>
                 </div>

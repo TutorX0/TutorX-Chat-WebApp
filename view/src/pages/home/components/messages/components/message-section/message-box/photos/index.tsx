@@ -50,13 +50,18 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
                 ) : null}
                 {message.mediaUrl ? (
                     <PhotoPopover mediaUrl={message.mediaUrl} type={message.type}>
-                        <div className="mb-2.5 rounded-md bg-neutral-300 p-3">
+                        <div className="mb-2.5 flex items-center justify-center rounded-md bg-neutral-300 p-3">
                             {message.type === "image" ? (
-                                <img src={message.mediaUrl} alt="A random WhatsApp image" className="size-full" loading="lazy" />
+                                <img
+                                    src={message.mediaUrl}
+                                    alt="A random WhatsApp image"
+                                    className="max-h-96 object-contain"
+                                    loading="lazy"
+                                />
                             ) : message.type === "video" ? (
                                 <video
                                     src={message.mediaUrl}
-                                    className="size-full"
+                                    className="max-h-96 object-contain"
                                     onMouseEnter={() => setShowControls(true)}
                                     onMouseLeave={() => setShowControls(false)}
                                     controls={showControls}

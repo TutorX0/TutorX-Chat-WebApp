@@ -98,7 +98,11 @@ export function Otp({ email }: OtpProps) {
                     )}
                 />
                 <div className="flex items-center justify-end">
-                    <Button type="submit" loading={loading} className="bg-login-primary hover:bg-login-primary/90 text-white">
+                    <Button
+                        type="submit"
+                        loading={loading}
+                        className="bg-login-primary hover:bg-login-primary/90 rounded-full text-white"
+                    >
                         Submit
                     </Button>
                 </div>

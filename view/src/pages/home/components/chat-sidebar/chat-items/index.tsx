@@ -60,9 +60,9 @@ export function ChatItems({ chats, loading, search }: ChatItemsProps) {
                 ))
             )}
             {chatType !== "chats" ? (
-                <div className="bg-sidebar sticky bottom-0 mt-auto flex flex-col items-center justify-between gap-x-6 gap-y-4 border-t px-2 py-4 sm:flex-row md:flex-col lg:flex-row">
-                    <DeleteGroup chatType={chatType} />
+                <div className="bg-sidebar sticky bottom-0 mt-auto flex flex-col items-center justify-between gap-5 border-t px-3 py-6">
                     <SelectChats alreadyAddedChats={basefilteredChats.map((chat) => chat.chatId)} />
+                    <DeleteGroup chatType={chatType} />
                 </div>
             ) : null}
         </ScrollArea>

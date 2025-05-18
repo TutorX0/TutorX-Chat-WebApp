@@ -67,7 +67,7 @@ export function UpdateChatName({ phoneNumber, name }: Pick<ChatItem, "phoneNumbe
                     )}
                 />
                 <div className="flex justify-end">
-                    <Button type="submit" disabled={loading}>
+                    <Button variant="secondary" className="rounded-full" type="submit" disabled={loading}>
                         Submit
                     </Button>
                 </div>

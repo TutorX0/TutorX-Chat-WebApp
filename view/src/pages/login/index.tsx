@@ -11,12 +11,12 @@ export default function LoginPage() {
     const [email, setEmail] = useState("");
 
     return (
-        <div className="bg-wp min-h-screen px-5 py-4 text-black">
+        <div className="bg-wp flex min-h-screen flex-col justify-center px-5 py-4 text-black">
             <header className="flex items-center gap-4">
                 <img src={logo} alt="TutorX Logo" loading="lazy" className="size-8" />
                 <span className="text-2xl font-medium text-[#2559A2]">TutorX</span>
             </header>
-            <main className="mx-auto max-w-5xl">
+            <main className="mx-auto flex max-w-5xl grow flex-col justify-center">
                 <div className="mt-10 mb-5 flex flex-col items-center gap-x-8 gap-y-4 rounded-3xl border border-black bg-white px-6 py-6 sm:px-16 md:flex-row">
                     <LoginLogo />
                     <p className="max-w-[33rem] text-center text-xl md:text-left">
@@ -40,6 +40,7 @@ export default function LoginPage() {
                         <img src={logo} alt="TutorX Logo" loading="lazy" className="size-48 sm:size-52 md:size-60 lg:size-80" />
                     </div>
                 </div>
+                <p className="mt-6 text-center text-sm">Copyrights @ {new Date().getFullYear()}. All right reserved to WCPL</p>
             </main>
         </div>
     );
