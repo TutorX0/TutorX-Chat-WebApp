@@ -12,11 +12,7 @@ type TextMessageProps = {
     message: ChatMessage;
 };
 
-<<<<<<< HEAD
-export function TextMessage({ date, isForwarded, messageId, sentBy, message }: TextMessageProps) {
-=======
 export function TextMessage({ message }: TextMessageProps) {
->>>>>>> 91ce848152bf726b4cc0eb42f331ccdfee25830c
     const toggleSelectedMessage = useStore((state) => state.toggleSelectedMessage);
     const selectMessageToggle = useStore((state) => state.selectMessageToggle);
     const selectedMessages = useStore((state) => state.selectedMessages);

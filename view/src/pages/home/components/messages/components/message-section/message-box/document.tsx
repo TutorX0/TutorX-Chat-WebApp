@@ -12,11 +12,7 @@ type DocumentMessageProps = {
     message: ChatMessage;
 };
 
-<<<<<<< HEAD
-export function DocumentMessage({ date, isForwarded, mediaUrl, messageId, sentBy, message }: DocumentMessageProps) {
-=======
 export function DocumentMessage({ message }: DocumentMessageProps) {
->>>>>>> 91ce848152bf726b4cc0eb42f331ccdfee25830c
     const [meta, setMeta] = useState({
         type: "",
         size: "",
@@ -65,7 +61,7 @@ export function DocumentMessage({ message }: DocumentMessageProps) {
                 ) : null}
                 <div
                     className={cn(
-                        "mb-2.5 rounded-md px-2 py-3 overflow-hidden",
+                        "mb-2.5 overflow-hidden rounded-md px-2 py-3",
                         message.sender === "admin" ? "bg-primary/20" : "bg-neutral-500/20"
                     )}
                 >
