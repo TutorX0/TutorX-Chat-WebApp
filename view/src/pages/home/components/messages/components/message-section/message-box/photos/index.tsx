@@ -13,7 +13,11 @@ type PhotoMessageProps = {
     message: ChatMessage;
 };
 
+<<<<<<< HEAD
+export function PhotoMessage({ date, isForwarded, mediaUrl, messageId, sentBy, message, type }: PhotoMessageProps) {
+=======
 export function PhotoMessage({ message }: PhotoMessageProps) {
+>>>>>>> 91ce848152bf726b4cc0eb42f331ccdfee25830c
     const [showControls, setShowControls] = useState(false);
 
     const toggleSelectedMessage = useStore((state) => state.toggleSelectedMessage);

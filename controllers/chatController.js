@@ -1,3 +1,4 @@
+
 const axios = require("axios");
 const Chat = require("../models/chatModel");
 const Message = require("../models/messageModel");
@@ -18,23 +19,29 @@ const generateGuestName = async () => {
 
 exports.sendMessage = async (req, res) => {
     const { message = "", type = "text" } = req.body;
-    const phoneNumber = req.body.phoneNumber.startsWith("+") ? req.body.phoneNumber.slice(1) : req.body.phoneNumber;
-    let mediaUrl = req.body.mediaUrl || null;
+    const phoneNumber = req.body.phoneNumber?.startsWith("+")
+        ? req.body.phoneNumber.slice(1)
+        : req.body.phoneNumber;
+    let mediaUrls = [];
 
     try {
         if (!phoneNumber) {
             return res.status(400).json({ status: "error", message: "Phone number is required" });
         }
 
-        // If a file is uploaded (handled by multer)
-        if (req.file) {
-            mediaUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+        // Handle multiple file uploads
+        if (req.files && req.files.length > 0) {
+            mediaUrls = req.files.map(file => ({
+                localUrl: `${req.protocol}://${req.get("host")}/uploads/${file.filename}`,
+                fileName: file.originalname,
+                filename: file.filename
+            }));
         }
 
-        let payload;
+        let responses = [];
 
         if (type === "template") {
-            payload = {
+            const payload = {
                 messaging_product: "whatsapp",
                 to: phoneNumber,
                 type: "template",
@@ -43,75 +50,100 @@ exports.sendMessage = async (req, res) => {
                     language: { code: "en_US" }
                 }
             };
+
+            const response = await axios.post(
+                `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`,
+                payload,
+                {
+                    headers: {
+                        Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+
+            responses.push(response.data);
+
         } else if (type === "text") {
             if (!message || typeof message !== "string") {
                 return res.status(400).json({ status: "error", message: "Message is required" });
             }
-            payload = {
+
+            const payload = {
                 messaging_product: "whatsapp",
                 to: phoneNumber,
                 type: "text",
                 text: { body: message.trim() }
             };
-        } else if (type === "image") {
-            if (!mediaUrl) return res.status(400).json({ status: "error", message: "Image URL is required" });
 
-            const imageWpId = await uploadImageToWhatsapp(req.file.filename);
-            console.log(imageWpId);
-            payload = {
-                messaging_product: "whatsapp",
-                to: phoneNumber,
-                type: "image",
-                image: { id: imageWpId, caption: message || "" }
-            };
-        } else if (type === "document") {
-            if (!mediaUrl) return res.status(400).json({ status: "error", message: "Document URL is required" });
+            const response = await axios.post(
+                `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`,
+                payload,
+                {
+                    headers: {
+                        Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
 
-            const documentWpId = await uploadImageToWhatsapp(req.file.filename);
-            payload = {
-                messaging_product: "whatsapp",
-                to: phoneNumber,
-                type: "document",
-                document: { id: documentWpId, caption: message || "" }
-            };
-        } else if (type === "audio") {
-            if (!mediaUrl) return res.status(400).json({ status: "error", message: "Audio URL is required" });
+            responses.push(response.data);
 
-            const audioWpId = await uploadImageToWhatsapp(req.file.filename);
-            payload = {
-                messaging_product: "whatsapp",
-                to: phoneNumber,
-                type: "audio",
-                audio: { id: audioWpId }
-            };
-        } else if (type === "video") {
-            if (!mediaUrl) return res.status(400).json({ status: "error", message: "Video URL is required" });
-
-            const videoWpId = await uploadImageToWhatsapp(req.file.filename);
-            payload = {
-                messaging_product: "whatsapp",
-                to: phoneNumber,
-                type: "video",
-                video: { id: videoWpId, caption: message || "" }
-            };
         } else {
-            return res.status(400).json({ status: "error", message: "Unsupported message type" });
+            // Handle media messages (image, document, audio, video)
+            if (!mediaUrls.length) {
+                return res.status(400).json({ status: "error", message: "Media file(s) are required" });
+            }
+
+            for (let media of mediaUrls) {
+                const mediaId = await uploadImageToWhatsapp(media.filename);
+                let payload;
+
+                if (type === "image") {
+                    payload = {
+                        messaging_product: "whatsapp",
+                        to: phoneNumber,
+                        type: "image",
+                        image: { id: mediaId, caption: message || "" }
+                    };
+                } else if (type === "document") {
+                    payload = {
+                        messaging_product: "whatsapp",
+                        to: phoneNumber,
+                        type: "document",
+                        document: { id: mediaId, caption: message || "" }
+                    };
+                } else if (type === "audio") {
+                    payload = {
+                        messaging_product: "whatsapp",
+                        to: phoneNumber,
+                        type: "audio",
+                        audio: { id: mediaId }
+                    };
+                } else if (type === "video") {
+                    payload = {
+                        messaging_product: "whatsapp",
+                        to: phoneNumber,
+                        type: "video",
+                        video: { id: mediaId, caption: message || "" }
+                    };
+                } else {
+                    return res.status(400).json({ status: "error", message: "Unsupported media type" });
+                }
+
+                const response = await axios.post(
+                    `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`,
+                    payload,
+                    {
+                        headers: { Authorization: `Bearer ${process.env.ACCESS_TOKEN}` }
+                    }
+                );
+
+                responses.push(response.data);
+            }
         }
 
-        const headers = {
-            Authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-        };
-
-        if (type === "template" || type === "text") {
-            headers["Content-Type"] = "application/json";
-        }
-
-        // Send WhatsApp message
-        const response = await axios.post(`https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`, payload, {
-            headers
-        });
-
-        // Create Chat if not exist
+        // Create Chat if not exists
         let chat = await Chat.findOne({ phoneNumber });
         if (!chat) {
             const name = await generateGuestName();
@@ -123,45 +155,70 @@ exports.sendMessage = async (req, res) => {
             await chat.save();
         }
 
-        // Save message in DB
-        const newMessage = new Message({
-            chatId: chat.chatId,
-            phoneNumber,
-            isForwarded: req.body.isForwarded,
-            replyTo: req.body.replyTo ?? null,
-            sender: "admin",
-            messageType: type,
-            content: message || "",
-            mediaUrl: mediaUrl || null,
-            fileName: req.file?.originalname || null
-        });
+        // Save message(s) in DB
+        const savedMessages = [];
 
-        await newMessage.save();
-
-        const io = getIO();
-        if (io) {
-            io.emit("newMessage", {
+        if (type === "text" || type === "template") {
+            const newMessage = new Message({
                 chatId: chat.chatId,
-                chatName: chat.name,
-                chat_id: chat._id,
                 phoneNumber,
+                isForwarded: req.body.isForwarded,
+                replyTo: req.body.replyTo ?? null,
                 sender: "admin",
                 messageType: type,
-                isForwarded: newMessage.isForwarded,
-                replyTo: newMessage.replyTo ?? null,
                 content: message || "",
-                mediaUrl: mediaUrl || null,
-                fileName: req.file?.originalname || null,
-                timestamp: newMessage.createdAt
+                mediaUrl: null,
+                fileName: null
             });
+
+            await newMessage.save();
+            savedMessages.push(newMessage);
         } else {
-            console.log("Socket.IO not initialized");
+            for (let media of mediaUrls) {
+                const newMessage = new Message({
+                    chatId: chat.chatId,
+                    phoneNumber,
+                    isForwarded: req.body.isForwarded,
+                    replyTo: req.body.replyTo ?? null,
+                    sender: "admin",
+                    messageType: type,
+                    content: message || "",
+                    mediaUrl: media.localUrl,
+                    fileName: media.fileName
+                });
+
+                await newMessage.save();
+                savedMessages.push(newMessage);
+            }
         }
+
+        // Emit each message to socket
+        const io = getIO();
+        if (io) {
+            for (let newMessage of savedMessages) {
+                io.emit("newMessage", {
+                    chatId: chat.chatId,
+                    chatName: chat.name,
+                    chat_id: chat._id,
+                    phoneNumber,
+                    sender: "admin",
+                    messageType: newMessage.messageType,
+                    isForwarded: newMessage.isForwarded,
+                    replyTo: newMessage.replyTo ?? null,
+                    content: newMessage.content,
+                    mediaUrl: newMessage.mediaUrl,
+                    fileName: newMessage.fileName,
+                    timestamp: newMessage.createdAt
+                });
+            }
+        }
+
         res.status(200).json({
             status: "success",
             chatId: chat.chatId,
-            data: response.data
+            responses
         });
+
     } catch (error) {
         console.error("Error sending message:", error);
         res.status(500).json({
@@ -169,8 +226,9 @@ exports.sendMessage = async (req, res) => {
             message: error.response?.data?.error?.message || error.message,
             details: error.response?.data || {}
         });
-    }
+    }               
 };
+
 
 exports.forwardMessage = async (req, res) => {
     const { phoneNumbers, messages } = req.body;

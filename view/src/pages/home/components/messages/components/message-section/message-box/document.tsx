@@ -12,7 +12,11 @@ type DocumentMessageProps = {
     message: ChatMessage;
 };
 
+<<<<<<< HEAD
+export function DocumentMessage({ date, isForwarded, mediaUrl, messageId, sentBy, message }: DocumentMessageProps) {
+=======
 export function DocumentMessage({ message }: DocumentMessageProps) {
+>>>>>>> 91ce848152bf726b4cc0eb42f331ccdfee25830c
     const [meta, setMeta] = useState({
         type: "",
         size: "",

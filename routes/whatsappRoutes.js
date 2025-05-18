@@ -7,6 +7,6 @@ const upload = require("../middleware/upload");
 router.get("/",  whatsappController.verifyWebhook);
 
 // Message receiving
-router.post("/",upload.single("mediaUrl"), whatsappController.receiveMessage);
+router.post("/",upload.array("mediaUrl",10), whatsappController.receiveMessage);
 
 module.exports = router;
