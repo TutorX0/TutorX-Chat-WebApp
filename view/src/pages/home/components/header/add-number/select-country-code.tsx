@@ -6,8 +6,8 @@ import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, Command
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import type { CountryList } from "@/hooks";
+import type { Form } from "./number-form";
 import { Button } from "@/components";
-import { Form } from "./number-form";
 import { cn } from "@/lib";
 
 type SelectCountryCodeProps = {

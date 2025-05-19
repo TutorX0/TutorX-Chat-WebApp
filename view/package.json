@@ -10,8 +10,6 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@emoji-mart/data": "^1.2.1",
-        "@emoji-mart/react": "^1.1.1",
         "@hookform/resolvers": "^5.0.1",
         "@radix-ui/react-alert-dialog": "^1.1.11",
         "@radix-ui/react-checkbox": "^1.2.3",
@@ -27,6 +25,7 @@
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "cmdk": "^1.1.1",
+        "emoji-picker-element": "^1.26.3",
         "i18n-iso-countries": "^7.14.0",
         "input-otp": "^1.4.2",
         "libphonenumber-js": "^1.12.7",
@@ -61,11 +60,5 @@
         "typescript": "~5.7.2",
         "typescript-eslint": "^8.26.1",
         "vite": "^6.3.1"
-    },
-    "overrides": {
-        "@emoji-mart/react": {
-            "react": "19.0.0",
-            "react-dom": "19.0.0"
-        }
     }
 }
