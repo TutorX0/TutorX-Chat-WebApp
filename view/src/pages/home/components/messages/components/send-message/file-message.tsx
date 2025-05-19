@@ -1,12 +1,14 @@
 import { CreditCardIcon, FileIcon, FolderOpenIcon, ImageIcon, Paperclip, VideoIcon } from "lucide-react";
-import { useRef, useState, type ChangeEvent, type Dispatch, type SetStateAction } from "react";
+import { useRef, useState, type Dispatch, type SetStateAction } from "react";
 
 import { Button, Popover, PopoverContent, PopoverTrigger } from "@/components";
 import { googleMeetMessage, paymentMessage } from "./constants";
+import type { UploadFile } from "@/types";
+import { addFile } from "@/lib";
 
 type FileMessageProps = {
-    files: File[];
-    setFiles: Dispatch<SetStateAction<File[]>>;
+    files: UploadFile[];
+    setFiles: Dispatch<SetStateAction<UploadFile[]>>;
     setMessage: Dispatch<SetStateAction<string>>;
     setFileDialogOpen: Dispatch<SetStateAction<boolean>>;
 };
@@ -16,12 +18,6 @@ export function FileMessage({ files, setFiles, setMessage, setFileDialogOpen }: 
 
     const imageRef = useRef<HTMLInputElement>(null);
     const documentRef = useRef<HTMLInputElement>(null);
-
-    function addFile(e: ChangeEvent<HTMLInputElement>) {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        setFiles((prev) => [...prev, file]);
-    }
 
     function sendConstantTexts(type: "google_meet" | "payment") {
         if (type === "google_meet") setMessage(googleMeetMessage);
@@ -49,7 +45,13 @@ export function FileMessage({ files, setFiles, setMessage, setFileDialogOpen }: 
                             {files.length}
                             {")"}
                         </span>
-                        <input type="file" ref={imageRef} className="hidden" accept="image/*,video/*" onChange={addFile} />
+                        <input
+                            type="file"
+                            ref={imageRef}
+                            className="hidden"
+                            accept="image/*,video/*"
+                            onChange={(e) => addFile(e, files, setFiles)}
+                        />
                     </div>
                 ) : null}
                 <div
@@ -58,7 +60,13 @@ export function FileMessage({ files, setFiles, setMessage, setFileDialogOpen }: 
                 >
                     <ImageIcon className="size-5" />
                     <span>Photos & videos</span>
-                    <input type="file" ref={imageRef} className="hidden" accept="image/*,video/*" onChange={addFile} />
+                    <input
+                        type="file"
+                        ref={imageRef}
+                        className="hidden"
+                        accept="image/*,video/*"
+                        onChange={(e) => addFile(e, files, setFiles)}
+                    />
                 </div>
                 <div
                     className="flex cursor-pointer items-center gap-2 pt-2 pb-2 text-sm"
@@ -66,7 +74,7 @@ export function FileMessage({ files, setFiles, setMessage, setFileDialogOpen }: 
                 >
                     <FileIcon className="size-5" />
                     <span>Document</span>
-                    <input type="file" ref={documentRef} className="hidden" onChange={addFile} />
+                    <input type="file" ref={documentRef} className="hidden" onChange={(e) => addFile(e, files, setFiles)} />
                 </div>
                 <div
                     className="flex cursor-pointer items-center gap-2 pt-2 pb-2 text-sm"

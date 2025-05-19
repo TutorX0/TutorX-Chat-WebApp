@@ -164,6 +164,7 @@ exports.receiveMessage = async (req, res) => {
                     chatId: chat.chatId,
                     chatName: chat.name,
                     chat_id: chat._id,
+                    messageId: newMessage._id,
                     phoneNumber,
                     sender: "user",
                     messageType: type,

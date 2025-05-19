@@ -25,7 +25,7 @@ export function useAddRealtimeMessage() {
                 chat_id: parsedResponse.data.chat_id
             };
             const newMessage: ChatMessage = {
-                _id: parsedResponse.data.chatId,
+                _id: parsedResponse.data.messageId,
                 createdAt: parsedResponse.data.timestamp,
                 fileName: parsedResponse.data.fileName,
                 mediaUrl: parsedResponse.data.mediaUrl,

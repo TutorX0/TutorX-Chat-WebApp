@@ -3,18 +3,19 @@ import { Send } from "lucide-react";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 
-import { textMessageResponseSchema } from "@/validations";
+// import { textMessageResponseSchema } from "@/validations";
 import { AutosizeTextarea, Button } from "@/components";
 import { FileMessage } from "./file-message";
+import type { UploadFile } from "@/types";
 import { axiosClient, cn } from "@/lib";
 import { useStore } from "@/store";
 import { Emoji } from "./emoji";
 import { Reply } from "./reply";
 
 type SendMessageProps = {
-    files: File[];
+    files: UploadFile[];
     phoneNumber: string;
-    setFiles: Dispatch<SetStateAction<File[]>>;
+    setFiles: Dispatch<SetStateAction<UploadFile[]>>;
     setFileDialogOpen: Dispatch<SetStateAction<boolean>>;
 };
 
@@ -33,9 +34,7 @@ export function SendMessage({ files, phoneNumber, setFiles, setFileDialogOpen }:
         setLoading(true);
         try {
             const response = await axiosClient.post("/chat/send", { phoneNumber, message, replyTo: replyMessage });
-
-            const parsedResponse = textMessageResponseSchema.safeParse(response.data);
-            if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
+            console.log(response.data); // TODO: validate incoming data
 
             setMessage("");
             setReplyMessage(null);

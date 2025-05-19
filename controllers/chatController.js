@@ -1,4 +1,3 @@
-
 const axios = require("axios");
 const Chat = require("../models/chatModel");
 const Message = require("../models/messageModel");
@@ -19,9 +18,7 @@ const generateGuestName = async () => {
 
 exports.sendMessage = async (req, res) => {
     const { message = "", type = "text" } = req.body;
-    const phoneNumber = req.body.phoneNumber?.startsWith("+")
-        ? req.body.phoneNumber.slice(1)
-        : req.body.phoneNumber;
+    const phoneNumber = req.body.phoneNumber?.startsWith("+") ? req.body.phoneNumber.slice(1) : req.body.phoneNumber;
     let mediaUrls = [];
 
     try {
@@ -31,7 +28,7 @@ exports.sendMessage = async (req, res) => {
 
         // Handle multiple file uploads
         if (req.files && req.files.length > 0) {
-            mediaUrls = req.files.map(file => ({
+            mediaUrls = req.files.map((file) => ({
                 localUrl: `${req.protocol}://${req.get("host")}/uploads/${file.filename}`,
                 fileName: file.originalname,
                 filename: file.filename
@@ -63,7 +60,6 @@ exports.sendMessage = async (req, res) => {
             );
 
             responses.push(response.data);
-
         } else if (type === "text") {
             if (!message || typeof message !== "string") {
                 return res.status(400).json({ status: "error", message: "Message is required" });
@@ -88,7 +84,6 @@ exports.sendMessage = async (req, res) => {
             );
 
             responses.push(response.data);
-
         } else {
             // Handle media messages (image, document, audio, video)
             if (!mediaUrls.length) {
@@ -200,6 +195,7 @@ exports.sendMessage = async (req, res) => {
                     chatId: chat.chatId,
                     chatName: chat.name,
                     chat_id: chat._id,
+                    messageId: newMessage._id,
                     phoneNumber,
                     sender: "admin",
                     messageType: newMessage.messageType,
@@ -218,7 +214,6 @@ exports.sendMessage = async (req, res) => {
             chatId: chat.chatId,
             responses
         });
-
     } catch (error) {
         console.error("Error sending message:", error);
         res.status(500).json({
@@ -226,9 +221,8 @@ exports.sendMessage = async (req, res) => {
             message: error.response?.data?.error?.message || error.message,
             details: error.response?.data || {}
         });
-    }               
+    }
 };
-
 
 exports.forwardMessage = async (req, res) => {
     const { phoneNumbers, messages } = req.body;
@@ -332,6 +326,7 @@ exports.forwardMessage = async (req, res) => {
                         chatId: chat.chatId,
                         chatName: chat.name,
                         chat_id: chat._id,
+                        messageId: newMessage._id,
                         phoneNumber,
                         sender: "admin",
                         messageType: type,

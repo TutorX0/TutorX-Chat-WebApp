@@ -51,6 +51,7 @@ export const fetchMessageResponseSchema = z.object({
 });
 
 export const socketData = z.object({
+    messageId: z.string(),
     chatId: z.string(),
     chatName: z.string(),
     chat_id: z.string(),

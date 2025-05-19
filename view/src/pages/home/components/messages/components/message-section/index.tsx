@@ -46,12 +46,12 @@ export function MessageSection({ chatId }: MessageSectionProps) {
 
     return (
         <ScrollArea className="relative h-[70vh] grow px-4 pb-0">
-            <section ref={scrollSectionRef} className="h-full overflow-y-auto pr-4" style={{ maxHeight: "100%" }}>
+            <section ref={scrollSectionRef} className="relative h-full pr-4" style={{ maxHeight: "100%" }}>
                 <div className="pt-3"></div> {/* Just to create some separation from the header */}
                 {messages
                     ? Object.keys(messages).map((days, index) => (
                           <section key={`Chat-${index + 1}`}>
-                              <div className="sticky top-0 z-50 flex justify-center">
+                              <div className="sticky top-4 z-50 flex justify-center">
                                   <div className="bg-message-sent-by-user rounded-md border px-2 py-1 text-xs">{days}</div>
                               </div>
                               {messages[days].map((message) => {

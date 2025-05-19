@@ -8,10 +8,11 @@ import { MessageHeader } from "./components/message-header";
 import { SendMessage } from "./components/send-message";
 import { useDeleteSearchParam } from "@/hooks";
 import type { ChatItem } from "@/validations";
+import type { UploadFile } from "@/types";
 import { useStore } from "@/store";
 
 export function Messages() {
-    const [files, setFiles] = useState<File[]>([]);
+    const [files, setFiles] = useState<UploadFile[]>([]);
     const [fileDialogOpen, setFileDialogOpen] = useState(files.length > 0);
 
     const [searchParams] = useSearchParams();
