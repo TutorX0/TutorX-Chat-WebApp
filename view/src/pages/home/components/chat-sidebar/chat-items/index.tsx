@@ -2,13 +2,13 @@ import { useSearchParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 import type { ChatItem as ChatItemType } from "@/validations";
+import { SelectChats } from "@/components/select-chats";
 import { ChatItemsLoading } from "../loading";
 import { DeleteGroup } from "./delete-group";
 import { ScrollArea } from "@/components";
 import { useStore } from "@/store";
 import { ChatItem } from "./item";
 import { cn } from "@/lib";
-import { SelectChats } from "@/components/select-chats";
 
 type ChatItemsProps = {
     chats: ChatItemType[];
@@ -24,20 +24,44 @@ export function ChatItems({ chats, loading, search }: ChatItemsProps) {
 
     const [basefilteredChats, setBaseFilteredChats] = useState<ChatItemType[]>([]);
     const [filteredChats, setFilteredChats] = useState<ChatItemType[]>([]);
+    const [groupLoading, setGroupLoading] = useState(false);
 
     useEffect(() => {
+        setGroupLoading(true);
+
         const matchedGroup = groups?.find((group) => group.groupName.toLowerCase() === chatType?.toLowerCase());
+        let filtered: ChatItemType[] = [];
 
         if (matchedGroup) {
             const messageIdSet = new Set(matchedGroup.messageIds);
-            const filtered = chats.filter((chat) => messageIdSet.has(chat.chatId));
-            setBaseFilteredChats(filtered);
+            filtered = chats.filter((chat) => messageIdSet.has(chat.chatId));
         } else {
-            setBaseFilteredChats(chats);
+            filtered = chats;
         }
+
+        const timeoutId = setTimeout(() => {
+            setBaseFilteredChats(filtered);
+            setGroupLoading(false);
+        }, 200);
+
+        return () => clearTimeout(timeoutId);
     }, [chatType, groups, chats]);
 
+    // useEffect(() => {
+    //     const matchedGroup = groups?.find((group) => group.groupName.toLowerCase() === chatType?.toLowerCase());
+
+    //     if (matchedGroup) {
+    //         const messageIdSet = new Set(matchedGroup.messageIds);
+    //         const filtered = chats.filter((chat) => messageIdSet.has(chat.chatId));
+    //         setBaseFilteredChats(filtered);
+    //     } else {
+    //         setBaseFilteredChats(chats);
+    //     }
+    // }, [chatType, groups, chats]);
+
     useEffect(() => {
+        setGroupLoading(true);
+
         const timeoutId = setTimeout(() => {
             if (!search) setFilteredChats(basefilteredChats);
             else {
@@ -45,6 +69,7 @@ export function ChatItems({ chats, loading, search }: ChatItemsProps) {
                     return basefilteredChats.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()));
                 });
             }
+            setGroupLoading(false);
         }, 500);
 
         return () => clearTimeout(timeoutId);
@@ -52,7 +77,7 @@ export function ChatItems({ chats, loading, search }: ChatItemsProps) {
 
     return (
         <ScrollArea className={cn("h-[70vh] grow px-5", chatType === "chats" ? "pb-4" : "")}>
-            {loading ? (
+            {groupLoading || loading ? (
                 <ChatItemsLoading />
             ) : (
                 filteredChats.map((chat) => (

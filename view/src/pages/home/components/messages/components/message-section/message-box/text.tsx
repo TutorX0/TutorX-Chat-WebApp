@@ -42,7 +42,13 @@ export function TextMessage({ message }: TextMessageProps) {
                 messageSelected ? "bg-message-sent-by-me/40 hover:bg-message-sent-by-me/40" : ""
             )}
         >
-            {selectMessageToggle ? <Checkbox checked={messageSelected ? true : false} onCheckedChange={onCheckedChange} /> : null}
+            {selectMessageToggle ? (
+                <Checkbox
+                    checked={messageSelected ? true : false}
+                    onCheckedChange={onCheckedChange}
+                    className="border-neutral-400"
+                />
+            ) : null}
             <div
                 className={cn(
                     "relative my-2 w-fit max-w-10/12 rounded-md px-2 py-1.5 shadow-md lg:max-w-2/3",

@@ -31,7 +31,13 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
                 messageSelected ? "bg-message-sent-by-me/40 hover:bg-message-sent-by-me/40" : ""
             )}
         >
-            {selectMessageToggle ? <Checkbox checked={messageSelected ? true : false} onCheckedChange={onCheckedChange} /> : null}
+            {selectMessageToggle ? (
+                <Checkbox
+                    checked={messageSelected ? true : false}
+                    onCheckedChange={onCheckedChange}
+                    className="border-neutral-400"
+                />
+            ) : null}
             <div
                 className={cn(
                     "relative my-2 w-fit max-w-xs rounded-md shadow-md",
