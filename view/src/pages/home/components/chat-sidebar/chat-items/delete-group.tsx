@@ -63,8 +63,12 @@ export function DeleteGroup({ chatType }: DeleteGroupProps) {
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction disabled={loading} onClick={deleteGroup}>
+                    <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                        disabled={loading}
+                        onClick={deleteGroup}
+                        className="bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-full shadow-xs"
+                    >
                         Delete Group
                     </AlertDialogAction>
                 </AlertDialogFooter>

@@ -46,7 +46,7 @@ export function MessageSection({ chatId }: MessageSectionProps) {
 
     return (
         <ScrollArea className="relative h-[70vh] grow px-4 pb-0">
-            <section ref={scrollSectionRef} className="relative h-full pr-4" style={{ maxHeight: "100%" }}>
+            <section ref={scrollSectionRef} className="relative h-full" style={{ maxHeight: "100%" }}>
                 <div className="pt-3"></div> {/* Just to create some separation from the header */}
                 {messages
                     ? Object.keys(messages).map((days, index) => (
@@ -72,7 +72,7 @@ export function MessageSection({ chatId }: MessageSectionProps) {
                     <Button
                         variant="secondary"
                         size="icon"
-                        className={cn("fixed right-8 rounded-full", replyMessage ? "bottom-36" : "bottom-20")}
+                        className={cn("fixed right-4 rounded-full", replyMessage ? "bottom-36" : "bottom-20")}
                         onClick={scrollIntoView}
                     >
                         <ChevronDown />

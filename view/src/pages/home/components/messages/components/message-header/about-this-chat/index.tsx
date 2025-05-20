@@ -16,8 +16,8 @@ export function AboutThisChat({ chatId, phoneNumber, name }: Pick<ChatItem, "pho
                     <p className="cursor-pointer font-semibold">{name}</p>
                 </div>
             </SheetTrigger>
-            <SheetContent className="w-10/12 px-4 py-8">
-                <ScrollArea className="h-full">
+            <SheetContent className="w-10/12 py-8 pl-4">
+                <ScrollArea className="h-full pr-4">
                     <UpdateChatName name={name} phoneNumber={phoneNumber} />
                     <Medias chatId={chatId} />
                 </ScrollArea>
