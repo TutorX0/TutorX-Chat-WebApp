@@ -1,23 +1,16 @@
-import { CreditCardIcon, FileIcon, FolderOpenIcon, ImageIcon, Paperclip, VideoIcon } from "lucide-react";
-import { useRef, useState, type Dispatch, type SetStateAction } from "react";
+import { CreditCardIcon, FileIcon, ImageIcon, Paperclip, VideoIcon } from "lucide-react";
+import { useState, type Dispatch, type SetStateAction } from "react";
 
 import { Button, Popover, PopoverContent, PopoverTrigger } from "@/components";
 import { googleMeetMessage, paymentMessage } from "./constants";
-import type { UploadFile } from "@/types";
-import { addFile } from "@/lib";
+import { SendFiles } from "./send-files";
 
 type FileMessageProps = {
-    files: UploadFile[];
-    setFiles: Dispatch<SetStateAction<UploadFile[]>>;
     setMessage: Dispatch<SetStateAction<string>>;
-    setFileDialogOpen: Dispatch<SetStateAction<boolean>>;
 };
 
-export function FileMessage({ files, setFiles, setMessage, setFileDialogOpen }: FileMessageProps) {
+export function FileMessage({ setMessage }: FileMessageProps) {
     const [open, setOpen] = useState(false);
-
-    const imageRef = useRef<HTMLInputElement>(null);
-    const documentRef = useRef<HTMLInputElement>(null);
 
     function sendConstantTexts(type: "google_meet" | "payment") {
         if (type === "google_meet") setMessage(googleMeetMessage);
@@ -33,49 +26,18 @@ export function FileMessage({ files, setFiles, setMessage, setFileDialogOpen }: 
                 </Button>
             </PopoverTrigger>
             <PopoverContent align="start" className="w-full">
-                {files.length > 0 ? (
-                    <div
-                        className="flex cursor-pointer items-center gap-2 pt-1 pb-2 text-sm"
-                        onClick={() => setFileDialogOpen(true)}
-                    >
-                        <FolderOpenIcon className="size-5" />
-                        <span>File lobby</span>
-                        <span className="text-sm">
-                            {"("}
-                            {files.length}
-                            {")"}
-                        </span>
-                        <input
-                            type="file"
-                            ref={imageRef}
-                            className="hidden"
-                            accept="image/*,video/*"
-                            onChange={(e) => addFile(e, files, setFiles)}
-                        />
+                <SendFiles fileType="image_videos">
+                    <div className="flex cursor-pointer items-center gap-2 pt-1 pb-2 text-sm">
+                        <ImageIcon className="size-5" />
+                        <span>Photos & videos</span>
                     </div>
-                ) : null}
-                <div
-                    className="flex cursor-pointer items-center gap-2 pt-1 pb-2 text-sm"
-                    onClick={() => imageRef.current?.click()}
-                >
-                    <ImageIcon className="size-5" />
-                    <span>Photos & videos</span>
-                    <input
-                        type="file"
-                        ref={imageRef}
-                        className="hidden"
-                        accept="image/*,video/*"
-                        onChange={(e) => addFile(e, files, setFiles)}
-                    />
-                </div>
-                <div
-                    className="flex cursor-pointer items-center gap-2 pt-2 pb-2 text-sm"
-                    onClick={() => documentRef.current?.click()}
-                >
-                    <FileIcon className="size-5" />
-                    <span>Document</span>
-                    <input type="file" ref={documentRef} className="hidden" onChange={(e) => addFile(e, files, setFiles)} />
-                </div>
+                </SendFiles>
+                <SendFiles fileType="documents">
+                    <div className="flex cursor-pointer items-center gap-2 pt-2 pb-2 text-sm">
+                        <FileIcon className="size-5" />
+                        <span>Document</span>
+                    </div>
+                </SendFiles>
                 <div
                     className="flex cursor-pointer items-center gap-2 pt-2 pb-2 text-sm"
                     onClick={() => sendConstantTexts("google_meet")}

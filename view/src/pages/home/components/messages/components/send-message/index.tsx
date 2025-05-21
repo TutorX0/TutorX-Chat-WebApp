@@ -1,4 +1,4 @@
-import { useState, type Dispatch, type FormEvent, type SetStateAction } from "react";
+import { useState, type FormEvent } from "react";
 import { Send } from "lucide-react";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
@@ -6,20 +6,16 @@ import { toast } from "sonner";
 // import { textMessageResponseSchema } from "@/validations";
 import { AutosizeTextarea, Button } from "@/components";
 import { FileMessage } from "./file-message";
-import type { UploadFile } from "@/types";
 import { axiosClient, cn } from "@/lib";
 import { useStore } from "@/store";
 import { Emoji } from "./emoji";
 import { Reply } from "./reply";
 
 type SendMessageProps = {
-    files: UploadFile[];
     phoneNumber: string;
-    setFiles: Dispatch<SetStateAction<UploadFile[]>>;
-    setFileDialogOpen: Dispatch<SetStateAction<boolean>>;
 };
 
-export function SendMessage({ files, phoneNumber, setFiles, setFileDialogOpen }: SendMessageProps) {
+export function SendMessage({ phoneNumber }: SendMessageProps) {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
 
@@ -64,7 +60,7 @@ export function SendMessage({ files, phoneNumber, setFiles, setFileDialogOpen }:
                 )}
             >
                 <Emoji setMessage={setMessage} />
-                <FileMessage files={files} setFiles={setFiles} setMessage={setMessage} setFileDialogOpen={setFileDialogOpen} />
+                <FileMessage setMessage={setMessage} />
                 <form onSubmit={sendTextMessage} className="flex flex-1 items-end gap-2">
                     <AutosizeTextarea
                         className="bg-message-input border-message-input outline-message-input focus-visible:border-message-input focus-visible:outline-message-input custom-scroll resize-none ring-0 ring-offset-0 focus-visible:ring-0 focus-visible:ring-offset-0"

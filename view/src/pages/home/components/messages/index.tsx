@@ -1,20 +1,15 @@
 import { useSearchParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { ChatNotSelected } from "./components/chat-not-selected";
-import { FileList } from "./components/send-message/file-list";
 import { MessageSection } from "./components/message-section";
 import { MessageHeader } from "./components/message-header";
 import { SendMessage } from "./components/send-message";
 import { useDeleteSearchParam } from "@/hooks";
 import type { ChatItem } from "@/validations";
-import type { UploadFile } from "@/types";
 import { useStore } from "@/store";
 
 export function Messages() {
-    const [files, setFiles] = useState<UploadFile[]>([]);
-    const [fileDialogOpen, setFileDialogOpen] = useState(files.length > 0);
-
     const [searchParams] = useSearchParams();
     const deleteSearchParam = useDeleteSearchParam();
     const openedChat = searchParams.get("open");
@@ -37,20 +32,8 @@ export function Messages() {
             <MessageHeader currentChat={currentChat} />
             <div className="after:bg-sidebar/90 relative isolate flex grow flex-col bg-[url(/chat-bg.png)] after:absolute after:inset-0 after:-z-10">
                 <MessageSection chatId={currentChat.chatId} />
-                <SendMessage
-                    files={files}
-                    setFiles={setFiles}
-                    phoneNumber={currentChat.phoneNumber}
-                    setFileDialogOpen={setFileDialogOpen}
-                />
+                <SendMessage phoneNumber={currentChat.phoneNumber} />
             </div>
-            <FileList
-                files={files}
-                setFiles={setFiles}
-                phoneNumber={currentChat.phoneNumber}
-                open={fileDialogOpen}
-                setOpen={setFileDialogOpen}
-            />
         </section>
     );
 }
