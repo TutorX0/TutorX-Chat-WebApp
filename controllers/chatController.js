@@ -91,7 +91,7 @@ exports.sendMessage = async (req, res) => {
             }
 
             for (let media of mediaUrls) {
-                const mediaId = await uploadImageToWhatsapp(media.filename);
+                const mediaId = await uploadImageToWhatsapp(media.filename, true);
                 let payload;
 
                 if (type === "image") {
@@ -254,35 +254,44 @@ exports.forwardMessage = async (req, res) => {
                 };
             } else if (type === "image") {
                 if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Image URL is required" });
+
+                const mediaId = await uploadImageToWhatsapp(message.mediaUrl, true);
                 payload = {
                     messaging_product: "whatsapp",
                     to: phoneNumber,
                     type: "image",
-                    image: { link: message.mediaUrl, caption: message.content || "" }
+                    image: { id: mediaId, caption: message.content || "" }
                 };
             } else if (type === "document") {
                 if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Document URL is required" });
+
+                const mediaId = await uploadImageToWhatsapp(message.mediaUrl, true);
+                console.log(mediaId);
                 payload = {
                     messaging_product: "whatsapp",
                     to: phoneNumber,
                     type: "document",
-                    document: { link: message.mediaUrl, caption: message.content || "" }
+                    document: { id: mediaId, caption: message.content || "" }
                 };
             } else if (type === "audio") {
                 if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Audio URL is required" });
+
+                const mediaId = await uploadImageToWhatsapp(message.mediaUrl, true);
                 payload = {
                     messaging_product: "whatsapp",
                     to: phoneNumber,
                     type: "audio",
-                    audio: { link: message.mediaUrl }
+                    audio: { id: mediaId }
                 };
             } else if (type === "video") {
                 if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Video URL is required" });
+
+                const mediaId = await uploadImageToWhatsapp(message.mediaUrl, true);
                 payload = {
                     messaging_product: "whatsapp",
                     to: phoneNumber,
                     type: "video",
-                    video: { link: message.mediaUrl, caption: message.content || "" }
+                    video: { id: mediaId, caption: message.content || "" }
                 };
             } else {
                 return res.status(400).json({ status: "error", message: "Unsupported message type" });
@@ -290,16 +299,11 @@ exports.forwardMessage = async (req, res) => {
 
             try {
                 // Send WhatsApp message
-                const response = await axios.post(
-                    `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`,
-                    payload,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${process.env.ACCESS_TOKEN}`,
-                            "Content-Type": "application/json"
-                        }
+                await axios.post(`https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`, payload, {
+                    headers: {
+                        Authorization: `Bearer ${process.env.ACCESS_TOKEN}`
                     }
-                );
+                });
 
                 // Create Chat if not exist
                 let chat = await Chat.findOne({ phoneNumber });

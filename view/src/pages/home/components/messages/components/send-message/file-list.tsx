@@ -131,24 +131,13 @@ function Video({ file }: FileProps) {
 }
 
 function Document({ file }: FileProps) {
-    const url = URL.createObjectURL(file);
-    const supported = [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    ];
+    const trimmedFileName = trimFileName(file.name, 30);
 
-    const trimmedFileName = trimFileName(file.name, 10);
-
-    if (!supported.includes(file.type)) {
-        return (
-            <div className="flex flex-col items-center justify-center gap-3">
-                <ImageIcon className="size-20 text-neutral-600" strokeWidth="1" />
-                <span className="text-neutral-400">Preview unavailable</span>
-                <span>{trimmedFileName}</span>
-            </div>
-        );
-    }
-
-    return <iframe src={url} className="size-full rounded object-contain" />;
+    return (
+        <div className="flex flex-col items-center justify-center gap-3">
+            <ImageIcon className="size-20 text-neutral-600" strokeWidth="1" />
+            <span className="text-neutral-400">Document</span>
+            <span>{trimmedFileName}</span>
+        </div>
+    );
 }

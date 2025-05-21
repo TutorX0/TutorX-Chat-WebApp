@@ -3,12 +3,27 @@ const FormData = require("form-data");
 const { join } = require("path");
 const axios = require("axios");
 
-async function uploadImageToWhatsapp(fileName) {
+async function uploadImageToWhatsapp(fileName, forward = false) {
     const data = new FormData();
     data.append("messaging_product", "whatsapp");
 
-    const filePath = join(__dirname, "../uploads", fileName);
-    data.append("file", createReadStream(filePath));
+    if (forward) {
+        try {
+            const response = await axios.get(fileName, { responseType: "stream" });
+            const fileStream = response.data;
+
+            const contentType = response.headers["content-type"] ?? "application/octet-stream";
+            const fileNameFromUrl = fileName.split("/").pop();
+
+            data.append("file", fileStream, { contentType, filename: fileNameFromUrl });
+        } catch (error) {
+            console.error("Error fetching file during forwarding", error);
+            return null;
+        }
+    } else {
+        const filePath = join(__dirname, "../uploads", fileName);
+        data.append("file", createReadStream(filePath));
+    }
 
     try {
         const response = await axios({
