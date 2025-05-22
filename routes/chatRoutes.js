@@ -9,8 +9,7 @@ const {
     forwardMessage
 } = require("../controllers/chatController");
 const upload = require("../middleware/upload");
-const router = express.Router();
-
+const express = require("express");
 router.post("/send", upload.array("mediaUrl", 10), sendMessage); // up to 10 files
 router.post("/forward", forwardMessage);
 router.post("/create", createChat);
