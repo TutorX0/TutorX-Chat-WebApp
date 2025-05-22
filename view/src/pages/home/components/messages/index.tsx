@@ -30,7 +30,7 @@ export function Messages() {
     return (
         <section className="flex grow flex-col">
             <MessageHeader currentChat={currentChat} />
-            <div className="after:bg-sidebar/90 relative isolate flex grow flex-col bg-[url(/chat-bg.png)] after:absolute after:inset-0 after:-z-10">
+            <div className="after:bg-sidebar/95 relative isolate flex grow flex-col bg-[url(/chat-bg.png)] after:absolute after:inset-0 after:-z-10">
                 <MessageSection chatId={currentChat.chatId} />
                 <SendMessage phoneNumber={currentChat.phoneNumber} />
             </div>

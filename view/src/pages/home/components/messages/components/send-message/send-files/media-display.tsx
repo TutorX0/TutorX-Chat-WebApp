@@ -1,4 +1,4 @@
-import { ImageIcon } from "lucide-react";
+import { FileIcon } from "lucide-react";
 import { useMemo } from "react";
 
 import { cn, trimFileName } from "@/lib";
@@ -31,11 +31,11 @@ export function Document({ file, preview = false }: DocumentProps) {
                 preview ? "h-full" : "h-11/12 border px-20"
             )}
         >
-            <ImageIcon className={cn("text-neutral-600", preview ? "size-8" : "size-20")} strokeWidth="1" />
+            <FileIcon className={cn("text-neutral-600", preview ? "size-8" : "size-20")} strokeWidth="1" />
             {preview ? null : (
                 <>
-                    <span className="text-neutral-400">Document</span>
-                    <span>{trimmedFileName}</span>
+                    <span className="text-center text-neutral-400">Document</span>
+                    <span className="text-center">{trimmedFileName}</span>
                 </>
             )}
         </div>

@@ -62,11 +62,11 @@ export function AddPill() {
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>New List</DialogTitle>
+                    <DialogTitle>New Group</DialogTitle>
                 </DialogHeader>
                 <div>
-                    <Input placeholder="Example: Work, Friends" autoFocus ref={inputRef} />
-                    <p className="mt-4 mb-2 text-center sm:text-left">Add to list</p>
+                    <Input placeholder="Example: Client, Experts" autoFocus ref={inputRef} />
+                    <p className="mt-4 mb-2 text-center sm:text-left">Add Members</p>
                     <ScrollArea className="h-full max-h-[40vh] pr-3">
                         {chats.map((chat) => (
                             <div
@@ -82,7 +82,7 @@ export function AddPill() {
                 </div>
                 <DialogFooter className="z-10">
                     <Button variant="secondary" className="rounded-full" loading={loading} onClick={createNewGroup}>
-                        Save
+                        Create Group
                     </Button>
                 </DialogFooter>
             </DialogContent>

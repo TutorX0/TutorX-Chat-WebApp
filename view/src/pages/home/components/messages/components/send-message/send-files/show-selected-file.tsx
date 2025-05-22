@@ -44,9 +44,9 @@ export function ShowSelectedFile({ fileType, selectedId, setSelectedId }: ShowSe
             {selectedFile ? (
                 <div className="mt-6 w-full max-w-xl">
                     <ResponsiveTextarea fileType={fileType} selectedFile={selectedFile} />
-                    <div className="mt-4 flex justify-end">
+                    <div className="mt-4 flex justify-center lg:justify-end">
                         <Button variant="secondary" className="rounded-full" onClick={removeCurrentFile}>
-                            Remove this element
+                            Remove this document
                         </Button>
                     </div>
                 </div>

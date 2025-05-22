@@ -8,9 +8,12 @@ const {
     getFilesByChatId,
     forwardMessage
 } = require("../controllers/chatController");
+const { sendMultipleFilesWithCaptions } = require("../controllers/sendMultipleFilesWithCaptions");
 const upload = require("../middleware/upload");
-const express = require("express");
+const router = express.Router();
+
 router.post("/send", upload.array("mediaUrl", 10), sendMessage); // up to 10 files
+router.post("/send-multiple-files/:phoneNumber", upload.any(), sendMultipleFilesWithCaptions);
 router.post("/forward", forwardMessage);
 router.post("/create", createChat);
 router.put("/update", updateGuestName);

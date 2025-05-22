@@ -8,10 +8,10 @@ const uploadImageToWhatsapp = require("../utils/uploadImageToWhatsapp");
 require("dotenv").config();
 
 // Generate chatId based on phone number
-const generateChatId = (phoneNumber) => `chat_${phoneNumber}`;
+exports.generateChatId = (phoneNumber) => `chat_${phoneNumber}`;
 
 // Generate guest name dynamically
-const generateGuestName = async () => {
+exports.generateGuestName = async () => {
     const count = await Chat.countDocuments(); // Count existing chats
     return `Guest ${count + 1}`;
 };
@@ -266,7 +266,6 @@ exports.forwardMessage = async (req, res) => {
                 if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Document URL is required" });
 
                 const mediaId = await uploadImageToWhatsapp(message.mediaUrl, true);
-                console.log(mediaId);
                 payload = {
                     messaging_product: "whatsapp",
                     to: phoneNumber,
