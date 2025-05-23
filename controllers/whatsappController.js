@@ -80,7 +80,7 @@ exports.receiveMessage = async (req, res) => {
                 const savedPath = path.join(uploadDir, savedFileName);
                 fs.writeFileSync(savedPath, mediaResponse.data);
                 return {
-                    filePath: `/uploads/${savedFileName}`,
+                    filePath: `${req.protocol}://${req.get("host")}/uploads/${savedFileName}`,
                     fileName: savedFileName
                 };
             };

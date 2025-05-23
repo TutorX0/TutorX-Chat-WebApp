@@ -43,16 +43,16 @@ export function Medias({ chatId }: MediasProps) {
                     {mediaFiles.length ? (
                         mediaFiles.map(({ _id, mediaUrl, type }) =>
                             mediaUrl ? (
-                                <div key={`Media-${_id}`}>
+                                <div key={`Media-${_id}`} className="flex items-center justify-center rounded-md bg-neutral-800">
                                     {type === "image" ? (
                                         <img
                                             src={mediaUrl}
                                             alt="A random WhatsApp image"
-                                            className="max-h-80 object-contain"
+                                            className="h-40 w-full rounded-md object-cover"
                                             loading="lazy"
                                         />
                                     ) : type === "video" ? (
-                                        <video src={mediaUrl} className="max-h-80 object-contain" controls />
+                                        <video src={mediaUrl} className="h-40 w-full rounded-md object-contain" />
                                     ) : null}
                                 </div>
                             ) : null

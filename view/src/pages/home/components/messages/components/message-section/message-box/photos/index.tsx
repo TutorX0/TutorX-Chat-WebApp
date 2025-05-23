@@ -40,7 +40,7 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
             ) : null}
             <div
                 className={cn(
-                    "relative my-2 w-fit max-w-xs rounded-md shadow-md",
+                    "relative my-2 w-10/12 max-w-xs rounded-md shadow-md",
                     message.sender === "admin" ? "bg-message-sent-by-me ml-auto" : "bg-message-sent-by-user",
                     message.content ? "p-2" : ""
                 )}
@@ -59,24 +59,19 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
                 ) : null}
                 {message.mediaUrl ? (
                     <PhotoPopover mediaUrl={message.mediaUrl} type={message.type}>
-                        <div
-                            className={cn(
-                                "flex items-center justify-center rounded-md",
-                                message.content ? "bg-neutral-400 p-2" : "p-1"
-                            )}
-                        >
+                        <div className={cn("flex items-center justify-center rounded-md bg-neutral-400 p-2")}>
                             {message.type === "image" ? (
                                 <img
                                     src={message.mediaUrl}
                                     alt="A random WhatsApp image"
-                                    className="max-h-96 rounded-md object-contain"
+                                    className="max-h-96 w-full rounded-md object-contain"
                                     loading="lazy"
                                 />
                             ) : message.type === "video" ? (
                                 <div className="relative isolate before:absolute before:inset-0 before:bg-black/50">
                                     <video
                                         src={message.mediaUrl}
-                                        className="max-h-96 rounded-md object-contain"
+                                        className="max-h-96 w-full rounded-md object-contain"
                                         controls={false}
                                     />
                                     <div className="absolute top-1/2 left-1/2 -translate-1/2 rounded-full border bg-white/20 p-4">

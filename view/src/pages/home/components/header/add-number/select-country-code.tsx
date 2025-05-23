@@ -36,7 +36,7 @@ export function SelectCountryCode({ control, countryList, setValue }: SelectCoun
                                 >
                                     {field.value
                                         ? countryList.find((country) => country.name === field.value)?.name
-                                        : "Select language"}
+                                        : "Select nationality"}
                                     <ChevronsUpDown className="opacity-50" />
                                 </Button>
                             </FormControl>

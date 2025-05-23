@@ -41,6 +41,8 @@ export function ActionButtons({ fileType, phoneNumber, setOpen }: ActionButtonsP
         try {
             await axiosClient.post(`/chat/send-multiple-files/${phoneNumber}`, formData);
             setOpen(false);
+            clearFiles("image_videos");
+            clearFiles("documents");
         } catch (error: unknown) {
             let message = "An unexpected error was returned from the server";
             if (error instanceof AxiosError) message = error?.response?.data?.message;

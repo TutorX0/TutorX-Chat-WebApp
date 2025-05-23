@@ -9,20 +9,23 @@ async function uploadImageToWhatsapp(fileName, forward = false) {
 
     if (forward) {
         try {
+            console.log(fileName);
             const response = await axios.get(fileName, { responseType: "stream" });
             const fileStream = response.data;
 
             const contentType = response.headers["content-type"] ?? "application/octet-stream";
             const fileNameFromUrl = fileName.split("/").pop();
 
+            console.log(fileStream);
             data.append("file", fileStream, { contentType, filename: fileNameFromUrl });
         } catch (error) {
-            console.error("Error fetching file during forwarding", error);
+            // console.error("Error fetching file during forwarding", error);
             return null;
         }
     } else {
         const filePath = join(__dirname, "../uploads", fileName);
         data.append("file", createReadStream(filePath));
+        console.log(createReadStream(filePath));
     }
 
     try {
@@ -35,7 +38,7 @@ async function uploadImageToWhatsapp(fileName, forward = false) {
 
         return response.data.id;
     } catch (error) {
-        console.log(error);
+        // console.log(error);
         return null;
     }
 }

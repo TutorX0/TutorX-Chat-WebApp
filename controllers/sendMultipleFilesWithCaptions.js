@@ -1,10 +1,20 @@
 const axios = require("axios");
+const { join } = require("path");
+const { unlinkSync } = require("fs");
 
-const { generateGuestName, generateChatId } = require("./chatController");
 const uploadImageToWhatsapp = require("../utils/uploadImageToWhatsapp");
 const Message = require("../models/messageModel");
 const Chat = require("../models/chatModel");
 const { getIO } = require("../socket");
+
+// Generate chatId based on phone number
+const generateChatId = (phoneNumber) => `chat_${phoneNumber}`;
+
+// Generate guest name dynamically
+const generateGuestName = async () => {
+    const count = await Chat.countDocuments(); // Count existing chats
+    return `Guest ${count + 1}`;
+};
 
 exports.sendMultipleFilesWithCaptions = async (req, res) => {
     const phoneNumber = req.params.phoneNumber;
@@ -40,15 +50,21 @@ exports.sendMultipleFilesWithCaptions = async (req, res) => {
                 [field.type]: { id: mediaId, caption: field.message ?? "" }
             };
 
-            const response = await axios.post(
-                `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`,
-                payload,
-                {
-                    headers: { Authorization: `Bearer ${process.env.ACCESS_TOKEN}` }
-                }
-            );
+            try {
+                const response = await axios.post(
+                    `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`,
+                    payload,
+                    {
+                        headers: { Authorization: `Bearer ${process.env.ACCESS_TOKEN}` }
+                    }
+                );
 
-            responses.push(response.data);
+                responses.push(response.data);
+            } catch {
+                const filePath = join(__dirname, "..", "uploads", field.file.filename);
+                unlinkSync(filePath);
+                continue;
+            }
 
             const newMessage = new Message({
                 chatId: chat.chatId,

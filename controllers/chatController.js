@@ -8,10 +8,10 @@ const uploadImageToWhatsapp = require("../utils/uploadImageToWhatsapp");
 require("dotenv").config();
 
 // Generate chatId based on phone number
-exports.generateChatId = (phoneNumber) => `chat_${phoneNumber}`;
+const generateChatId = (phoneNumber) => `chat_${phoneNumber}`;
 
 // Generate guest name dynamically
-exports.generateGuestName = async () => {
+const generateGuestName = async () => {
     const count = await Chat.countDocuments(); // Count existing chats
     return `Guest ${count + 1}`;
 };
@@ -344,7 +344,7 @@ exports.forwardMessage = async (req, res) => {
                     console.log("Socket.IO not initialized");
                 }
             } catch (error) {
-                console.error("Error sending message:", error);
+                // console.error("Error sending message:", error);
                 return res.status(500).json({
                     status: "error",
                     message: error.response?.data?.error?.message || error.message,

@@ -62,7 +62,7 @@ function Item({ _id, name }: ChatItemProps) {
 
     return (
         <div
-            className="data-[active=true]:bg-selected-chat hover:bg-chat-hover flex cursor-pointer items-center gap-4 rounded-md p-3"
+            className="data-[active=true]:bg-selected-chat hover:bg-chat-hover my-2 flex cursor-pointer items-center gap-4 rounded-md p-3"
             data-active={searchParams.get("open") === _id}
             onClick={() => updateSearchParam("open", _id)}
         >
