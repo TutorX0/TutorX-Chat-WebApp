@@ -64,11 +64,11 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
                                 <img
                                     src={message.mediaUrl}
                                     alt="A random WhatsApp image"
-                                    className="max-h-96 w-full rounded-md object-contain"
+                                    className="max-h-96 w-full cursor-pointer rounded-md object-contain"
                                     loading="lazy"
                                 />
                             ) : message.type === "video" ? (
-                                <div className="relative isolate before:absolute before:inset-0 before:bg-black/50">
+                                <div className="relative isolate cursor-pointer before:absolute before:inset-0 before:bg-black/50">
                                     <video
                                         src={message.mediaUrl}
                                         className="max-h-96 w-full rounded-md object-contain"

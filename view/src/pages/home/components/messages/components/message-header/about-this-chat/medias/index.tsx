@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from "react";
-import { File } from "lucide-react";
+import { useMemo } from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components";
-import { fetchMetadata, readableFileSize } from "@/lib";
+import { MediaFile, MediaImageAndVideos } from "./files";
 import type { MessageRecord } from "@/store/messages";
 import { useStore } from "@/store";
 
@@ -42,20 +41,7 @@ export function Medias({ chatId }: MediasProps) {
                 <div className="m-4 grid grid-cols-2 gap-4">
                     {mediaFiles.length ? (
                         mediaFiles.map(({ _id, mediaUrl, type }) =>
-                            mediaUrl ? (
-                                <div key={`Media-${_id}`} className="flex items-center justify-center rounded-md bg-neutral-800">
-                                    {type === "image" ? (
-                                        <img
-                                            src={mediaUrl}
-                                            alt="A random WhatsApp image"
-                                            className="h-40 w-full rounded-md object-cover"
-                                            loading="lazy"
-                                        />
-                                    ) : type === "video" ? (
-                                        <video src={mediaUrl} className="h-40 w-full rounded-md object-contain" />
-                                    ) : null}
-                                </div>
-                            ) : null
+                            mediaUrl ? <MediaImageAndVideos _id={_id} mediaUrl={mediaUrl} type={type} /> : null
                         )
                     ) : (
                         <p className="col-span-2 text-center text-neutral-400">There are no media files in this chat</p>
@@ -74,35 +60,5 @@ export function Medias({ chatId }: MediasProps) {
                 </div>
             </TabsContent>
         </Tabs>
-    );
-}
-
-function MediaFile({ mediaUrl, fileName }: { mediaUrl: string; fileName: string | null }) {
-    const [meta, setMeta] = useState({
-        type: "",
-        size: "",
-        name: ""
-    });
-
-    useEffect(() => {
-        if (!mediaUrl) return;
-
-        fetchMetadata(mediaUrl, fileName).then((meta) => {
-            setMeta({ type: meta.type ?? "", name: meta.name, size: readableFileSize(meta.size) });
-        });
-    }, []);
-
-    return (
-        <a href={mediaUrl} download={fileName ?? mediaUrl} target="_blank" className="overflow-hidden">
-            <div className="rounded-md">
-                <div className="flex items-center gap-x-2">
-                    <File className="size-8 shrink-0 whitespace-nowrap text-neutral-400" />
-                    <div>
-                        <p className="text-sm">{meta.name}</p>
-                        <p className="text-xs text-neutral-400">{meta.size}</p>
-                    </div>
-                </div>
-            </div>
-        </a>
     );
 }
