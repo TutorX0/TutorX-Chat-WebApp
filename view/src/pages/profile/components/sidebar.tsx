@@ -59,7 +59,7 @@ export function ProfileSidebar({ currentTab, setOpen, isResponsive = false }: Pr
                 {filteredOptions.map((option) => (
                     <div
                         key={`Profile-Option-${option}`}
-                        className="data-[active=true]:bg-selected-chat hover:bg-chat-hover flex cursor-pointer items-center gap-4 rounded-md p-3"
+                        className="data-[active=true]:bg-selected-chat hover:bg-chat-hover my-2 flex cursor-pointer items-center gap-4 rounded-md p-3"
                         data-active={currentTab === option.toLowerCase()}
                         onClick={() => optionClick(option)}
                     >
