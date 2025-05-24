@@ -40,8 +40,13 @@ export function Logout() {
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={onLogout}>Logout</AlertDialogAction>
+                    <AlertDialogCancel className="rounded-full">Cancel</AlertDialogCancel>
+                    <AlertDialogAction
+                        className="bg-secondary text-secondary-foreground hover:bg-secondary/80 rounded-full shadow-xs"
+                        onClick={onLogout}
+                    >
+                        Logout
+                    </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
