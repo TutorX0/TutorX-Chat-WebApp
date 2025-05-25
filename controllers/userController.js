@@ -10,7 +10,14 @@ const generateOTP = () => {
 exports.sendOTP = async (req, res) => {
     try {
         const { email } = req.body;
+        const allowedEmail = "helpdesk.tutorx@gmail.com"; // <-- Replace with the desired email
+
         if (!email) return res.status(400).json({ message: "Email is required" });
+
+        // ✅ Restrict to allowed email only
+        if (email.toLowerCase() !== allowedEmail.toLowerCase()) {
+            return res.status(403).json({ message: "Unauthorized email" });
+        }
 
         const otpCode = generateOTP();
 
@@ -35,6 +42,7 @@ exports.sendOTP = async (req, res) => {
         res.status(500).json({ message: "Server error", error: error.message });
     }
 };
+
 
 exports.verifyOTP = async (req, res) => {
     try {

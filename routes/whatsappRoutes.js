@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const whatsappController = require("../controllers/whatsappController");
-const upload = require("../middleware/upload");
-
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 // Meta verification
 router.get("/",  whatsappController.verifyWebhook);
 
 // Message receiving
-router.post("/",upload.array("mediaUrl",10), whatsappController.receiveMessage);
+router.post("/",upload.any(), whatsappController.receiveMessage);
 
 module.exports = router;

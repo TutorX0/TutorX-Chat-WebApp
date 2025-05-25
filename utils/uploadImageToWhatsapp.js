@@ -1,46 +1,64 @@
-const { createReadStream } = require("fs");
-const FormData = require("form-data");
-const { join } = require("path");
 const axios = require("axios");
+const path = require("path");
+const s3 = require("../utils/s3config");
+const FormData = require("form-data");
 
-async function uploadImageToWhatsapp(fileName, forward = false) {
-    const data = new FormData();
-    data.append("messaging_product", "whatsapp");
+const getMimeType = (fileName) => {
+    const ext = path.extname(fileName).toLowerCase();
 
-    if (forward) {
-        try {
-            console.log(fileName);
-            const response = await axios.get(fileName, { responseType: "stream" });
-            const fileStream = response.data;
+    const mimeTypes = {
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".pdf": "application/pdf",
+        ".doc": "application/msword",
+        ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ".txt": "text/plain",
+        ".zip": "application/zip",
+        ".html": "text/html",
+        ".csv": "text/csv",
+        ".mp4": "video/mp4",
+        ".mp3": "audio/mpeg",
+        ".json": "application/json"
+    };
 
-            const contentType = response.headers["content-type"] ?? "application/octet-stream";
-            const fileNameFromUrl = fileName.split("/").pop();
+    return mimeTypes[ext] || "application/octet-stream"; // Default fallback
+};
 
-            console.log(fileStream);
-            data.append("file", fileStream, { contentType, filename: fileNameFromUrl });
-        } catch (error) {
-            // console.error("Error fetching file during forwarding", error);
-            return null;
+const uploadImageToWhatsapp = async (fileBuffer, fileName) => {
+    const mimeType = getMimeType(fileName); // Always returns something now
+
+    const s3Params = {
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: `uploads/${Date.now()}_${fileName}`,
+        Body: fileBuffer,
+        ContentType: mimeType
+    };
+
+    const upload = await s3.upload(s3Params).promise();
+    const s3Url = upload.Location;
+
+    const formData = new FormData();
+    formData.append("file", fileBuffer, {
+        filename: fileName,
+        contentType: mimeType
+    });
+    formData.append("messaging_product", "whatsapp");
+    formData.append("type", mimeType);
+
+    const response = await axios.post(
+        `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/media`,
+        formData,
+        {
+            headers: {
+                ...formData.getHeaders(),
+                Authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+            }
         }
-    } else {
-        const filePath = join(__dirname, "../uploads", fileName);
-        data.append("file", createReadStream(filePath));
-        console.log(createReadStream(filePath));
-    }
+    );
 
-    try {
-        const response = await axios({
-            url: `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/media`,
-            method: "post",
-            headers: { Authorization: `Bearer ${process.env.ACCESS_TOKEN}` },
-            data
-        });
-
-        return response.data.id;
-    } catch (error) {
-        // console.log(error);
-        return null;
-    }
-}
+    return { mediaId: response.data.id, s3Url };
+};
 
 module.exports = uploadImageToWhatsapp;

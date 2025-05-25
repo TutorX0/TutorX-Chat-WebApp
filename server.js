@@ -25,7 +25,6 @@ app.enable("trust proxy");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({ origin: true, credentials: true }));
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Import webhookRoutes with socket.io passed in
 // const webhookRoutes = require("./routes/webhooks")(io);

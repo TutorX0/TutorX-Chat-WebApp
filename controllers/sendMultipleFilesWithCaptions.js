@@ -1,18 +1,13 @@
 const axios = require("axios");
-const { join } = require("path");
-const { unlinkSync } = require("fs");
-
 const uploadImageToWhatsapp = require("../utils/uploadImageToWhatsapp");
 const Message = require("../models/messageModel");
 const Chat = require("../models/chatModel");
 const { getIO } = require("../socket");
 
-// Generate chatId based on phone number
 const generateChatId = (phoneNumber) => `chat_${phoneNumber}`;
 
-// Generate guest name dynamically
 const generateGuestName = async () => {
-    const count = await Chat.countDocuments(); // Count existing chats
+    const count = await Chat.countDocuments();
     return `Guest ${count + 1}`;
 };
 
@@ -20,6 +15,7 @@ exports.sendMultipleFilesWithCaptions = async (req, res) => {
     const phoneNumber = req.params.phoneNumber;
     const body = JSON.parse(JSON.stringify(req.body));
 
+    // Match each file object with the file in req.files
     const result = body.files.map((item, index) => {
         const file = req.files.find((f) => f.fieldname === `files[${index}][file]`);
         return { ...item, file };
@@ -30,6 +26,7 @@ exports.sendMultipleFilesWithCaptions = async (req, res) => {
 
     try {
         let chat = await Chat.findOne({ phoneNumber });
+
         if (!chat) {
             const name = await generateGuestName();
             chat = new Chat({
@@ -41,13 +38,29 @@ exports.sendMultipleFilesWithCaptions = async (req, res) => {
         }
 
         for (const field of result) {
-            const mediaId = await uploadImageToWhatsapp(field.file.filename);
+            if (!field.file) continue;
+
+            const fileBuffer = field.file.buffer;
+            const fileName = field.file.originalname;
+
+            let mediaId, s3Url;
+            try {
+                const uploadResult = await uploadImageToWhatsapp(fileBuffer, fileName);
+                mediaId = uploadResult.mediaId;
+                s3Url = uploadResult.s3Url;
+            } catch (err) {
+                console.error("Media upload failed:", err.message);
+                continue;
+            }
 
             const payload = {
                 messaging_product: "whatsapp",
                 to: phoneNumber,
                 type: field.type,
-                [field.type]: { id: mediaId, caption: field.message ?? "" }
+                [field.type]: {
+                    id: mediaId,
+                    caption: field.message ?? ""
+                }
             };
 
             try {
@@ -55,48 +68,50 @@ exports.sendMultipleFilesWithCaptions = async (req, res) => {
                     `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`,
                     payload,
                     {
-                        headers: { Authorization: `Bearer ${process.env.ACCESS_TOKEN}` }
+                        headers: {
+                            Authorization: `Bearer ${process.env.ACCESS_TOKEN}`
+                        }
                     }
                 );
 
                 responses.push(response.data);
-            } catch {
-                const filePath = join(__dirname, "..", "uploads", field.file.filename);
-                unlinkSync(filePath);
+
+                const newMessage = new Message({
+                    chatId: chat.chatId,
+                    phoneNumber,
+                    isForwarded: false,
+                    replyTo: req.body.replyTo ?? null,
+                    sender: "admin",
+                    messageType: field.type,
+                    content: field.message || "",
+                    mediaUrl: s3Url,
+                    fileName: fileName
+                });
+
+                await newMessage.save();
+                savedMessages.push(newMessage);
+
+                console.log("Message saved:", newMessage);
+                const io = getIO();
+                io.emit("newMessage", {
+                    chatId: chat.chatId,
+                    chatName: chat.name,
+                    chat_id: chat._id,
+                    messageId: newMessage._id,
+                    phoneNumber,
+                    sender: "admin",
+                    messageType: newMessage.messageType,
+                    isForwarded: newMessage.isForwarded,
+                    replyTo: newMessage.replyTo ?? null,
+                    content: newMessage.content,
+                    mediaUrl: newMessage.mediaUrl,
+                    fileName: newMessage.fileName,
+                    timestamp: newMessage.createdAt
+                });
+            } catch (err) {
+                console.error("Message send failed:", err.response?.data || err.message);
                 continue;
             }
-
-            const newMessage = new Message({
-                chatId: chat.chatId,
-                phoneNumber,
-                isForwarded: false,
-                replyTo: req.body.replyTo ?? null,
-                sender: "admin",
-                messageType: field.type,
-                content: field.message || "",
-                mediaUrl: `${req.protocol}://${req.get("host")}/uploads/${field.file.filename}`,
-                fileName: field.file.filename
-            });
-
-            await newMessage.save();
-            savedMessages.push(newMessage);
-
-            const io = getIO();
-            io.emit("newMessage", {
-                chatId: chat.chatId,
-                chatName: chat.name,
-                chat_id: chat._id,
-                messageId: newMessage._id,
-                phoneNumber,
-                sender: "admin",
-                messageType: newMessage.messageType,
-                isForwarded: newMessage.isForwarded,
-                replyTo: newMessage.replyTo ?? null,
-                content: newMessage.content,
-                mediaUrl: newMessage.mediaUrl,
-                fileName: newMessage.fileName,
-                timestamp: newMessage.createdAt
-            });
         }
 
         res.status(200).json({
@@ -105,6 +120,7 @@ exports.sendMultipleFilesWithCaptions = async (req, res) => {
             responses
         });
     } catch (error) {
+        console.error("Fatal error:", error.message);
         res.status(500).json({
             status: "error",
             message: error.response?.data?.error?.message || error.message,
