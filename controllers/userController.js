@@ -1,7 +1,7 @@
-const User = require("../models/userModel"); // Now user model has otp fields
+const User = require("../models/userModel");
 const sendOTP = require("../utils/mailer");
 const crypto = require("crypto");
-const generateToken = require("../utils/token"); // import the token generator
+const generateToken = require("../utils/token");
 
 const generateOTP = () => {
     return crypto.randomInt(100000, 999999).toString();
@@ -10,7 +10,7 @@ const generateOTP = () => {
 exports.sendOTP = async (req, res) => {
     try {
         const { email } = req.body;
-        const allowedEmail = "helpdesk.tutorx@gmail.com"; // <-- Replace with the desired email
+        const allowedEmail = process.env.ALLOWED_EMAIL;
 
         if (!email) return res.status(400).json({ message: "Email is required" });
 
