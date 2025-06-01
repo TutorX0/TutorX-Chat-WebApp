@@ -91,7 +91,7 @@ export function MessageOptions({ message, messageType }: ContextProps) {
                     <Copy className="size-5" />
                     <span className="text-sm">Copy</span>
                 </div>
-                {["video", "image", "document"].includes(message.type) ? (
+                {["video", "image", "document", "audio"].includes(message.type) ? (
                     <div className="flex cursor-pointer items-center gap-2" onClick={downloadMedia}>
                         <DownloadIcon className="size-5" />
                         <span className="text-sm">Download</span>

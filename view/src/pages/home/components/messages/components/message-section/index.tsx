@@ -59,7 +59,8 @@ export function MessageSection({ chatId }: MessageSectionProps) {
                                       text: <TextMessage key={message.createdAt} message={message} />,
                                       image: <PhotoMessage key={message.createdAt} message={message} />,
                                       video: <PhotoMessage key={message.createdAt} message={message} />,
-                                      document: <DocumentMessage key={message.createdAt} message={message} />
+                                      document: <DocumentMessage key={message.createdAt} message={message} />,
+                                      audio: <DocumentMessage key={message.createdAt} message={message} />
                                   };
 
                                   return component[message.type as "text"];
