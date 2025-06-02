@@ -384,7 +384,7 @@ exports.createChat = async (req, res) => {
 
         res.status(201).json({
             status: "success",
-            message: "Chat created successfully",
+            message: "New Contact added Successfully",
             chat: newChat
         });
     } catch (err) {

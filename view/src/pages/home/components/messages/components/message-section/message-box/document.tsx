@@ -10,9 +10,10 @@ import { useStore } from "@/store";
 
 type DocumentMessageProps = {
     message: ChatMessage;
+    isAudio?: boolean;
 };
 
-export function DocumentMessage({ message }: DocumentMessageProps) {
+export function DocumentMessage({ message, isAudio = false }: DocumentMessageProps) {
     const [meta, setMeta] = useState({
         type: "",
         size: "",
@@ -77,7 +78,13 @@ export function DocumentMessage({ message }: DocumentMessageProps) {
                                 <div className="flex items-center gap-x-2">
                                     <File className="size-8 shrink-0 whitespace-nowrap" />
                                     <div>
-                                        <p className="text-sm">{meta.name}</p>
+                                        {
+                                            isAudio ?
+                                                <p className="text-sm">WhatsApp recorded audio</p>
+                                                :
+                                                <p className="text-sm">{meta.name}</p>
+
+                                        }
                                         <p className="text-xs text-neutral-300">{meta.size}</p>
                                     </div>
                                 </div>

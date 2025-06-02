@@ -59,7 +59,7 @@ exports.removeUserFromGroup = async (req, res) => {
             { new: true }
         );
 
-        res.status(200).json({ message: "Message removed from group", group: updatedGroup });
+        res.status(200).json({ message: "Member removed from group", group: updatedGroup });
     } catch (error) {
         console.error("Error removing message from group:", error);
         res.status(500).json({ message: "Internal server error" });

@@ -50,23 +50,23 @@ export function MessageSection({ chatId }: MessageSectionProps) {
                 <div className="pt-3"></div> {/* Just to create some separation from the header */}
                 {messages
                     ? Object.keys(messages).map((days, index) => (
-                          <section key={`Chat-${index + 1}`}>
-                              <div className="sticky top-4 z-50 flex justify-center">
-                                  <div className="bg-message-sent-by-user rounded-md border px-2 py-1 text-xs">{days}</div>
-                              </div>
-                              {messages[days].map((message) => {
-                                  const component = {
-                                      text: <TextMessage key={message.createdAt} message={message} />,
-                                      image: <PhotoMessage key={message.createdAt} message={message} />,
-                                      video: <PhotoMessage key={message.createdAt} message={message} />,
-                                      document: <DocumentMessage key={message.createdAt} message={message} />,
-                                      audio: <DocumentMessage key={message.createdAt} message={message} />
-                                  };
+                        <section key={`Chat-${index + 1}`}>
+                            <div className="sticky top-4 z-50 flex justify-center">
+                                <div className="bg-message-sent-by-user rounded-md border px-2 py-1 text-xs">{days}</div>
+                            </div>
+                            {messages[days].map((message) => {
+                                const component = {
+                                    text: <TextMessage key={message.createdAt} message={message} />,
+                                    image: <PhotoMessage key={message.createdAt} message={message} />,
+                                    video: <PhotoMessage key={message.createdAt} message={message} />,
+                                    document: <DocumentMessage key={message.createdAt} message={message} />,
+                                    audio: <DocumentMessage key={message.createdAt} message={message} isAudio />
+                                };
 
-                                  return component[message.type as "text"];
-                              })}
-                          </section>
-                      ))
+                                return component[message.type as "text"];
+                            })}
+                        </section>
+                    ))
                     : null}
                 <div ref={scrollToBottomRef} className="pt-3"></div>
                 {showScrollButton ? (

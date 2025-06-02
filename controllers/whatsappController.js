@@ -77,7 +77,7 @@ exports.receiveMessage = async (req, res) => {
                     fileName = message.document.filename || fileName;
                     break;
                 case "audio":
-                    content = "Audio received";
+                    content = message.audio.caption || "";
                     ({ s3Url: mediaUrl, fileName } = await uploadMediaToS3(message.audio.id, token));
                     break;
                 case "video":

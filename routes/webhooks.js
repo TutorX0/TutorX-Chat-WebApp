@@ -45,14 +45,14 @@ module.exports = (io) => {
                     content = message.image?.caption || "";
                     mediaUrl = message.image?.link || null;
                 } else if (type === "document") {
-                    content = message.document?.caption || "Document received";
+                    content = message.document?.caption || "";
                     mediaUrl = message.document?.link || null;
                     fileName = message.document?.filename || null;
                 } else if (type === "audio") {
-                    content = "Audio received";
+                    content = message.audio?.caption || "";
                     mediaUrl = message.audio?.link || null;
                 } else if (type === "video") {
-                    content = message.video?.caption || "Video received";
+                    content = message.video?.caption || "";
                     mediaUrl = message.video?.link || null;
                 } else {
                     content = "Unsupported message type";
