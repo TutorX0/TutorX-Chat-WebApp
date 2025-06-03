@@ -5,6 +5,7 @@ const path = require("path");
 const { getIO } = require("../socket");
 const moment = require("moment"); // Make sure moment is installed
 const uploadImageToWhatsapp = require("../utils/uploadImageToWhatsapp");
+const forwardDocumentToWhatsapp = require("../utils/forwardDocumentToWhatsapp");
 require("dotenv").config();
 
 // Generate chatId based on phone number
@@ -255,7 +256,7 @@ exports.forwardMessage = async (req, res) => {
             } else if (type === "image") {
                 if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Image URL is required" });
 
-                const mediaId = await uploadImageToWhatsapp(message.mediaUrl, true);
+                const mediaId = await forwardDocumentToWhatsapp(message.mediaUrl);
                 payload = {
                     messaging_product: "whatsapp",
                     to: phoneNumber,
@@ -265,7 +266,7 @@ exports.forwardMessage = async (req, res) => {
             } else if (type === "document") {
                 if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Document URL is required" });
 
-                const mediaId = await uploadImageToWhatsapp(message.mediaUrl, true);
+                const mediaId = await forwardDocumentToWhatsapp(message.mediaUrl);
                 payload = {
                     messaging_product: "whatsapp",
                     to: phoneNumber,
@@ -275,7 +276,7 @@ exports.forwardMessage = async (req, res) => {
             } else if (type === "audio") {
                 if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Audio URL is required" });
 
-                const mediaId = await uploadImageToWhatsapp(message.mediaUrl, true);
+                const mediaId = await forwardDocumentToWhatsapp(message.mediaUrl);
                 payload = {
                     messaging_product: "whatsapp",
                     to: phoneNumber,
@@ -285,7 +286,7 @@ exports.forwardMessage = async (req, res) => {
             } else if (type === "video") {
                 if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Video URL is required" });
 
-                const mediaId = await uploadImageToWhatsapp(message.mediaUrl, true);
+                const mediaId = await forwardDocumentToWhatsapp(message.mediaUrl);
                 payload = {
                     messaging_product: "whatsapp",
                     to: phoneNumber,
@@ -384,7 +385,7 @@ exports.createChat = async (req, res) => {
 
         res.status(201).json({
             status: "success",
-            message: "New Contact added Successfully",
+            message: "Chat created successfully",
             chat: newChat
         });
     } catch (err) {
