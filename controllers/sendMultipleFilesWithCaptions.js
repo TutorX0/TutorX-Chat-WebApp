@@ -45,7 +45,10 @@ exports.sendMultipleFilesWithCaptions = async (req, res) => {
 
             let mediaId, s3Url;
             try {
+                console.log("Uploading media to WhatsApp:", fileName);
+                console.log("File buffer size:", fileBuffer.length, "bytes");
                 const uploadResult = await uploadImageToWhatsapp(fileBuffer, fileName);
+                console.log("Media uploaded successfully:", uploadResult);
                 mediaId = uploadResult.mediaId;
                 s3Url = uploadResult.s3Url;
             } catch (err) {

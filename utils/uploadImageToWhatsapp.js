@@ -2,9 +2,10 @@ const axios = require("axios");
 const path = require("path");
 const s3 = require("../utils/s3config");
 const FormData = require("form-data");
+const mime = require("mime-types");
 
 const uploadImageToWhatsapp = async (fileBuffer, fileName) => {
-    const contentType = "application/octet-stream"; // No specific MIME binding
+    const contentType = mime.lookup(fileName) || "application/octet-stream";
 
     const s3Params = {
         Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -22,7 +23,7 @@ const uploadImageToWhatsapp = async (fileBuffer, fileName) => {
         contentType
     });
     formData.append("messaging_product", "whatsapp");
-    formData.append("type", contentType); // WhatsApp expects a type, but you’re now using a generic one
+    formData.append("type", contentType); // This MUST match WhatsApp's accepted MIME types
 
     const response = await axios.post(
         `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/media`,
