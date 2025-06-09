@@ -15,7 +15,7 @@ Looking forward to a productive and engaging session!`;
 
 export const paymentMessage = `💳 Payment Instructions
 
-🔗 Razorpay Link: https://rzp.io/l/example-payment-link
+🔗 Razorpay Link: https://rzp.io/rzp/TxCAD
 
 🧾 Details:
 This payment is required to confirm the task and initiate the expert’s work. If an advance payment has already been made, please pay the remaining amount.
