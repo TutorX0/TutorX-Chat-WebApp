@@ -69,7 +69,7 @@ export function ForwardMessage({ messages, children }: ForwardMessageProps) {
                         </div>
                     ))}
                 </ScrollArea>
-                <DialogFooter className="z-10 flex items-center justify-between gap-x-4">
+                <DialogFooter className="z-10 flex flex-row items-center justify-center gap-x-4 pr-3">
                     <Button variant="outline" className="rounded-full" onClick={resetForwarding}>
                         Cancel
                     </Button>

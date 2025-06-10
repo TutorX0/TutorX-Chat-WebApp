@@ -24,7 +24,7 @@ export default function HomePage() {
                     <ResizablePanel
                         maxSize={50}
                         minSize={20}
-                        defaultSize={30}
+                        defaultSize={25}
                         className={cn("flex-col", currentChat ? "hidden md:flex" : "flex")}
                     >
                         <ChatSidebar />

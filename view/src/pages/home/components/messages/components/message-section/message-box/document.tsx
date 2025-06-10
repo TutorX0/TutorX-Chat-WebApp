@@ -92,7 +92,7 @@ export function DocumentMessage({ message, isAudio = false }: DocumentMessagePro
                         </a>
                     ) : null}
                 </div>
-                <p>{message.content}</p>
+                <p className="wrap-break-word">{message.content}</p>
                 <div className="flex items-center justify-end">
                     <p className="text-xs text-neutral-400">{readableTime(message.createdAt)}</p>
                 </div>

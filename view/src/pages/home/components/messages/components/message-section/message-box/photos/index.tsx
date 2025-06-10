@@ -82,7 +82,7 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
                         </div>
                     </PhotoPopover>
                 ) : null}
-                <p>{message.content}</p>
+                <p className="wrap-break-word">{message.content}</p>
                 <div className="m-1 flex items-center justify-end">
                     <p className="text-xs text-neutral-400">{readableTime(message.createdAt)}</p>
                 </div>
