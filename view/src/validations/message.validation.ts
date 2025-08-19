@@ -22,6 +22,9 @@ export const replySchema = z.object({
 
 export type Reply = z.infer<typeof replySchema>;
 
+/**
+ * ✅ ChatMessage schema updated with `status` field
+ */
 export const chatMessage = z.object({
     _id: z.string(),
     sender: z.string(),
@@ -31,7 +34,10 @@ export const chatMessage = z.object({
     fileName: z.string().nullable(),
     createdAt: z.string(),
     isForwarded: z.boolean(),
-    replyTo: replySchema.nullable()
+    replyTo: replySchema.nullable(),
+
+    // 👇 Added this for tick system
+    status: z.enum(["sent", "delivered", "read"]).optional()
 });
 
 export type ChatMessage = z.infer<typeof chatMessage>;
@@ -50,6 +56,10 @@ export const fetchMessageResponseSchema = z.object({
     })
 });
 
+/**
+ * ✅ SocketData schema updated with `status` field
+ * so real-time events also carry ticks info
+ */
 export const socketData = z.object({
     messageId: z.string(),
     chatId: z.string(),
@@ -63,7 +73,10 @@ export const socketData = z.object({
     sender: z.string(),
     timestamp: z.string(),
     isForwarded: z.boolean(),
-    replyTo: replySchema.nullable()
+    replyTo: replySchema.nullable(),
+
+    // 👇 Added this
+    status: z.enum(["sent", "delivered", "read"]).optional()
 });
 
 export type SocketData = z.infer<typeof socketData>;

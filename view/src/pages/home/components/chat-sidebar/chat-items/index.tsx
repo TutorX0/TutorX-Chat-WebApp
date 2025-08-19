@@ -26,10 +26,13 @@ export function ChatItems({ chats, loading, search }: ChatItemsProps) {
     const [groupLoading, setGroupLoading] = useState(false);
     const currentGroupRef = useRef<string | null>(null);
 
+    // ✅ Group filter
     const filteredByGroup = useMemo(() => {
         if (!groups || !chatType) return chats;
 
-        const matchedGroup = groups.find((group) => group.groupName.toLowerCase() === chatType.toLowerCase());
+        const matchedGroup = groups.find(
+            (group) => group.groupName.toLowerCase() === chatType.toLowerCase()
+        );
 
         if (!matchedGroup) return chats;
 
@@ -37,11 +40,15 @@ export function ChatItems({ chats, loading, search }: ChatItemsProps) {
         return chats.filter((chat) => messageIdSet.has(chat.chatId));
     }, [chats, groups, chatType]);
 
+    // ✅ Search filter
     const filteredChats = useMemo(() => {
         if (!search.trim()) return filteredByGroup;
-        return filteredByGroup.filter((item) => item.name.toLowerCase().includes(search.toLowerCase()));
+        return filteredByGroup.filter((item) =>
+            item.name.toLowerCase().includes(search.toLowerCase())
+        );
     }, [filteredByGroup, search]);
 
+    // ✅ Group transition smooth loading
     useEffect(() => {
         const normalized = chatType?.toLowerCase() || null;
         if (normalized !== currentGroupRef.current) {
@@ -63,18 +70,31 @@ export function ChatItems({ chats, loading, search }: ChatItemsProps) {
     }, [filteredChats, groupLoading, hasResolvedInitialGroup]);
 
     return (
-        <ScrollArea className={cn("h-[70vh] grow px-5", chatType === "chats" ? "pb-4" : "")}>
+        <ScrollArea
+            className={cn("h-[70vh] grow px-5", chatType === "chats" ? "pb-4" : "")}
+        >
             {groupLoading || loading ? (
                 <ChatItemsLoading />
             ) : (
                 filteredChats.map((chat) => (
-                    <ChatItem key={`Chat-${chat._id}`} name={chat.name} _id={chat._id} chatId={chat.chatId} chatType={chatType} />
+                    <ChatItem
+                        key={`Chat-${chat._id}`}
+                        _id={chat._id}
+                        chatId={chat.chatId}
+                        chatType={chatType}
+                        name={chat.name}
+                        lastMessage={chat.lastMessage}         // ✅ new
+                        lastMessageType={chat.lastMessageType} // ✅ new
+                        lastMessageTime={chat.lastMessageTime} // ✅ new
+                    />
                 ))
             )}
 
             {chatType !== "chats" ? (
                 <div className="bg-sidebar sticky bottom-0 mt-auto flex flex-col items-center justify-between gap-5 border-t px-3 py-6">
-                    <SelectChats alreadyAddedChats={filteredByGroup.map((chat) => chat.chatId)} />
+                    <SelectChats
+                        alreadyAddedChats={filteredByGroup.map((chat) => chat.chatId)}
+                    />
                     <DeleteGroup chatType={chatType} />
                 </div>
             ) : null}
