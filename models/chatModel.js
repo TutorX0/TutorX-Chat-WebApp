@@ -1,0 +1,20 @@
+const mongoose = require("mongoose");
+
+const chatSchema = new mongoose.Schema(
+    {
+        chatId: { type: String, required: true, unique: true }, // Unique ID based on phone number
+        phoneNumber: { type: String, required: true, unique: true }, // WhatsApp Number
+        name: { type: String, required: true, unique: true }, // Dynamic Guest Name (e.g., Guest 1, Guest 2)
+        lastMessage: {
+            type: {
+                content: { type: String },
+                messageType: { type: String },
+                timestamp: { type: Date }
+            },
+            default: null
+        }
+    },
+    { timestamps: true }
+);
+
+module.exports = mongoose.model("Chat", chatSchema);
