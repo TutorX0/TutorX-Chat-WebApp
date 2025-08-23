@@ -8,10 +8,7 @@ import { Checkbox } from "@/components";
 import { ReplyBox } from "./reply-box";
 import { useStore } from "@/store";
 
-<<<<<<< HEAD
-=======
 // ✅ TextMessage props type
->>>>>>> 81bdef25041d8e55d92e72bb2f7950aeeb7b8a46
 type TextMessageProps = {
     message: ChatMessage;
 };
@@ -76,11 +73,6 @@ export function TextMessage({ message }: TextMessageProps) {
                         </span>
                     ) : null}
                 </div>
-<<<<<<< HEAD
-                <div className="mt-1 flex items-center justify-end">
-                    <p className="text-xs text-neutral-400">{readableTime(message.createdAt)}</p>
-                </div>
-=======
                 
                 {/* ✅ Footer row where time + ticks show */}
                 <div className="mt-1 flex items-center justify-end gap-x-1">
@@ -97,7 +89,6 @@ export function TextMessage({ message }: TextMessageProps) {
                     )}
                 </div>
 
->>>>>>> 81bdef25041d8e55d92e72bb2f7950aeeb7b8a46
                 <MessageOptions message={message} messageType="text" />
             </div>
         </div>

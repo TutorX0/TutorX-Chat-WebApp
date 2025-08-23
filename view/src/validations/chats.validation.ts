@@ -7,12 +7,8 @@ export const chatSchema = z.object({
     name: z.string(),
     lastMessage: z.string(),
     lastMessageType: z.string(),
-<<<<<<< HEAD
-    lastMessageTime: z.string()
-=======
     lastMessageTime: z.string(),
     unreadCount: z.number().optional().default(0)
->>>>>>> 81bdef25041d8e55d92e72bb2f7950aeeb7b8a46
 });
 
 export const chatsResponseSchema = z.object({

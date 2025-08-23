@@ -4,10 +4,6 @@ import { AxiosError } from "axios";
 import { useState } from "react";
 import { toast } from "sonner";
 
-<<<<<<< HEAD
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components";
-import { groupCreationResponseSchema, type ChatItem } from "@/validations";
-=======
 import {
     ContextMenu,
     ContextMenuContent,
@@ -18,28 +14,19 @@ import {
     groupCreationResponseSchema,
     type ChatItem,
 } from "@/validations";
->>>>>>> 81bdef25041d8e55d92e72bb2f7950aeeb7b8a46
 import { useUpdateSearchParam } from "@/hooks";
 import { axiosClient } from "@/lib";
 import { useStore } from "@/store";
 
-<<<<<<< HEAD
-type ChatItemProps = Pick<ChatItem, "_id" | "name"> & {
-=======
 type ChatItemProps = Pick<
     ChatItem,
     "_id" | "name" | "lastMessage" | "lastMessageTime" | "unreadCount"
 > & {
->>>>>>> 81bdef25041d8e55d92e72bb2f7950aeeb7b8a46
     chatType: string | null;
     chatId: string;
 };
 
-<<<<<<< HEAD
-export function ChatItem({ _id, chatId, chatType, name }: ChatItemProps) {
-=======
 export function ChatItem({ _id, chatId, chatType, name, lastMessage, lastMessageTime, unreadCount }: ChatItemProps) {
->>>>>>> 81bdef25041d8e55d92e72bb2f7950aeeb7b8a46
     const [loading, setLoading] = useState(false);
     const addGroup = useStore((state) => state.addGroup);
 
@@ -48,12 +35,6 @@ export function ChatItem({ _id, chatId, chatType, name, lastMessage, lastMessage
 
         setLoading(true);
         try {
-<<<<<<< HEAD
-            const response = await axiosClient.put("/group/remove-users", { groupName: chatType, messageId: chatId });
-
-            const parsedResponse = groupCreationResponseSchema.safeParse(response.data);
-            if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
-=======
             const response = await axiosClient.put("/group/remove-users", {
                 groupName: chatType,
                 messageId: chatId,
@@ -64,18 +45,13 @@ export function ChatItem({ _id, chatId, chatType, name, lastMessage, lastMessage
             );
             if (!parsedResponse.success)
                 return toast.error("Invalid data type sent from server");
->>>>>>> 81bdef25041d8e55d92e72bb2f7950aeeb7b8a46
 
             addGroup(parsedResponse.data.group);
             toast.success(response.data.message);
         } catch (error: unknown) {
             let message = "An unexpected error was returned from the server";
-<<<<<<< HEAD
-            if (error instanceof AxiosError) message = error?.response?.data?.message;
-=======
             if (error instanceof AxiosError)
                 message = error?.response?.data?.message;
->>>>>>> 81bdef25041d8e55d92e72bb2f7950aeeb7b8a46
             toast.error(message);
         } finally {
             setLoading(false);
@@ -83,13 +59,6 @@ export function ChatItem({ _id, chatId, chatType, name, lastMessage, lastMessage
     }
 
     return chatType === "chats" ? (
-<<<<<<< HEAD
-        <Item name={name} _id={_id} chatType={chatType} chatId={chatId} />
-    ) : (
-        <ContextMenu>
-            <ContextMenuTrigger>
-                <Item name={name} _id={_id} chatType={chatType} chatId={chatId} />
-=======
         <Item
             _id={_id}
             chatType={chatType}
@@ -111,7 +80,6 @@ export function ChatItem({ _id, chatId, chatType, name, lastMessage, lastMessage
                     lastMessageTime={lastMessageTime}
                     unreadCount={unreadCount}
                 />
->>>>>>> 81bdef25041d8e55d92e72bb2f7950aeeb7b8a46
             </ContextMenuTrigger>
             <ContextMenuContent>
                 <ContextMenuItem onClick={removeFromGroup} disabled={loading}>
@@ -122,9 +90,6 @@ export function ChatItem({ _id, chatId, chatType, name, lastMessage, lastMessage
     );
 }
 
-<<<<<<< HEAD
-function Item({ _id, name }: ChatItemProps) {
-=======
 function Item({
     _id,
     name,
@@ -132,20 +97,11 @@ function Item({
     lastMessageTime,
     unreadCount,
 }: ChatItemProps) {
->>>>>>> 81bdef25041d8e55d92e72bb2f7950aeeb7b8a46
     const updateSearchParam = useUpdateSearchParam();
     const [searchParams] = useSearchParams();
 
     return (
         <div
-<<<<<<< HEAD
-            className="data-[active=true]:bg-selected-chat hover:bg-chat-hover my-2 flex cursor-pointer items-center gap-4 rounded-md p-3"
-            data-active={searchParams.get("open") === _id}
-            onClick={() => updateSearchParam("open", _id)}
-        >
-            <UserCircle strokeWidth="1" className="size-8 rounded-full text-neutral-500" />
-            <p className="font-semibold">{name}</p>
-=======
             className="data-[active=true]:bg-selected-chat hover:bg-chat-hover my-2 flex cursor-pointer items-center justify-between rounded-md p-3"
             data-active={searchParams.get("open") === _id}
             onClick={() => updateSearchParam("open", _id)}
@@ -178,7 +134,6 @@ function Item({
                     <span className="mt-1 min-h-[20px]"></span>
                 )}
             </div>
->>>>>>> 81bdef25041d8e55d92e72bb2f7950aeeb7b8a46
         </div>
     );
 }
