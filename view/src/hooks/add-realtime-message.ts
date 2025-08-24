@@ -19,7 +19,7 @@ export function useAddRealtimeMessage() {
     const playNotification = () => {
         const audio = new Audio(notificationSound);
         audio.play().catch(() => {
-            // if browser blocks autoplay, we can ignore the error
+            // ignore autoplay errors
         });
     };
 
@@ -46,14 +46,19 @@ export function useAddRealtimeMessage() {
                 type: parsedResponse.data.messageType,
                 content: parsedResponse.data.content,
                 replyTo: parsedResponse.data.replyTo,
-                isForwarded: parsedResponse.data.isForwarded
+                isForwarded: parsedResponse.data.isForwarded,
+                status: parsedResponse.data.status
             };
 
             pushMessage(chatDetails, newMessage);
             moveChatToTop(parsedResponse.data.phoneNumber);
 
-            // 🔊 play notification sound only if the message is not from the logged-in user
-            if (newMessage.sender !== user?.id) {
+            // 🛠️ FIX: prevent sound for self messages
+            const isOwnMessage =
+                newMessage.sender === "admin" || // backend sometimes marks own msg as "admin"
+                newMessage.sender === user?.id;   // or real user id match
+
+            if (!isOwnMessage) {
                 playNotification();
             }
         });

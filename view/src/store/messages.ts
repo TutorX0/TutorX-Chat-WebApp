@@ -2,17 +2,22 @@ import type { StateCreator } from "zustand";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 
-import { fetchMessageResponseSchema, type ChatMessage, type GroupedMessages } from "@/validations";
+import {
+    fetchMessageResponseSchema,
+    type ChatMessage,
+    type GroupedMessages,
+    type SocketData
+} from "@/validations";
 import { axiosClient } from "@/lib";
 import type { StoreType } from ".";
 
 export type MessageRecord = Record<string, GroupedMessages>;
 
 type ChatDetails = {
+    chat_id: string;
     chatId: string;
     chatName: string;
     phoneNumber: string;
-    chat_id: string;
 };
 
 export type MessageSlice = {
@@ -22,12 +27,17 @@ export type MessageSlice = {
     pushMessage: (chatDetails: ChatDetails, newMessage: ChatMessage) => void;
 };
 
-export const createMessageSlice: StateCreator<StoreType, [], [], MessageSlice> = (set, get) => ({
+export const createMessageSlice: StateCreator<
+    StoreType,
+    [["zustand/devtools", never], ["zustand/immer", never]],
+    [],
+    MessageSlice
+> = (set, get) => ({
     messages: {},
     loading: {},
 
     fetchMessages: async (chatId) => {
-        if (get().messages[chatId]) return; // Already fetched
+        if (get().messages[chatId]) return;
 
         set((state) => ({
             loading: { ...state.loading, [chatId]: true }
@@ -38,12 +48,26 @@ export const createMessageSlice: StateCreator<StoreType, [], [], MessageSlice> =
 
             const parsedResponse = fetchMessageResponseSchema.safeParse(response.data);
             if (!parsedResponse.success) {
+                console.error("Invalid data type sent from server:", parsedResponse.error);
                 toast.error("Invalid data type sent from server");
                 return;
             }
 
+            const groupedMessages = parsedResponse.data.chat.groupedMessages;
+
+            // ✅ ensure every message has status
+            for (const groupKey in groupedMessages) {
+                groupedMessages[groupKey] = groupedMessages[groupKey].map((msg) => {
+                    if (!msg.status) {
+                        console.warn("Message missing status, defaulting to 'pending'", msg);
+                        return { ...msg, status: "pending" };
+                    }
+                    return msg;
+                });
+            }
+
             set((state) => ({
-                messages: { ...state.messages, [chatId]: parsedResponse.data.chat.groupedMessages },
+                messages: { ...state.messages, [chatId]: groupedMessages },
                 loading: { ...state.loading, [chatId]: false }
             }));
         } catch (error) {
@@ -79,7 +103,10 @@ export const createMessageSlice: StateCreator<StoreType, [], [], MessageSlice> =
         set((state) => {
             const existingMessages = state.messages[chatDetails.chatId] || {};
             const groupKey = "Today";
-            const updatedGroup = [...(existingMessages[groupKey] || []), newMessage];
+            const updatedGroup = [
+                ...(existingMessages[groupKey] || []),
+                { ...newMessage, status: newMessage.status || "pending" } // ✅ fallback
+            ];
 
             return {
                 messages: {

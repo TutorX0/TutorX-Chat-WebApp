@@ -1,4 +1,4 @@
-import { Forward } from "lucide-react";
+import { Forward, Check, CheckCheck } from "lucide-react"; // ✅ added tick icons
 import { useState } from "react";
 
 import type { ChatMessage } from "@/validations";
@@ -72,9 +72,31 @@ export function TextMessage({ message }: TextMessageProps) {
                         </span>
                     ) : null}
                 </div>
-                <div className="mt-1 flex items-center justify-end">
+
+                {/* ✅ Time + Tick section */}
+                <div className="mt-1 flex items-center justify-end gap-1">
+                    {/* Time */}
                     <p className="text-xs text-neutral-400">{readableTime(message.createdAt)}</p>
+
+                    {/* ✅ WhatsApp-style ticks (only for admin/user-sent messages) */}
+                    {message.sender === "admin" && (
+                        <>
+                            {message.status === "pending" && (
+                                <Check className="w-4 h-4 text-neutral-400 ml-1" /> // single gray tick
+                            )}
+                            {message.status === "sent" && (
+                                <Check className="w-4 h-4 text-neutral-400 ml-1" /> // single gray tick (sent)
+                            )}
+                            {message.status === "delivered" && (
+                                <CheckCheck className="w-4 h-4 text-neutral-400 ml-1" /> // double gray ticks
+                            )}
+                            {message.status === "seen" && (
+                                <CheckCheck className="w-4 h-4 text-blue-500 ml-1" /> // double blue ticks
+                            )}
+                        </>
+                    )}
                 </div>
+
                 <MessageOptions message={message} messageType="text" />
             </div>
         </div>

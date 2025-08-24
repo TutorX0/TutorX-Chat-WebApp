@@ -1,27 +1,17 @@
 import { z } from "zod";
 
-const textMessageDataResponseSchema = z.object({
-    messaging_product: z.string(),
-    messages: z.array(z.object({ id: z.string() })),
-    contacts: z.array(z.object({ input: z.string(), wa_id: z.string() }))
-});
-
-export const textMessageResponseSchema = z.object({
-    chatId: z.string(),
-    status: z.string(),
-    data: textMessageDataResponseSchema
-});
-
-export type TextMessage = z.infer<typeof textMessageResponseSchema>;
-
+// reply schema
 export const replySchema = z.object({
+    _id: z.string(),
     sender: z.string(),
-    content: z.string().optional().nullable(),
-    mediaType: z.string()
+    content: z.string().optional(),
+    type: z.string(),
+    mediaUrl: z.string().nullable(),
+    fileName: z.string().nullable(),
+    createdAt: z.string()
 });
 
-export type Reply = z.infer<typeof replySchema>;
-
+// core chat message schema
 export const chatMessage = z.object({
     _id: z.string(),
     sender: z.string(),
@@ -31,25 +21,17 @@ export const chatMessage = z.object({
     fileName: z.string().nullable(),
     createdAt: z.string(),
     isForwarded: z.boolean(),
-    replyTo: replySchema.nullable()
+    replyTo: replySchema.nullable(),
+    status: z.enum(["pending", "sent", "delivered", "read", "failed"]).default("pending") // ✅ added
 });
 
 export type ChatMessage = z.infer<typeof chatMessage>;
 
-export const groupedMessages = z.record(z.array(chatMessage));
-
+// grouped messages
+export const groupedMessages = z.record(z.string(), z.array(chatMessage));
 export type GroupedMessages = z.infer<typeof groupedMessages>;
 
-export const fetchMessageResponseSchema = z.object({
-    status: z.string(),
-    chat: z.object({
-        chatId: z.string(),
-        groupedMessages: groupedMessages,
-        name: z.string(),
-        phoneNumber: z.string()
-    })
-});
-
+// socket data (for realtime messages)
 export const socketData = z.object({
     messageId: z.string(),
     chatId: z.string(),
@@ -63,7 +45,15 @@ export const socketData = z.object({
     sender: z.string(),
     timestamp: z.string(),
     isForwarded: z.boolean(),
-    replyTo: replySchema.nullable()
+    replyTo: replySchema.nullable(),
+    status: z.enum(["pending", "sent", "delivered", "read", "failed"]).default("pending") // ✅ added
 });
-
 export type SocketData = z.infer<typeof socketData>;
+
+// fetch messages schema
+export const fetchMessageResponseSchema = z.object({
+    message: z.string().optional(), // optional message,
+    chat: z.object({
+        groupedMessages: groupedMessages
+    })
+});
