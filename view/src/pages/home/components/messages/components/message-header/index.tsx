@@ -3,7 +3,7 @@ import { Forward, X } from "lucide-react";
 import { Button, ForwardMessage } from "@/components";
 import { AboutThisChat } from "./about-this-chat";
 import { useDeleteSearchParam } from "@/hooks";
-import type { ChatItem } from "@/validations";
+import type { ChatItem } from "@/store/validations";
 import { useStore } from "@/store";
 
 type MessageHeaderProps = {

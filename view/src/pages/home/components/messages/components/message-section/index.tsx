@@ -8,18 +8,6 @@ import { TextMessage } from "./message-box/text";
 import { useStore } from "@/store";
 import { cn } from "@/lib";
 
-// 🔊 import notification sound from assets
-import notificationSound from "@/assets/incoming-message-online-whatsapp.mp3";  
-
-// ✅ Strongly typed message
-type Message = {
-    _id: string;
-    senderId: string;
-    createdAt: string;
-    type: "text" | "image" | "video" | "document" | "audio";
-    content: string;
-};
-
 type MessageSectionProps = {
     chatId: string;
 };
@@ -30,81 +18,26 @@ export function MessageSection({ chatId }: MessageSectionProps) {
     const scrollToBottomRef = useRef<HTMLDivElement>(null);
     const scrollSectionRef = useRef<HTMLElement>(null);
 
-    // 🔊 audio setup only once
-    const audioRef = useRef<HTMLAudioElement>(new Audio(notificationSound));
-    const lastMessageId = useRef<string | null>(null);
-
     const fetchMessages = useStore((state) => state.fetchMessages);
     const replyMessage = useStore((state) => state.replyMessage);
+    const messages = useStore((state) => state.messages)[chatId];
 
-    // ✅ direct type inference (no extra annotation needed)
-    const messages = useStore((state) => state.messages[chatId]) as
-        | Record<string, Message[]>
-        | undefined;
-
-    // 🔊 user id for checking sender
-    const userId: string | undefined = useStore((state) => state.user?._id);
-
-    // 👇 Show/hide scroll button
     useEffect(() => {
         if (!scrollToBottomRef.current) return;
 
-        const observer = new IntersectionObserver(
-            ([entry]) => setShowScrollButton(!entry.isIntersecting),
-            { threshold: 0 }
-        );
+        const observer = new IntersectionObserver(([entry]) => setShowScrollButton(!entry.isIntersecting), { threshold: 0 });
         observer.observe(scrollToBottomRef.current);
 
         return () => observer.disconnect();
     }, []);
 
-    // 👇 Fetch messages when chatId changes
     useEffect(() => {
         fetchMessages(chatId);
-    }, [chatId, fetchMessages]);
+    }, [chatId]);
 
-    // 👇 Auto scroll when messages update
     useEffect(() => {
-        if (scrollToBottomRef.current) {
-            scrollToBottomRef.current.scrollIntoView();
-        }
+        if (scrollToBottomRef.current) scrollToBottomRef.current.scrollIntoView();
     }, [messages]);
-
-    // 🔊 Configure audio volume + cleanup
-    useEffect(() => {
-        audioRef.current.volume = 0.5;
-
-        return () => {
-            audioRef.current.src = ""; // cleanup
-        };
-    }, []);
-
-    // 🔊 Play sound on new message
-    useEffect(() => {
-        if (!messages) return;
-
-        const allMessages = Object.values(messages).flat();
-        if (allMessages.length === 0) return;
-
-        const latestMessage = allMessages[allMessages.length - 1];
-
-        // first render ke liye baseline set karo
-        if (!lastMessageId.current) {
-            lastMessageId.current = latestMessage._id;
-            return;
-        }
-
-        // ✅ only play for new incoming messages (not sent by self)
-        if (lastMessageId.current !== latestMessage._id) {
-            lastMessageId.current = latestMessage._id;
-
-            if (latestMessage.senderId !== userId) {
-                audioRef.current
-                    .play()
-                    .catch(() => console.warn("Sound blocked until user interaction"));
-            }
-        }
-    }, [messages, userId]);
 
     function scrollIntoView() {
         if (!scrollToBottomRef.current) return;
@@ -113,66 +46,34 @@ export function MessageSection({ chatId }: MessageSectionProps) {
 
     return (
         <ScrollArea className="relative h-[70vh] grow px-4 pb-0">
-            <section
-                ref={scrollSectionRef}
-                className="relative h-full"
-                style={{ maxHeight: "100%" }}
-            >
-                <div className="pt-3"></div>
-
+            <section ref={scrollSectionRef} className="relative h-full" style={{ maxHeight: "100%" }}>
+                <div className="pt-3"></div> {/* Just to create some separation from the header */}
                 {messages
                     ? Object.keys(messages).map((days, index) => (
-                          <section key={`Chat-${index + 1}`}>
-                              <div className="sticky top-4 z-50 flex justify-center">
-                                  <div className="bg-message-sent-by-user rounded-md border px-2 py-1 text-xs">
-                                      {days}
-                                  </div>
-                              </div>
+                        <section key={`Chat-${index + 1}`}>
+                            <div className="sticky top-4 z-50 flex justify-center">
+                                <div className="bg-message-sent-by-user rounded-md border px-2 py-1 text-xs">{days}</div>
+                            </div>
+                            {messages[days].map((message) => {
+                                const component = {
+                                    text: <TextMessage key={message.createdAt} message={message} />,
+                                    image: <PhotoMessage key={message.createdAt} message={message} />,
+                                    video: <PhotoMessage key={message.createdAt} message={message} />,
+                                    document: <DocumentMessage key={message.createdAt} message={message} />,
+                                    audio: <DocumentMessage key={message.createdAt} message={message} isAudio />
+                                };
 
-                              {messages[days].map((message) => {
-                                  switch (message.type) {
-                                      case "text":
-                                          return (
-                                              <TextMessage key={message._id} message={message} />
-                                          );
-                                      case "image":
-                                      case "video":
-                                          return (
-                                              <PhotoMessage key={message._id} message={message} />
-                                          );
-                                      case "document":
-                                          return (
-                                              <DocumentMessage key={message._id} message={message} />
-                                          );
-                                      case "audio":
-                                          return (
-                                              <DocumentMessage
-                                                  key={message._id}
-                                                  message={message}
-                                                  isAudio
-                                              />
-                                          );
-                                      default: {
-                                          // ✅ exhaustive check
-                                          const _exhaustive: never = message.type;
-                                          return null;
-                                      }
-                                  }
-                              })}
-                          </section>
-                      ))
+                                return component[message.type as "text"];
+                            })}
+                        </section>
+                    ))
                     : null}
-
                 <div ref={scrollToBottomRef} className="pt-3"></div>
-
                 {showScrollButton ? (
                     <Button
                         variant="secondary"
                         size="icon"
-                        className={cn(
-                            "fixed right-4 rounded-full",
-                            replyMessage ? "bottom-36" : "bottom-20"
-                        )}
+                        className={cn("fixed right-4 rounded-full", replyMessage ? "bottom-36" : "bottom-20")}
                         onClick={scrollIntoView}
                     >
                         <ChevronDown />

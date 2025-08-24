@@ -1,6 +1,6 @@
 import { FileIcon, ImageIcon, VideoIcon } from "lucide-react";
 
-import type { Reply } from "@/validations";
+import type { Reply } from "@/store/validations";
 
 export function ReplyBox({ replyTo }: { replyTo: Reply | null }) {
     if (!replyTo) return null;

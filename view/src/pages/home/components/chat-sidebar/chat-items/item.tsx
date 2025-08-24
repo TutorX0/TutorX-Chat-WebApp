@@ -4,29 +4,18 @@ import { AxiosError } from "axios";
 import { useState } from "react";
 import { toast } from "sonner";
 
-import {
-    ContextMenu,
-    ContextMenuContent,
-    ContextMenuItem,
-    ContextMenuTrigger,
-} from "@/components";
-import {
-    groupCreationResponseSchema,
-    type ChatItem,
-} from "@/validations";
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from "@/components";
+import { groupCreationResponseSchema, type ChatItem } from "@/validations";
 import { useUpdateSearchParam } from "@/hooks";
 import { axiosClient } from "@/lib";
 import { useStore } from "@/store";
 
-type ChatItemProps = Pick<
-    ChatItem,
-    "_id" | "name" | "lastMessage" | "lastMessageTime" | "unreadCount"
-> & {
+type ChatItemProps = Pick<ChatItem, "_id" | "name"> & {
     chatType: string | null;
     chatId: string;
 };
 
-export function ChatItem({ _id, chatId, chatType, name, lastMessage, lastMessageTime, unreadCount }: ChatItemProps) {
+export function ChatItem({ _id, chatId, chatType, name }: ChatItemProps) {
     const [loading, setLoading] = useState(false);
     const addGroup = useStore((state) => state.addGroup);
 
@@ -35,23 +24,16 @@ export function ChatItem({ _id, chatId, chatType, name, lastMessage, lastMessage
 
         setLoading(true);
         try {
-            const response = await axiosClient.put("/group/remove-users", {
-                groupName: chatType,
-                messageId: chatId,
-            });
+            const response = await axiosClient.put("/group/remove-users", { groupName: chatType, messageId: chatId });
 
-            const parsedResponse = groupCreationResponseSchema.safeParse(
-                response.data
-            );
-            if (!parsedResponse.success)
-                return toast.error("Invalid data type sent from server");
+            const parsedResponse = groupCreationResponseSchema.safeParse(response.data);
+            if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
 
             addGroup(parsedResponse.data.group);
             toast.success(response.data.message);
         } catch (error: unknown) {
             let message = "An unexpected error was returned from the server";
-            if (error instanceof AxiosError)
-                message = error?.response?.data?.message;
+            if (error instanceof AxiosError) message = error?.response?.data?.message;
             toast.error(message);
         } finally {
             setLoading(false);
@@ -59,27 +41,11 @@ export function ChatItem({ _id, chatId, chatType, name, lastMessage, lastMessage
     }
 
     return chatType === "chats" ? (
-        <Item
-            _id={_id}
-            chatType={chatType}
-            chatId={chatId}
-            name={name}
-            lastMessage={lastMessage}
-            lastMessageTime={lastMessageTime}
-            unreadCount={unreadCount}
-        />
+        <Item name={name} _id={_id} chatType={chatType} chatId={chatId} />
     ) : (
         <ContextMenu>
             <ContextMenuTrigger>
-                <Item
-                    _id={_id}
-                    chatType={chatType}
-                    chatId={chatId}
-                    name={name}
-                    lastMessage={lastMessage}
-                    lastMessageTime={lastMessageTime}
-                    unreadCount={unreadCount}
-                />
+                <Item name={name} _id={_id} chatType={chatType} chatId={chatId} />
             </ContextMenuTrigger>
             <ContextMenuContent>
                 <ContextMenuItem onClick={removeFromGroup} disabled={loading}>
@@ -90,50 +56,18 @@ export function ChatItem({ _id, chatId, chatType, name, lastMessage, lastMessage
     );
 }
 
-function Item({
-    _id,
-    name,
-    lastMessage,
-    lastMessageTime,
-    unreadCount,
-}: ChatItemProps) {
+function Item({ _id, name }: ChatItemProps) {
     const updateSearchParam = useUpdateSearchParam();
     const [searchParams] = useSearchParams();
 
     return (
         <div
-            className="data-[active=true]:bg-selected-chat hover:bg-chat-hover my-2 flex cursor-pointer items-center justify-between rounded-md p-3"
+            className="data-[active=true]:bg-selected-chat hover:bg-chat-hover my-2 flex cursor-pointer items-center gap-4 rounded-md p-3"
             data-active={searchParams.get("open") === _id}
             onClick={() => updateSearchParam("open", _id)}
         >
-            {/* Left Section - Avatar + Name + Last Message */}
-            <div className="flex items-center gap-4 overflow-hidden">
-                <UserCircle
-                    strokeWidth="1"
-                    className="size-8 rounded-full text-neutral-500"
-                />
-                <div className="flex flex-col overflow-hidden">
-                    <p className="font-semibold truncate">{name}</p>
-                    <p className="text-sm text-gray-500 truncate max-w-[200px]">
-                        {lastMessage || ""}
-                    </p>
-                </div>
-            </div>
-
-            {/* Right Section - Time + Unread Badge */}
-            <div className="flex flex-col items-end ml-2">
-                <span className="text-xs text-gray-400">
-                    {lastMessageTime || ""}
-                </span>
-
-                {unreadCount && unreadCount > 0 ? (
-                    <span className="mt-1 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                        {unreadCount}
-                    </span>
-                ) : (
-                    <span className="mt-1 min-h-[20px]"></span>
-                )}
-            </div>
+            <UserCircle strokeWidth="1" className="size-8 rounded-full text-neutral-500" />
+            <p className="font-semibold">{name}</p>
         </div>
     );
 }

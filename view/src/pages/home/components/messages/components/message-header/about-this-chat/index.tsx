@@ -2,7 +2,7 @@ import { UserCircle } from "lucide-react";
 
 import { ScrollArea, Sheet, SheetContent, SheetTrigger } from "@/components";
 import { UpdateChatName } from "./update-chat-name";
-import type { ChatItem } from "@/validations";
+import type { ChatItem } from "@/store/validations";
 import { Medias } from "./medias";
 
 export function AboutThisChat({ chatId, phoneNumber, name }: Pick<ChatItem, "phoneNumber" | "name" | "chatId">) {

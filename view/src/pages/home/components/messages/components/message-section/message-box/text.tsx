@@ -8,7 +8,6 @@ import { Checkbox } from "@/components";
 import { ReplyBox } from "./reply-box";
 import { useStore } from "@/store";
 
-// ✅ TextMessage props type
 type TextMessageProps = {
     message: ChatMessage;
 };
@@ -73,22 +72,9 @@ export function TextMessage({ message }: TextMessageProps) {
                         </span>
                     ) : null}
                 </div>
-                
-                {/* ✅ Footer row where time + ticks show */}
-                <div className="mt-1 flex items-center justify-end gap-x-1">
+                <div className="mt-1 flex items-center justify-end">
                     <p className="text-xs text-neutral-400">{readableTime(message.createdAt)}</p>
-
-                    {/* 👈 CHANGE: Add ticks only for messages sent by me (admin) */}
-                    {message.sender === "admin" && (
-                        <span className="ml-1 text-xs">
-                            {/* 👈 CHANGE: Status field expected from backend (same as WhatsApp API: "sent" | "delivered" | "read") */}
-                            {message.status === "sent" && "✓"}
-                            {message.status === "delivered" && "✓✓"}
-                            {message.status === "read" && <span className="text-blue-500">✓✓</span>}
-                        </span>
-                    )}
                 </div>
-
                 <MessageOptions message={message} messageType="text" />
             </div>
         </div>

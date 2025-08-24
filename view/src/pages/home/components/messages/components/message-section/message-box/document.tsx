@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 import { cn, fetchMetadata, readableFileSize, readableTime } from "@/lib";
 import { MessageOptions } from "./message-options";
-import type { ChatMessage } from "@/validations";
+import type { ChatMessage } from "@/store/validations";
 import { Checkbox } from "@/components";
 import { ReplyBox } from "./reply-box";
 import { useStore } from "@/store";

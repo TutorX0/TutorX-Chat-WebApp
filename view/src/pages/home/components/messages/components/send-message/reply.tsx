@@ -1,6 +1,6 @@
 import { FileIcon, ImageIcon, VideoIcon, X } from "lucide-react";
 
-import type { Reply as ReplyType } from "@/validations";
+import type { Reply as ReplyType } from "@/store/validations";
 import { Button } from "@/components";
 import { useStore } from "@/store";
 

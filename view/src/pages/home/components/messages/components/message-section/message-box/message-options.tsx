@@ -4,7 +4,7 @@ import { toast } from "sonner";
 
 import { Button, ForwardMessage, Popover, PopoverContent, PopoverTrigger } from "@/components";
 import { cn, getExtensionFromMimeType } from "@/lib";
-import type { ChatMessage } from "@/validations";
+import type { ChatMessage } from "@/store/validations";
 import { useStore } from "@/store";
 
 type ContextProps = {

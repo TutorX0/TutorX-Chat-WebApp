@@ -5,7 +5,7 @@ import { AxiosError } from "axios";
 import { toast } from "sonner";
 
 import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage, Input } from "@/components";
-import { emailResponseSchema, emailSchema, type EmailType } from "@/validations";
+import { emailResponseSchema, emailSchema, type EmailType } from "@/store/validations";
 import { axiosClient } from "@/lib";
 
 type EmailProps = {

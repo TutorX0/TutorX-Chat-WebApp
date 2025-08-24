@@ -1,6 +1,6 @@
 import type { StateCreator } from "zustand";
 
-import type { GroupSchema } from "@/validations";
+import type { GroupSchema } from "@/store/validations";
 
 export type GroupSlice = {
     groups: GroupSchema[] | null;
