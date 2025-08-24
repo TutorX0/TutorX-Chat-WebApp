@@ -56,9 +56,16 @@ export function ChatItem({ _id, chatId, chatType, name, lastMessage }: ChatItemP
     );
 }
 
-function Item({ _id, name, lastMessage }: ChatItemProps) {
+function Item({ _id, name, lastMessage, chatId }: ChatItemProps) {
     const updateSearchParam = useUpdateSearchParam();
     const [searchParams] = useSearchParams();
+
+    // 🔹 Fallback: if name is empty, show WhatsApp default username (last 10 digits of phone/chatId)
+    const displayName = name?.trim()
+        ? name
+        : chatId
+            ? `+${chatId.slice(-10)}`
+            : "Unknown";
 
     return (
         <div
@@ -68,15 +75,15 @@ function Item({ _id, name, lastMessage }: ChatItemProps) {
         >
             <UserCircle strokeWidth="1" className="size-8 rounded-full text-neutral-500" />
             <div className="flex flex-col overflow-hidden">
-                <p className="font-semibold truncate">{name}</p>
-               {lastMessage && lastMessage.content !== null ? (
-  <p className="text-sm text-neutral-500 truncate">
-    {lastMessage.content || "[Media Message]"}
-  </p>
-) : (
-  <p className="text-sm text-neutral-400 italic">No messages yet</p>
-)}
-
+                {/* 🔹 Use displayName instead of name */}
+                <p className="font-semibold truncate">{displayName}</p>
+                {lastMessage && lastMessage.content !== null ? (
+                    <p className="text-sm text-neutral-500 truncate">
+                        {lastMessage.content || "[Media Message]"}
+                    </p>
+                ) : (
+                    <p className="text-sm text-neutral-400 italic">No messages yet</p>
+                )}
             </div>
         </div>
     );
