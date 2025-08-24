@@ -10,12 +10,12 @@ import { useUpdateSearchParam } from "@/hooks";
 import { axiosClient } from "@/lib";
 import { useStore } from "@/store";
 
-type ChatItemProps = Pick<ChatItem, "_id" | "name"> & {
+type ChatItemProps = Pick<ChatItem, "_id" | "name" | "lastMessage"> & {
     chatType: string | null;
     chatId: string;
 };
 
-export function ChatItem({ _id, chatId, chatType, name }: ChatItemProps) {
+export function ChatItem({ _id, chatId, chatType, name, lastMessage }: ChatItemProps) {
     const [loading, setLoading] = useState(false);
     const addGroup = useStore((state) => state.addGroup);
 
@@ -41,11 +41,11 @@ export function ChatItem({ _id, chatId, chatType, name }: ChatItemProps) {
     }
 
     return chatType === "chats" ? (
-        <Item name={name} _id={_id} chatType={chatType} chatId={chatId} />
+        <Item name={name} _id={_id} chatType={chatType} chatId={chatId} lastMessage={lastMessage} />
     ) : (
         <ContextMenu>
             <ContextMenuTrigger>
-                <Item name={name} _id={_id} chatType={chatType} chatId={chatId} />
+                <Item name={name} _id={_id} chatType={chatType} chatId={chatId} lastMessage={lastMessage} />
             </ContextMenuTrigger>
             <ContextMenuContent>
                 <ContextMenuItem onClick={removeFromGroup} disabled={loading}>
@@ -56,7 +56,7 @@ export function ChatItem({ _id, chatId, chatType, name }: ChatItemProps) {
     );
 }
 
-function Item({ _id, name }: ChatItemProps) {
+function Item({ _id, name, lastMessage }: ChatItemProps) {
     const updateSearchParam = useUpdateSearchParam();
     const [searchParams] = useSearchParams();
 
@@ -67,7 +67,17 @@ function Item({ _id, name }: ChatItemProps) {
             onClick={() => updateSearchParam("open", _id)}
         >
             <UserCircle strokeWidth="1" className="size-8 rounded-full text-neutral-500" />
-            <p className="font-semibold">{name}</p>
+            <div className="flex flex-col overflow-hidden">
+                <p className="font-semibold truncate">{name}</p>
+               {lastMessage && lastMessage.content !== null ? (
+  <p className="text-sm text-neutral-500 truncate">
+    {lastMessage.content || "[Media Message]"}
+  </p>
+) : (
+  <p className="text-sm text-neutral-400 italic">No messages yet</p>
+)}
+
+            </div>
         </div>
     );
 }
