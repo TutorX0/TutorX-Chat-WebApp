@@ -1,6 +1,6 @@
 import type { StateCreator } from "zustand";
 
-import type { UserType } from "@/store/validations";
+import type { UserType } from "@/validations";
 
 export type UserSlice = {
     user: UserType | null;

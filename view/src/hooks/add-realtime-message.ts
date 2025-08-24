@@ -5,11 +5,23 @@ import { socketData, type ChatMessage } from "@/validations";
 import { useSocket } from "@/context";
 import { useStore } from "@/store";
 
+// 👇 imported the audio file 
+import notificationSound from "@/assets/incoming-message-online-whatsapp.mp3";
+
 export function useAddRealtimeMessage() {
     const { socket } = useSocket();
 
     const pushMessage = useStore((state) => state.pushMessage);
     const moveChatToTop = useStore((state) => state.moveChatToTop);
+    const user = useStore((state) => state.user); // 👈 logged-in user info
+
+    // 🔊 inline helper to play notification sound
+    const playNotification = () => {
+        const audio = new Audio(notificationSound);
+        audio.play().catch(() => {
+            // if browser blocks autoplay, we can ignore the error
+        });
+    };
 
     useEffect(() => {
         if (!socket) return;
@@ -24,6 +36,7 @@ export function useAddRealtimeMessage() {
                 phoneNumber: parsedResponse.data.phoneNumber,
                 chat_id: parsedResponse.data.chat_id
             };
+
             const newMessage: ChatMessage = {
                 _id: parsedResponse.data.messageId,
                 createdAt: parsedResponse.data.timestamp,
@@ -38,10 +51,15 @@ export function useAddRealtimeMessage() {
 
             pushMessage(chatDetails, newMessage);
             moveChatToTop(parsedResponse.data.phoneNumber);
+
+            // 🔊 play notification sound only if the message is not from the logged-in user
+            if (newMessage.sender !== user?.id) {
+                playNotification();
+            }
         });
 
         return () => {
             socket.off("newMessage");
         };
-    });
+    }, [socket, pushMessage, moveChatToTop, user]);
 }

@@ -1,6 +1,6 @@
 import type { StateCreator } from "zustand";
 
-import type { ChatItem } from "@/store/validations";
+import type { ChatItem } from "@/validations";
 
 export type ChatSlice = {
     chats: ChatItem[];
