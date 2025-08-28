@@ -3,7 +3,7 @@ import { Pencil } from "lucide-react";
 import { AxiosError } from "axios";
 import { toast } from "sonner";
 
-import { updateUserFields } from "@/store/validations";
+import { updateUserFields } from "@/validations";
 import { Button, Input } from "@/components";
 import { axiosClient, cn } from "@/lib";
 import { useStore } from "@/store";

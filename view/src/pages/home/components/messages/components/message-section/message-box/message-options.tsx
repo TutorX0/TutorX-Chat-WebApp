@@ -1,12 +1,13 @@
-import { ChevronDown, Copy, DownloadIcon, Forward, ListChecks, Reply } from "lucide-react";
+import { ChevronDown, Copy, DownloadIcon, Forward, ListChecks, Reply as ReplyIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button, ForwardMessage, Popover, PopoverContent, PopoverTrigger } from "@/components";
 import { cn, getExtensionFromMimeType } from "@/lib";
-import type { ChatMessage } from "@/store/validations";
+import type { ChatMessage } from "@/validations";
 import { useStore } from "@/store";
 
+// ✅ Added messageType to type to fix TS errors
 type ContextProps = {
     message: ChatMessage;
     messageType: string;
@@ -31,9 +32,13 @@ export function MessageOptions({ message, messageType }: ContextProps) {
 
     function toggleReply() {
         setReplyMessage({
+            _id: message._id,
+            sender: message.sender,
+            type: message.type,
             content: message.content,
-            mediaType: message.type,
-            sender: message.sender
+            mediaUrl: message.mediaUrl ?? null,
+            fileName: message.fileName ?? null,
+            createdAt: message.createdAt
         });
         setOpen(false);
     }
@@ -45,7 +50,7 @@ export function MessageOptions({ message, messageType }: ContextProps) {
             const response = await fetch(message.mediaUrl);
 
             if (!response.ok) {
-                toast.error(`Failed to fetch image. Status: ${response.status}`);
+                toast.error(`Failed to fetch media. Status: ${response.status}`);
                 return;
             }
 
@@ -63,8 +68,8 @@ export function MessageOptions({ message, messageType }: ContextProps) {
             anchor.remove();
 
             URL.revokeObjectURL(blobUrl);
-        } catch (error) {
-            toast.error("Image download failed");
+        } catch {
+            toast.error("Media download failed");
         }
     }
 
@@ -84,19 +89,19 @@ export function MessageOptions({ message, messageType }: ContextProps) {
             </PopoverTrigger>
             <PopoverContent className="text-options w-full space-y-3">
                 <div className="flex cursor-pointer items-center gap-2" onClick={toggleReply}>
-                    <Reply className="size-5" />
+                    <ReplyIcon className="size-5" />
                     <span className="text-sm">Reply</span>
                 </div>
                 <div className="flex cursor-pointer items-center gap-2" onClick={copyToClipboard}>
                     <Copy className="size-5" />
                     <span className="text-sm">Copy</span>
                 </div>
-                {["video", "image", "document", "audio"].includes(message.type) ? (
+                {["video", "image", "document", "audio"].includes(message.type) && (
                     <div className="flex cursor-pointer items-center gap-2" onClick={downloadMedia}>
                         <DownloadIcon className="size-5" />
                         <span className="text-sm">Download</span>
                     </div>
-                ) : null}
+                )}
                 <ForwardMessage
                     messages={[{ content: message.content, id: message._id, mediaUrl: message.mediaUrl, type: messageType }]}
                 >

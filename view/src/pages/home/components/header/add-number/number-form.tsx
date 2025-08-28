@@ -32,7 +32,7 @@ export function NumberForm({ setOpen }: NumberFormProps) {
         resolver: zodResolver(formSchema),
         defaultValues: { countryName: "", name: "", number: "" }
     });
-    form.setValue;
+    // form.setValue;
     const [loading, setLoading] = useState(false);
     const countryList = useCountryList();
     const addChat = useStore((state) => state.addChat);
@@ -54,13 +54,12 @@ export function NumberForm({ setOpen }: NumberFormProps) {
 
             addChat({
                 _id: parsedResponse.data.chat._id,
-                chatId: parsedResponse.data.chat.chatId,
-                name: parsedResponse.data.chat.name,
+                 chatId: parsedResponse.data.chat.chatId,
+                 name: parsedResponse.data.chat.name,
                 phoneNumber: parsedResponse.data.chat.phoneNumber,
-                lastMessage: "",
-                lastMessageTime: "",
-                lastMessageType: ""
-            });
+                lastMessage: { content: "", messageType: null, timestamp: null },
+                unreadCount: 0 // <--- add this
+                });
 
             toast.success(parsedResponse.data.message);
             setOpen(false);

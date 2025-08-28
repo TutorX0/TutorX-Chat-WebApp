@@ -90,7 +90,7 @@ export function TextMessage({ message }: TextMessageProps) {
                             {message.status === "delivered" && (
                                 <CheckCheck className="w-4 h-4 text-neutral-400 ml-1" /> // double gray ticks
                             )}
-                            {message.status === "seen" && (
+                            {message.status === "read" && (
                                 <CheckCheck className="w-4 h-4 text-blue-500 ml-1" /> // double blue ticks
                             )}
                         </>

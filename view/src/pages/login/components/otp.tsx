@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { Button, Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components";
 import { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot } from "@/components";
-import { otpResponseSchema, otpSchema, type OtpType } from "@/store/validations";
+import { otpResponseSchema, otpSchema, type OtpType } from "@/validations";
 import { axiosClient } from "@/lib";
 import { useStore } from "@/store";
 
