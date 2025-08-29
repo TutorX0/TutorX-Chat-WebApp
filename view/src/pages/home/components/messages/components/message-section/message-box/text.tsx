@@ -34,6 +34,9 @@ export function TextMessage({ message }: TextMessageProps) {
         toggleSelectedMessage({ content: message.content, id: message._id, mediaUrl: message.mediaUrl, type: message.type });
     }
 
+    
+
+
     return (
         <div
             className={cn(
