@@ -1,7 +1,7 @@
 import { Forward, PlayIcon } from "lucide-react";
 
 import { MessageOptions } from "../message-options";
-import type { ChatMessage } from "@/store/validations";
+import type { ChatMessage } from "@/validations";
 import { PhotoPopover } from "./photo-popover";
 import { cn, readableTime } from "@/lib";
 import { Checkbox } from "@/components";
