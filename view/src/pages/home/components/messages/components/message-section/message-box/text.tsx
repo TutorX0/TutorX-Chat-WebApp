@@ -17,7 +17,9 @@ export function TextMessage({ message }: TextMessageProps) {
     const selectMessageToggle = useStore((state) => state.selectMessageToggle);
     const selectedMessages = useStore((state) => state.selectedMessages);
 
-    const messageSelected = selectedMessages.find((selectedMessage) => selectedMessage.id === message._id);
+    const messageSelected = selectedMessages.find(
+        (selectedMessage) => selectedMessage.id === message._id
+    );
 
     const [isExpanded, setIsExpanded] = useState(false);
 
@@ -31,18 +33,35 @@ export function TextMessage({ message }: TextMessageProps) {
     const displayedLines = displayedContent.split("\n");
 
     function onCheckedChange() {
-        toggleSelectedMessage({ content: message.content, id: message._id, mediaUrl: message.mediaUrl, type: message.type });
+        toggleSelectedMessage({
+            content: message.content,
+            id: message._id,
+            mediaUrl: message.mediaUrl,
+            type: message.type,
+        });
     }
 
-    
-
+    // // ✅ Full debug log for each message
+    // console.log("🔍 [Message Debug Log] =====================================");
+    // console.log("Sender     :", message.sender);
+    // console.log("ID         :", message._id);
+    // console.log("Chat ID    :", message.chatId);
+    // console.log("Type       :", message.type);
+    // console.log("Content    :", message.content);
+    // console.log("Media URL  :", message.mediaUrl);
+    // console.log("Reply To   :", message.replyTo);
+    // console.log("Status     :", message.status);
+    // console.log("Created At :", message.createdAt);
+    // console.log("============================================================");
 
     return (
         <div
             className={cn(
                 "group flex items-center gap-x-4",
                 selectMessageToggle ? "hover:bg-neutral-400/5" : "",
-                messageSelected ? "bg-message-sent-by-me/40 hover:bg-message-sent-by-me/40" : ""
+                messageSelected
+                    ? "bg-message-sent-by-me/40 hover:bg-message-sent-by-me/40"
+                    : ""
             )}
         >
             {selectMessageToggle ? (
@@ -55,7 +74,9 @@ export function TextMessage({ message }: TextMessageProps) {
             <div
                 className={cn(
                     "relative my-2 w-fit max-w-10/12 rounded-md px-2 py-1.5 shadow-md lg:max-w-2/3",
-                    message.sender === "admin" ? "bg-message-sent-by-me ml-auto" : "bg-message-sent-by-user"
+                    message.sender === "admin"
+                        ? "bg-message-sent-by-me ml-auto"
+                        : "bg-message-sent-by-user"
                 )}
             >
                 <ReplyBox replyTo={message.replyTo} />
@@ -67,10 +88,15 @@ export function TextMessage({ message }: TextMessageProps) {
                 ) : null}
                 <div>
                     {displayedLines.map((line, index) => (
-                        <p key={`${message._id}-line-${index + 1}`}>{line.trim() === "" ? "\u00A0" : line}</p>
+                        <p key={`${message._id}-line-${index + 1}`}>
+                            {line.trim() === "" ? "\u00A0" : line}
+                        </p>
                     ))}
                     {isLong ? (
-                        <span onClick={() => setIsExpanded((prev) => !prev)} className="cursor-pointer text-sm text-blue-400">
+                        <span
+                            onClick={() => setIsExpanded((prev) => !prev)}
+                            className="cursor-pointer text-sm text-blue-400"
+                        >
                             {isExpanded ? "Read less" : "Read more"}
                         </span>
                     ) : null}
@@ -79,9 +105,11 @@ export function TextMessage({ message }: TextMessageProps) {
                 {/* ✅ Time + Tick section */}
                 <div className="mt-1 flex items-center justify-end gap-1">
                     {/* Time */}
-                    <p className="text-xs text-neutral-400">{readableTime(message.createdAt)}</p>
+                    <p className="text-xs text-neutral-400">
+                        {readableTime(message.createdAt)}
+                    </p>
 
-                    {/* ✅ WhatsApp-style ticks (only for admin/user-sent messages) */}
+                    {/* ✅ WhatsApp-style ticks (only for admin-sent messages) */}
                     {message.sender === "admin" && (
                         <>
                             {message.status === "pending" && (

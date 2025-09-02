@@ -495,8 +495,10 @@ exports.getChatHistory = async (req, res) => {
         if (!chat) {
             return res.status(404).json({ status: "error", message: "Chat not found" });
         }
-
+        
         const messages = await Message.find({ chatId }).sort({ createdAt: 1 }); // Oldest first
+
+        console.log(messages)
 
         const groupedMessages = {};
 
@@ -515,6 +517,7 @@ exports.getChatHistory = async (req, res) => {
                 fileName: msg.fileName || null,
                 createdAt: msg.createdAt,
                 isForwarded: msg.isForwarded,
+                status: msg.status ?? null,
                 replyTo: msg.replyTo ?? null
             });
         });

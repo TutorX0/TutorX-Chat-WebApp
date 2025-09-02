@@ -1,3 +1,4 @@
+// src/validations/chats.validation.ts
 import { z } from "zod";
 
 // 🔹 Base fields for all chats
@@ -17,6 +18,7 @@ const serverV2 = z.object({
       content: z.string().nullable().optional(),
       messageType: z.string().nullable().optional(),
       timestamp: z.union([z.string(), z.date()]).nullable().optional(),
+      status: z.enum(["pending", "sent", "delivered", "read"]).optional(), // ✅ status included
     })
     .nullable()
     .optional(),
@@ -28,6 +30,7 @@ const serverV1 = z.object({
   lastMessage: z.string().nullable().optional(),
   lastMessageType: z.string().nullable().optional(),
   lastMessageTime: z.union([z.string(), z.date()]).nullable().optional(),
+  lastMessageStatus: z.enum(["pending", "sent", "delivered", "read"]).optional(), // ✅ v1 support
 });
 
 // 🔹 Union both server shapes and normalize
@@ -56,6 +59,7 @@ export const chatSchema = z
           content: data.lastMessage?.content ?? "",
           messageType: data.lastMessage?.messageType ?? null,
           timestamp: ts instanceof Date ? ts.toISOString() : (ts ?? null),
+          status: data.lastMessage?.status ?? "pending", // ✅ status normalize
         },
       };
     }
@@ -64,6 +68,7 @@ export const chatSchema = z
     const ts = (data as any).lastMessageTime ?? null;
     const content = (data as any).lastMessage ?? "";
     const messageType = (data as any).lastMessageType ?? null;
+    const status = (data as any).lastMessageStatus ?? "pending";
 
     return {
       ...common,
@@ -71,6 +76,7 @@ export const chatSchema = z
         content,
         messageType,
         timestamp: ts instanceof Date ? ts.toISOString() : (ts ?? null),
+        status,
       },
     };
   });

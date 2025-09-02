@@ -10,6 +10,11 @@ export function SocketProvider({ children }: PropsWithChildren) {
         const newSocket = import.meta.env.PROD ? io() : io("http://localhost:3000");
         setSocket(newSocket);
 
+        // 🔍 Debug all incoming events
+        newSocket.onAny((event, ...args) => {
+            console.log("📡 [SOCKET EVENT]", event, JSON.stringify(args, null, 2));
+        });
+
         return () => {
             newSocket.close();
         };

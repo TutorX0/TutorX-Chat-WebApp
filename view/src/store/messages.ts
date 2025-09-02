@@ -5,10 +5,21 @@ import { StateCreator } from "zustand";
 import {
   fetchMessageResponseSchema,
   type ChatMessage,
-  type GroupedMessages
+  type GroupedMessages,
 } from "@/validations";
 import { axiosClient } from "@/lib";
 import type { StoreType } from ".";
+
+// ✅ Strictly allowed statuses
+const allowedStatuses = ["pending", "sent", "delivered", "read", "failed"] as const;
+export type MessageStatus = typeof allowedStatuses[number];
+
+// ✅ Normalize unknown status from backend → safe union
+function normalizeStatus(status: string | undefined): MessageStatus {
+  return (allowedStatuses.includes(status as MessageStatus)
+    ? status
+    : "pending") as MessageStatus;
+}
 
 export type MessageRecord = Record<string, GroupedMessages>;
 
@@ -24,6 +35,11 @@ export type MessageSlice = {
   loading: Record<string, boolean>;
   fetchMessages: (chatId: string) => Promise<void>;
   pushMessage: (chatDetails: ChatDetails, newMessage: ChatMessage) => void;
+  updateMessageStatus: (
+    chatId: string,
+    messageId: string,
+    newStatus: string
+  ) => void;
 };
 
 export const createMessageSlice: StateCreator<
@@ -35,84 +51,152 @@ export const createMessageSlice: StateCreator<
   messages: {},
   loading: {},
 
+  // 🔥 Fetch messages from API
   fetchMessages: async (chatId) => {
+    console.log(get()); // ✅ fix: call get()
+
     if (get().messages[chatId]) return;
 
     set((state) => ({
-      loading: { ...state.loading, [chatId]: true }
+      loading: { ...state.loading, [chatId]: true },
     }));
 
     try {
       const response = await axiosClient(`/chat/history/${chatId}`);
+      console.log("📡 API /chat/history/:chatId raw:", response);
       const parsedResponse = fetchMessageResponseSchema.safeParse(response.data);
 
       if (!parsedResponse.success) {
-        console.error("Invalid data from server:", parsedResponse.error);
+        console.error("❌ Invalid data from server:", parsedResponse.error);
         toast.error("Invalid data type sent from server");
         return;
       }
 
       const groupedMessages = parsedResponse.data.chat.groupedMessages;
 
-      // Ensure every message has a status
+      // ✅ Preserve backend status but normalize
       for (const groupKey in groupedMessages) {
         groupedMessages[groupKey] = groupedMessages[groupKey].map((msg) => ({
           ...msg,
-          status: msg.status || "pending"
+          status: normalizeStatus(msg.status),
         }));
       }
 
       set((state) => ({
         messages: { ...state.messages, [chatId]: groupedMessages },
-        loading: { ...state.loading, [chatId]: false }
+        loading: { ...state.loading, [chatId]: false },
       }));
     } catch (error) {
       let message = "An unexpected error was returned from the server";
-      if (error instanceof AxiosError) message = error?.response?.data?.message;
+      if (error instanceof AxiosError) {
+        message = error?.response?.data?.message ?? message;
+      }
       toast.error(message);
 
       set((state) => ({
-        loading: { ...state.loading, [chatId]: false }
+        loading: { ...state.loading, [chatId]: false },
       }));
     }
   },
 
-  pushMessage: async (chatDetails, newMessage) => {
-    const { addChat, messages, fetchMessages } = get();
-
-    if (!messages[chatDetails.chatId] || Object.keys(messages[chatDetails.chatId]).length === 0) {
-      await fetchMessages(chatDetails.chatId);
-    }
-
-    if (!messages[chatDetails.chatId]) {
-      addChat({
-        _id: chatDetails.chat_id,
-        chatId: chatDetails.chatId,
-        name: chatDetails.chatName,
-        phoneNumber: chatDetails.phoneNumber,
-        lastMessage: { content: "", messageType: null, timestamp: null },
-        unreadCount: 0
-      });
-      return;
-    }
-
+  // 🔥 Push a new message locally
+  pushMessage: (chatDetails, newMessage) => {
     set((state) => {
       const existingMessages = state.messages[chatDetails.chatId] || {};
-      const groupKey = "Today";
+
+      // Use createdAt, not timestamp
+      const groupKey = new Date(newMessage.createdAt || Date.now()).toLocaleDateString(
+        "en-US",
+        { month: "short", day: "numeric", year: "numeric" }
+      );
+
       const updatedGroup = [
         ...(existingMessages[groupKey] || []),
-        { ...newMessage, status: newMessage.status || "pending" }
+        { ...newMessage, status: normalizeStatus(newMessage.status) }, // ✅ normalize
       ];
+
+      let updatedChats = state.chats;
+      const chatIndex = state.chats.findIndex(
+        (c) => c.chatId === chatDetails.chatId
+      );
+
+      if (chatIndex === -1) {
+        // New chat
+        updatedChats = [
+          ...state.chats,
+          {
+            _id: chatDetails.chat_id,
+            chatId: chatDetails.chatId,
+            name: chatDetails.chatName,
+            phoneNumber: chatDetails.phoneNumber,
+            lastMessage: {
+              content: newMessage.content,
+              messageType: newMessage.type,
+              timestamp: newMessage.createdAt,
+              status: normalizeStatus(newMessage.status), // ✅ normalize
+            },
+            unreadCount: 1,
+          },
+        ];
+      } else {
+        // Existing chat
+        updatedChats = state.chats.map((chat, i) =>
+          i === chatIndex
+            ? {
+                ...chat,
+                lastMessage: {
+                  content: newMessage.content,
+                  messageType: newMessage.type,
+                  timestamp: newMessage.createdAt,
+                  status: normalizeStatus(newMessage.status), // ✅ normalize
+                },
+                unreadCount: chat.unreadCount + 1,
+              }
+            : chat
+        );
+      }
 
       return {
         messages: {
           ...state.messages,
           [chatDetails.chatId]: {
             ...existingMessages,
-            [groupKey]: updatedGroup
-          }
-        }
+            [groupKey]: updatedGroup,
+          },
+        },
+        chats: updatedChats,
       };
     });
-  }
+  },
+
+  // 🔥 Update message status (for sockets / API updates)
+  updateMessageStatus: (chatId, messageId, newStatus) =>
+    set((state) => {
+      const chatMessages = state.messages[chatId];
+      if (!chatMessages) return state;
+
+      const updatedGroups = Object.fromEntries(
+        Object.entries(chatMessages).map(([groupKey, msgs]) => [
+          groupKey,
+          msgs.map((msg) =>
+            msg._id === messageId
+              ? { ...msg, status: normalizeStatus(newStatus) } // ✅ normalize
+              : msg
+          ),
+        ])
+      );
+
+      console.log(
+        `🟢 Status updated → chatId:${chatId}, msgId:${messageId}, status:${normalizeStatus(
+          newStatus
+        )}`
+      );
+
+      return {
+        messages: {
+          ...state.messages,
+          [chatId]: updatedGroups,
+        },
+      };
+    }),
 });
