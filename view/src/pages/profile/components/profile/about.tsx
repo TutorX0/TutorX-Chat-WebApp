@@ -4,7 +4,7 @@ import { AxiosError } from "axios";
 import { toast } from "sonner";
 
 import { AutosizeTextarea, Button } from "@/components";
-import { updateUserFields } from "@/store/validations";
+import { updateUserFields } from "@/validations";
 import { axiosClient, cn } from "@/lib";
 import { useStore } from "@/store";
 
