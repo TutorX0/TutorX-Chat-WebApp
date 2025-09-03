@@ -28,6 +28,7 @@ export function ChatItem({ _id, chatId, chatType, name, lastMessage, unreadCount
     const [loading, setLoading] = useState(false);
     const addGroup = useStore((state) => state.addGroup);
 
+
     async function removeFromGroup() {
         if (loading) return;
 
@@ -95,12 +96,13 @@ function Item({ _id, name, lastMessage, chatId, unreadCount }: ChatItemProps) {
         ? `+${chatId.slice(-10)}`
         : "Unknown";
 
-    const handleClick = () => {
-        console.log(`[ChatItem] Opening chat: ${chatId} → resetting unread`);
-        resetUnread(chatId); // 🔥 Reset unread on open
-        updateSearchParam("open", _id);
-    };
-
+const handleClick = () => {
+    console.log(`[ChatItem] Opening chat: ${chatId} → resetting unread`);
+    resetUnread(chatId);
+    axiosClient.patch(`/chat/${chatId}/reset-unread`); // 👈 Remove the extra "chat_" prefix
+    updateSearchParam("open", _id);
+};
+                    console.log("unread count: ", unreadCount)
     return (
         <div
             className="data-[active=true]:bg-selected-chat hover:bg-chat-hover my-2 flex cursor-pointer items-center gap-4 rounded-md p-3"
@@ -115,11 +117,12 @@ function Item({ _id, name, lastMessage, chatId, unreadCount }: ChatItemProps) {
                 <div className="flex justify-between items-center">
                     <p className="font-semibold truncate">{displayName}</p>
                     {/* 🔥 Unread badge on right */}
-                    {unreadCount && unreadCount > 0 && (
-                        <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white">
-                            {unreadCount}
-                        </span>
-                    )}
+
+                {Number(unreadCount) > 0 && (
+    <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white">
+        {unreadCount} 
+    </span>
+)}
                 </div>
                 {lastMessage && lastMessage.content !== null ? (
                     <p className="text-sm text-neutral-500 truncate">

@@ -134,6 +134,7 @@ exports.receiveMessage = async (req, res) => {
             }
 
             // 🟢 FIX: Save whatsappMessageId so statuses can update later
+            // In the receiveMessage function, after saving the new message
             const newMessage = new Message({
                 chatId: chat.chatId,
                 phoneNumber,
@@ -142,22 +143,24 @@ exports.receiveMessage = async (req, res) => {
                 content,
                 mediaUrl,
                 fileName,
-                whatsappMessageId: message.id, // 👈 store WA message.id
-                status: "delivered" // incoming msg → already delivered
+                whatsappMessageId: message.id,
+                status: "delivered"
             });
 
             await newMessage.save();
 
             const last = savedMessages[savedMessages.length - 1];
             if (last) {
+                // 👈 Increment unread count for incoming user messages
                 await Chat.findOneAndUpdate(
                     { chatId: chat.chatId },
                     {
+                        $inc: { unreadCount: 1 }, // Increment unread count
                         $set: {
                             lastMessage: {
-                                content: last.content || last.fileName || "Media",
-                                messageType: last.messageType,
-                                timestamp: last.createdAt
+                                content: newMessage.content || newMessage.fileName || "Media",
+                                messageType: newMessage.messageType,
+                                timestamp: newMessage.createdAt
                             }
                         }
                     }

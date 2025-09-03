@@ -136,7 +136,7 @@ export const createMessageSlice: StateCreator<
               timestamp: newMessage.createdAt,
               status: normalizeStatus(newMessage.status), // ✅ normalize
             },
-            unreadCount: 1,
+            unreadCount: 0,
           },
         ];
       } else {
@@ -151,7 +151,7 @@ export const createMessageSlice: StateCreator<
                   timestamp: newMessage.createdAt,
                   status: normalizeStatus(newMessage.status), // ✅ normalize
                 },
-                unreadCount: chat.unreadCount + 1,
+                  
               }
             : chat
         );

@@ -14,6 +14,7 @@ export function useAddRealtimeMessage() {
     const pushMessage = useStore((state) => state.pushMessage);
     const moveChatToTop = useStore((state) => state.moveChatToTop);
     const updateMessageStatus = useStore((state) => state.updateMessageStatus);
+        const incrementUnread = useStore((state) => state.incrementUnread);
     const user = useStore((state) => state.user); // 👈 logged-in user info
 
     // 🔊 inline helper to play notification sound
@@ -74,9 +75,12 @@ useEffect(() => {
       newMessage.sender === "admin" || 
       newMessage.sender === user?.id;
 
-    if (!isOwnMessage) {
-      playNotification();
-    }
+  if (!isOwnMessage) {
+    console.log("not own message")
+                // 👈 Increment unread count for incoming messages
+                incrementUnread(parsedResponse.data.chatId);
+                playNotification();
+            }
   });
 
   return () => {
@@ -84,6 +88,6 @@ useEffect(() => {
     socket.off("newMessage");
     socket.off("messageStatusUpdate")
   };
-}, [socket, pushMessage, moveChatToTop, updateMessageStatus, user]);
+}, [socket, pushMessage, moveChatToTop, incrementUnread, updateMessageStatus, user]);
 
 }

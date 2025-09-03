@@ -19,9 +19,7 @@ const generateGuestName = async () => {
 
 exports.sendMessage = async (req, res) => {
     const { message = "", type = "text" } = req.body;
-    const phoneNumber = req.body.phoneNumber?.startsWith("+")
-        ? req.body.phoneNumber.slice(1)
-        : req.body.phoneNumber;
+    const phoneNumber = req.body.phoneNumber?.startsWith("+") ? req.body.phoneNumber.slice(1) : req.body.phoneNumber;
 
     let mediaUrls = [];
 
@@ -94,7 +92,6 @@ exports.sendMessage = async (req, res) => {
 
             await newMessage.save();
             savedMessages.push(newMessage);
-
         } else if (type === "text") {
             if (!message || typeof message !== "string") {
                 return res.status(400).json({ status: "error", message: "Message is required" });
@@ -137,7 +134,6 @@ exports.sendMessage = async (req, res) => {
 
             await newMessage.save();
             savedMessages.push(newMessage);
-
         } else {
             if (!mediaUrls.length) {
                 return res.status(400).json({ status: "error", message: "Media file(s) are required" });
@@ -235,6 +231,7 @@ exports.sendMessage = async (req, res) => {
                     chatName: chat.name,
                     chat_id: chat._id,
                     messageId: newMessage._id,
+                    whatsappMessageId: newMessage.whatsappMessageId,
                     phoneNumber,
                     sender: "admin",
                     messageType: newMessage.messageType,
@@ -263,7 +260,6 @@ exports.sendMessage = async (req, res) => {
         });
     }
 };
-
 
 exports.forwardMessage = async (req, res) => {
     const { phoneNumbers, messages } = req.body;
@@ -371,6 +367,7 @@ exports.forwardMessage = async (req, res) => {
                         chatName: chat.name,
                         chat_id: chat._id,
                         messageId: newMessage._id,
+                        whatsappMessageId: newMessage.whatsappMessageId,
                         phoneNumber,
                         sender: "admin",
                         messageType: type,
@@ -418,7 +415,8 @@ exports.createChat = async (req, res) => {
         const newChat = new Chat({
             chatId,
             name,
-            phoneNumber
+            phoneNumber,
+            unreadCount: 0 // 👈 Initialize with 0 unread messages
         });
 
         await newChat.save();
@@ -431,6 +429,79 @@ exports.createChat = async (req, res) => {
     } catch (err) {
         console.error("Error creating chat:", err);
         res.status(500).json({ status: "error", message: err.message });
+    }
+};
+// Add this new function to your controller
+exports.incrementUnreadCount = async (req, res) => {
+    try {
+        const { chatId } = req.params;
+        console.log("incrementing undead for chatId:", chatId);
+        if (!chatId) {
+            return res.status(400).json({
+                status: "error",
+                message: "Chat ID is required"
+            });
+        }
+
+        const chat = await Chat.findOneAndUpdate(
+            { chatId },
+            { $inc: { unreadCount: 1 } }, // Increment by 1
+            { new: true }
+        );
+
+        if (!chat) {
+            return res.status(404).json({
+                status: "error",
+                message: "Chat not found"
+            });
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: "Unread count incremented",
+            unreadCount: chat.unreadCount
+        });
+    } catch (error) {
+        console.error("Error incrementing unread count:", error);
+        res.status(500).json({
+            status: "error",
+            message: error.message
+        });
+    }
+};
+
+// Add this function to reset unread count (when user reads messages)
+exports.resetUnreadCount = async (req, res) => {
+    try {
+        const { chatId } = req.params;
+
+        if (!chatId) {
+            return res.status(400).json({
+                status: "error",
+                message: "Chat ID is required"
+            });
+        }
+
+        const chat = await Chat.findOneAndUpdate({ chatId }, { $set: { unreadCount: 0 } }, { new: true });
+
+        if (!chat) {
+            return res.status(404).json({
+                status: "error",
+                message: "Chat not found"
+            });
+        }
+
+        res.status(200).json({
+            status: "success",
+            message: "Unread count reset",
+            unreadCount: chat.unreadCount
+        });
+    } catch (error) {
+        console.error("Error resetting unread count:", error);
+        res.status(500).json({
+            status: "error",
+            message: error.message
+        });
     }
 };
 
@@ -495,10 +566,10 @@ exports.getChatHistory = async (req, res) => {
         if (!chat) {
             return res.status(404).json({ status: "error", message: "Chat not found" });
         }
-        
+
         const messages = await Message.find({ chatId }).sort({ createdAt: 1 }); // Oldest first
 
-        console.log(messages)
+        console.log(messages);
 
         const groupedMessages = {};
 
@@ -571,6 +642,7 @@ exports.getAllChats = async (req, res) => {
                     chatId: chat.chatId,
                     phoneNumber: chat.phoneNumber,
                     name: chat.name,
+                    unreadCount: chat.unreadCount, // 👈 Include unreadCount
                     lastMessage: lastMessage?.content || "",
                     lastMessageType: lastMessage?.type || "",
                     lastMessageTime: lastMessage?.createdAt || chat.updatedAt
@@ -581,7 +653,45 @@ exports.getAllChats = async (req, res) => {
         // Sort chats by last message time (descending)
         enrichedChats.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
 
-        // Return all enriched chats
+        res.status(200).json({
+            status: "success",
+            totalChats: enrichedChats.length,
+            chats: enrichedChats
+        });
+    } catch (err) {
+        console.error("Error fetching chats:", err);
+        res.status(500).json({ status: "error", message: err.message });
+    }
+};
+exports.getAllChats = async (req, res) => {
+    try {
+        // Fetch all chats
+        const chats = await Chat.find();
+
+        // Enrich each chat with the last message details
+        const enrichedChats = await Promise.all(
+            chats.map(async (chat) => {
+                const lastMessage = await Message.findOne({ chatId: chat.chatId })
+                    .sort({ createdAt: -1 })
+                    .select("content type createdAt")
+                    .lean();
+
+                return {
+                    _id: chat._id,
+                    chatId: chat.chatId,
+                    phoneNumber: chat.phoneNumber,
+                    name: chat.name,
+                    unreadCount: chat.unreadCount, // 👈 Include unreadCount
+                    lastMessage: lastMessage?.content || "",
+                    lastMessageType: lastMessage?.type || "",
+                    lastMessageTime: lastMessage?.createdAt || chat.updatedAt
+                };
+            })
+        );
+
+        // Sort chats by last message time (descending)
+        enrichedChats.sort((a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime));
+
         res.status(200).json({
             status: "success",
             totalChats: enrichedChats.length,

@@ -1,4 +1,5 @@
 import type { StateCreator } from "zustand";
+import { axiosClient } from "@/lib";
 import type { ChatItem } from "@/validations";
 
 export type ChatSlice = {
@@ -9,8 +10,8 @@ export type ChatSlice = {
     moveChatToTop: (phoneNumber: string) => void;
 
     // 🔥 Unread badge handling
-    incrementUnread: (phoneNumber: string) => void;
-    resetUnread: (phoneNumber: string) => void;
+    incrementUnread: (chatId: string) => void;
+    resetUnread: (chatId: string) => void;
 };
 
 export const createChatSlice: StateCreator<ChatSlice> = (set) => ({
@@ -57,25 +58,32 @@ export const createChatSlice: StateCreator<ChatSlice> = (set) => ({
         }),
 
     // 🔥 Increment unread count
-    incrementUnread: (phoneNumber) =>
-        set((state) => {
-            console.log(`📩 incrementUnread for ${phoneNumber}`);
-            return {
-                chats: state.chats.map((chat) =>
-                    chat.phoneNumber === phoneNumber
-                        ? { ...chat, unreadCount: (chat.unreadCount ?? 0) + 1 }
-                        : chat
-                )
-            };
-        }),
+// 🔥 Increment unread count - FIXED
+// Update your frontend store:
+incrementUnread: (chatId) => {
+    // Update frontend immediately
+    set((state) => ({
+        chats: state.chats.map((chat) =>
+            chat.chatId === chatId
+                ? { ...chat, unreadCount: (chat.unreadCount ?? 0) + 1 }
+                : chat
+        )
+    }));
+
+    // Sync with backend (but this might be redundant since webhook already increments)
+    axiosClient.patch(`/chat/${chatId}/increment-unread`)
+        .catch(error => {
+            console.error('Failed to sync unread count with server:', error);
+        });
+},
 
     // 🔥 Reset unread count (when chat is opened)
-    resetUnread: (phoneNumber) =>
+    resetUnread: (chatId) =>
         set((state) => {
-            console.log(`👀 resetUnread for ${phoneNumber}`);
+            console.log(`👀 resetUnread for ${chatId}`);
             return {
                 chats: state.chats.map((chat) =>
-                    chat.phoneNumber === phoneNumber ? { ...chat, unreadCount: 0 } : chat
+                    chat.chatId === chatId ? { ...chat, unreadCount: 0 } : chat
                 )
             };
         })

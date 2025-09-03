@@ -42,7 +42,7 @@ export const chatSchema = z
       chatId: data.chatId,
       phoneNumber: data.phoneNumber,
       name: data.name,
-      unreadCount: (data as any).unreadCount ?? 0,
+        unreadCount: data.unreadCount ?? 0, // default to 0
     };
 
     // v2 nested

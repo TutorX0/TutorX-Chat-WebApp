@@ -39,6 +39,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/group", groupRoutes);
 app.use("/api/whatsapp", templateRoutes);
+
 // WebSocket logic
 io.on("connection", (socket) => {
     socket.on("disconnect", () => {});
