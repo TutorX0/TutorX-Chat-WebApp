@@ -22,49 +22,56 @@ export function useAddRealtimeMessage() {
             // ignore autoplay errors
         });
     };
+useEffect(() => {
+  if (!socket) return;
 
-    useEffect(() => {
-        if (!socket) return;
+  // // 🔍 Debug: log every socket event
+  // socket.onAny((event, ...args) => {
+  //   console.log("📡 [SOCKET DEBUG] Event:", event, args);
+  // });
 
-        socket.on("newMessage", (data) => {
-            const parsedResponse = socketData.safeParse(data);
-            if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
+  socket.on("newMessage", (data) => {
+    console.log("📥 [SOCKET newMessage RAW DATA]", data);
 
-            const chatDetails = {
-                chatId: parsedResponse.data.chatId,
-                chatName: parsedResponse.data.chatName,
-                phoneNumber: parsedResponse.data.phoneNumber,
-                chat_id: parsedResponse.data.chat_id
-            };
+    const parsedResponse = socketData.safeParse(data);
+    if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
 
-            const newMessage: ChatMessage = {
-                _id: parsedResponse.data.messageId,
-                createdAt: parsedResponse.data.timestamp,
-                fileName: parsedResponse.data.fileName,
-                mediaUrl: parsedResponse.data.mediaUrl,
-                sender: parsedResponse.data.sender,
-                type: parsedResponse.data.messageType,
-                content: parsedResponse.data.content,
-                replyTo: parsedResponse.data.replyTo,
-                isForwarded: parsedResponse.data.isForwarded,
-                status: parsedResponse.data.status
-            };
+    const chatDetails = {
+      chatId: parsedResponse.data.chatId,
+      chatName: parsedResponse.data.chatName,
+      phoneNumber: parsedResponse.data.phoneNumber,
+      chat_id: parsedResponse.data.chat_id
+    };
 
-            pushMessage(chatDetails, newMessage);
-            moveChatToTop(parsedResponse.data.phoneNumber);
+    const newMessage: ChatMessage = {
+      _id: parsedResponse.data.messageId,
+      createdAt: parsedResponse.data.timestamp,
+      fileName: parsedResponse.data.fileName,
+      mediaUrl: parsedResponse.data.mediaUrl,
+      sender: parsedResponse.data.sender,
+      type: parsedResponse.data.messageType,
+      content: parsedResponse.data.content,
+      replyTo: parsedResponse.data.replyTo,
+      isForwarded: parsedResponse.data.isForwarded,
+      status: parsedResponse.data.status
+    };
 
-            // 🛠️ FIX: prevent sound for self messages
-            const isOwnMessage =
-                newMessage.sender === "admin" || // backend sometimes marks own msg as "admin"
-                newMessage.sender === user?.id;   // or real user id match
+    pushMessage(chatDetails, newMessage);
+    moveChatToTop(parsedResponse.data.phoneNumber);
 
-            if (!isOwnMessage) {
-                playNotification();
-            }
-        });
+    const isOwnMessage =
+      newMessage.sender === "admin" || 
+      newMessage.sender === user?.id;
 
-        return () => {
-            socket.off("newMessage");
-        };
-    }, [socket, pushMessage, moveChatToTop, user]);
+    if (!isOwnMessage) {
+      playNotification();
+    }
+  });
+
+  return () => {
+    socket.offAny();
+    socket.off("newMessage");
+  };
+}, [socket, pushMessage, moveChatToTop, user]);
+
 }

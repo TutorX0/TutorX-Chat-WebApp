@@ -57,7 +57,13 @@ export function NumberForm({ setOpen }: NumberFormProps) {
                  chatId: parsedResponse.data.chat.chatId,
                  name: parsedResponse.data.chat.name,
                 phoneNumber: parsedResponse.data.chat.phoneNumber,
-                lastMessage: { content: "", messageType: null, timestamp: null },
+                lastMessage: { 
+                    content: "", 
+                messageType: null, 
+                timestamp: null, 
+                status: "pending" // ✅ must include
+},
+
                 unreadCount: 0 // <--- add this
                 });
 

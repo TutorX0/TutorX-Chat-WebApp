@@ -69,7 +69,9 @@ export function ChatItems({ chats, loading, search }: ChatItemsProps) {
             ) : (
                 filteredChats.map((chat) => (
                     <ChatItem key={`Chat-${chat._id}`} name={chat.name} _id={chat._id} chatId={chat.chatId} chatType={chatType}
-                    lastMessage={chat.lastMessage}  />
+                    lastMessage={chat.lastMessage}
+                    unreadCount={chat.unreadCount}
+                    />
                 ))
             )}
 

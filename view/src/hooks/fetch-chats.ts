@@ -19,7 +19,8 @@ export function useFetchChats() {
             setLoading(true);
             try {
                 const response = await axiosClient.get("/chat/all-chats");
-
+                // 👇 Yaha dump karo raw response
+    // console.log("📡 API /chat/all-chats raw:", response.data);
                 const parsedResponse = chatsResponseSchema.safeParse(response.data);
                 if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
 
