@@ -13,6 +13,7 @@ export function useAddRealtimeMessage() {
 
     const pushMessage = useStore((state) => state.pushMessage);
     const moveChatToTop = useStore((state) => state.moveChatToTop);
+    const updateMessageStatus = useStore((state) => state.updateMessageStatus);
     const user = useStore((state) => state.user); // 👈 logged-in user info
 
     // 🔊 inline helper to play notification sound
@@ -26,9 +27,18 @@ useEffect(() => {
   if (!socket) return;
 
   // // 🔍 Debug: log every socket event
-  // socket.onAny((event, ...args) => {
-  //   console.log("📡 [SOCKET DEBUG] Event:", event, args);
-  // });
+  socket.onAny((event, ...args) => {
+    console.log("📡 [SOCKET DEBUG] Event:", event, args);
+  });
+
+     socket.on("messageStatusUpdate", (data) => {
+            console.log("📊 [SOCKET messageStatusUpdate RAW DATA]", data);
+
+         
+
+            // Update message status using your existing method signature
+            updateMessageStatus(data.chatId, data.whatsappMessageId, data.status);
+        });
 
   socket.on("newMessage", (data) => {
     console.log("📥 [SOCKET newMessage RAW DATA]", data);
@@ -50,6 +60,7 @@ useEffect(() => {
       mediaUrl: parsedResponse.data.mediaUrl,
       sender: parsedResponse.data.sender,
       type: parsedResponse.data.messageType,
+      whatsappMessageId: parsedResponse.data.whatsappMessageId,
       content: parsedResponse.data.content,
       replyTo: parsedResponse.data.replyTo,
       isForwarded: parsedResponse.data.isForwarded,
@@ -71,7 +82,8 @@ useEffect(() => {
   return () => {
     socket.offAny();
     socket.off("newMessage");
+    socket.off("messageStatusUpdate")
   };
-}, [socket, pushMessage, moveChatToTop, user]);
+}, [socket, pushMessage, moveChatToTop, updateMessageStatus, user]);
 
 }

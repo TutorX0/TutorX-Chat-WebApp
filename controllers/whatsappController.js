@@ -32,12 +32,14 @@ const uploadMediaToS3 = async (mediaId, token) => {
     const fileExt = getExtensionFromMime(contentType);
     const fileName = `${Date.now()}-whatsapp-media${fileExt}`;
 
-    const uploadRes = await s3.upload({
-        Bucket: process.env.AWS_S3_BUCKET_NAME,
-        Key: `uploads/${fileName}`,
-        Body: mediaRes.data,
-        ContentType: contentType
-    }).promise();
+    const uploadRes = await s3
+        .upload({
+            Bucket: process.env.AWS_S3_BUCKET_NAME,
+            Key: `uploads/${fileName}`,
+            Body: mediaRes.data,
+            ContentType: contentType
+        })
+        .promise();
 
     return { s3Url: uploadRes.Location, fileName };
 };
@@ -49,15 +51,23 @@ exports.receiveMessage = async (req, res) => {
         // ✅ Handle delivery/read statuses
         if (body.entry?.[0]?.changes?.[0]?.value?.statuses?.[0]) {
             const statuses = body.entry[0].changes[0].value.statuses;
-
+            // console.log("statuses: ", statuses);
             for (let status of statuses) {
                 const whatsappMessageId = status.id;
                 const statusValue = status.status; // "sent", "delivered", "read"
 
-                await Message.findOneAndUpdate(
+                const message = await Message.findOneAndUpdate(
                     { whatsappMessageId },
-                    { $set: { status: statusValue } }
+                    { $set: { status: statusValue } },
+                    { new: true }
                 );
+                console.log("Updated message status:", message);
+                const io = getIO();
+                io?.emit("messageStatusUpdate", {
+                    whatsappMessageId: message?._id,
+                    status: statusValue,
+                    chatId: message?.chatId.toString()
+                });
             }
 
             return res.status(200).send("STATUS_RECEIVED");
@@ -66,9 +76,7 @@ exports.receiveMessage = async (req, res) => {
         // ✅ Handle new incoming messages
         if (body.object && body.entry?.[0]?.changes?.[0]?.value?.messages?.[0]) {
             const message = body.entry[0].changes[0].value.messages[0];
-            const phoneNumber = message.from.startsWith("+")
-                ? message.from.slice(1)
-                : message.from;
+            const phoneNumber = message.from.startsWith("+") ? message.from.slice(1) : message.from;
             const type = message.type;
 
             let content = "";
@@ -162,6 +170,7 @@ exports.receiveMessage = async (req, res) => {
                 chatName: chat.name,
                 chat_id: chat._id,
                 messageId: newMessage._id,
+                whatsappMessageId: message.id,
                 phoneNumber,
                 sender: "user",
                 messageType: type,

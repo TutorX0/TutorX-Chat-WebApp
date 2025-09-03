@@ -9,6 +9,7 @@ import {
 } from "@/validations";
 import { axiosClient } from "@/lib";
 import type { StoreType } from ".";
+import { ms } from "zod/v4/locales";
 
 // ✅ Strictly allowed statuses
 const allowedStatuses = ["pending", "sent", "delivered", "read", "failed"] as const;
@@ -37,7 +38,7 @@ export type MessageSlice = {
   pushMessage: (chatDetails: ChatDetails, newMessage: ChatMessage) => void;
   updateMessageStatus: (
     chatId: string,
-    messageId: string,
+whatsappMessageId: string,
     newStatus: string
   ) => void;
 };
@@ -169,34 +170,34 @@ export const createMessageSlice: StateCreator<
     });
   },
 
-  // 🔥 Update message status (for sockets / API updates)
-  updateMessageStatus: (chatId, messageId, newStatus) =>
-    set((state) => {
-      const chatMessages = state.messages[chatId];
-      if (!chatMessages) return state;
+ 
+updateMessageStatus: (chatId, whatsappMessageId, newStatus) => // 👈 Match the parameter name
+  set((state) => {
+    const chatMessages = state.messages[chatId];
+    if (!chatMessages) return state;
+ 
+    const updatedGroups = Object.fromEntries(
+      Object.entries(chatMessages).map(([groupKey, msgs]) => [
+        groupKey,
+        msgs.map((msg) =>
+          msg._id === whatsappMessageId // 👈 Use whatsappMessageId consistently
+            ? { ...msg, status: normalizeStatus(newStatus) }
+            : msg
+        ),
+      ])
+    );
 
-      const updatedGroups = Object.fromEntries(
-        Object.entries(chatMessages).map(([groupKey, msgs]) => [
-          groupKey,
-          msgs.map((msg) =>
-            msg._id === messageId
-              ? { ...msg, status: normalizeStatus(newStatus) } // ✅ normalize
-              : msg
-          ),
-        ])
-      );
+    console.log(
+      `🟢 Status updated → chatId:${chatId}, whatsappMsgId:${whatsappMessageId}, status:${normalizeStatus(
+        newStatus
+      )}`
+    );
 
-      console.log(
-        `🟢 Status updated → chatId:${chatId}, msgId:${messageId}, status:${normalizeStatus(
-          newStatus
-        )}`
-      );
-
-      return {
-        messages: {
-          ...state.messages,
-          [chatId]: updatedGroups,
-        },
-      };
-    }),
+    return {
+      messages: {
+        ...state.messages,
+        [chatId]: updatedGroups,
+      },
+    };
+  }),
 });

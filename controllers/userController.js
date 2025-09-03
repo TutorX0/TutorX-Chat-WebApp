@@ -43,7 +43,6 @@ exports.sendOTP = async (req, res) => {
     }
 };
 
-
 exports.verifyOTP = async (req, res) => {
     try {
         const { email, otp } = req.body;
