@@ -7,6 +7,7 @@ const chatRoutes = require("./routes/chatRoutes");
 const userRoutes = require("./routes/userRoutes");
 const groupRoutes = require("./routes/groupRoutes");
 const whatsappRoutes = require("./routes/whatsappRoutes");
+const templateRoutes = require("./routes/templateRoutes");
 const path = require("path");
 const http = require("http");
 const socketModule = require("./socket");
@@ -37,7 +38,7 @@ app.use("/webhook", whatsappRoutes); // Webhook routes using io
 app.use("/api/chat", chatRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/group", groupRoutes);
-
+app.use("/api/whatsapp", templateRoutes);
 // WebSocket logic
 io.on("connection", (socket) => {
     socket.on("disconnect", () => {});
