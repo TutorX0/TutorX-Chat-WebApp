@@ -19,6 +19,7 @@ type ChatItemsProps = {
 export function ChatItems({ chats, loading, search }: ChatItemsProps) {
     const [searchParams] = useSearchParams();
     const chatType = searchParams.get("chat_type");
+    console.log("chat types: ", chatType)
 
     const groups = useStore((state) => state.groups);
 
@@ -75,7 +76,7 @@ export function ChatItems({ chats, loading, search }: ChatItemsProps) {
                 ))
             )}
 
-            {chatType !== "chats" ? (
+            {chatType !== "chats" && chatType!=="templates" ? (
                 <div className="bg-sidebar sticky bottom-0 mt-auto flex flex-col items-center justify-between gap-5 border-t px-3 py-6">
                     <SelectChats alreadyAddedChats={filteredByGroup.map((chat) => chat.chatId)} />
                     <DeleteGroup chatType={chatType} />

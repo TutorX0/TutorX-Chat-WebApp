@@ -1,4 +1,4 @@
-import { File, Forward } from "lucide-react";
+import { File, Forward, Check, CheckCheck, Clock, OctagonAlert } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { cn, fetchMetadata, readableFileSize, readableTime } from "@/lib";
@@ -66,6 +66,7 @@ export function DocumentMessage({ message, isAudio = false }: DocumentMessagePro
                         <span>Forwarded</span>
                     </div>
                 ) : null}
+
                 <div
                     className={cn(
                         "mb-2.5 overflow-hidden rounded-md px-2 py-3",
@@ -78,13 +79,11 @@ export function DocumentMessage({ message, isAudio = false }: DocumentMessagePro
                                 <div className="flex items-center gap-x-2">
                                     <File className="size-8 shrink-0 whitespace-nowrap" />
                                     <div>
-                                        {
-                                            isAudio ?
-                                                <p className="text-sm">WhatsApp recorded audio</p>
-                                                :
-                                                <p className="text-sm">{meta.name}</p>
-
-                                        }
+                                        {isAudio ? (
+                                            <p className="text-sm">WhatsApp recorded audio</p>
+                                        ) : (
+                                            <p className="text-sm">{meta.name}</p>
+                                        )}
                                         <p className="text-xs text-neutral-300">{meta.size}</p>
                                     </div>
                                 </div>
@@ -92,10 +91,34 @@ export function DocumentMessage({ message, isAudio = false }: DocumentMessagePro
                         </a>
                     ) : null}
                 </div>
+
                 <p className="wrap-break-word">{message.content}</p>
-                <div className="flex items-center justify-end">
+
+                {/* ✅ FIXED: Time + WhatsApp ticks */}
+                <div className="mt-1 flex items-center justify-end gap-1">
                     <p className="text-xs text-neutral-400">{readableTime(message.createdAt)}</p>
+
+                    {message.sender === "admin" && (
+                        <>
+                            {message.status === "failed" && (
+                                <OctagonAlert className="w-4 h-4 text-neutral-400 ml-1" />
+                            )}
+                            {message.status === "pending" && (
+                                <Clock className="w-4 h-4 text-neutral-400 ml-1" />
+                            )}
+                            {message.status === "sent" && (
+                                <Check className="w-4 h-4 text-neutral-400 ml-1" />
+                            )}
+                            {message.status === "delivered" && (
+                                <CheckCheck className="w-4 h-4 text-neutral-400 ml-1" />
+                            )}
+                            {message.status === "read" && (
+                                <CheckCheck className="w-4 h-4 text-blue-500 ml-1" />
+                            )}
+                        </>
+                    )}
                 </div>
+
                 <MessageOptions message={message} messageType="document" />
             </div>
         </div>

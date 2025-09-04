@@ -1,4 +1,4 @@
-import { Forward, PlayIcon } from "lucide-react";
+import { Forward, PlayIcon, Check, CheckCheck, Clock, OctagonAlert } from "lucide-react";
 
 import { MessageOptions } from "../message-options";
 import type { ChatMessage } from "@/validations";
@@ -20,7 +20,12 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
     const messageSelected = selectedMessages.find((selectedMessage) => selectedMessage.id === message._id);
 
     function onCheckedChange() {
-        toggleSelectedMessage({ content: message.content, id: message._id, mediaUrl: message.mediaUrl, type: message.type });
+        toggleSelectedMessage({
+            content: message.content,
+            id: message._id,
+            mediaUrl: message.mediaUrl,
+            type: message.type,
+        });
     }
 
     return (
@@ -46,6 +51,7 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
                 )}
             >
                 <ReplyBox replyTo={message.replyTo} />
+
                 {message.isForwarded ? (
                     <div
                         className={cn(
@@ -57,9 +63,10 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
                         <span>Forwarded</span>
                     </div>
                 ) : null}
+
                 {message.mediaUrl ? (
                     <PhotoPopover mediaUrl={message.mediaUrl} type={message.type}>
-                        <div className={cn("flex items-center justify-center rounded-md bg-neutral-400 p-2")}>
+                        <div className="flex items-center justify-center rounded-md bg-neutral-400 p-2">
                             {message.type === "image" ? (
                                 <img
                                     src={message.mediaUrl}
@@ -82,10 +89,34 @@ export function PhotoMessage({ message }: PhotoMessageProps) {
                         </div>
                     </PhotoPopover>
                 ) : null}
+
                 <p className="wrap-break-word">{message.content}</p>
-                <div className="m-1 flex items-center justify-end">
+
+                {/* ✅ Time + WhatsApp ticks */}
+                <div className="m-1 flex items-center justify-end gap-1">
                     <p className="text-xs text-neutral-400">{readableTime(message.createdAt)}</p>
+
+                    {message.sender === "admin" && (
+                        <>
+                            {message.status === "failed" && (
+                                <OctagonAlert className="w-4 h-4 text-neutral-400 ml-1" />
+                            )}
+                            {message.status === "pending" && (
+                                <Clock className="w-4 h-4 text-neutral-400 ml-1" />
+                            )}
+                            {message.status === "sent" && (
+                                <Check className="w-4 h-4 text-neutral-400 ml-1" />
+                            )}
+                            {message.status === "delivered" && (
+                                <CheckCheck className="w-4 h-4 text-neutral-400 ml-1" />
+                            )}
+                            {message.status === "read" && (
+                                <CheckCheck className="w-4 h-4 text-blue-500 ml-1" />
+                            )}
+                        </>
+                    )}
                 </div>
+
                 <MessageOptions message={message} messageType={message.type} />
             </div>
         </div>

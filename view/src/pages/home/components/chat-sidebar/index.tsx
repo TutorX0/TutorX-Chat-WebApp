@@ -16,7 +16,7 @@ export function ChatSidebar() {
     const groups = useStore((state) => state.groups);
     const chats = useStore((state) => state.chats);
 
-    const pillTitles = ["Chats", ...(groups ? groups.map((group) => group.groupName) : [])];
+    const pillTitles = ["Chats", "Templates", ...(groups ? groups.map((group) => group.groupName) : [])];
 
     return (
         <aside className="bg-sidebar flex grow flex-col gap-4 border pt-5">

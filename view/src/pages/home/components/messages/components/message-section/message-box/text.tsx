@@ -1,4 +1,4 @@
-import { Forward, Check, CheckCheck } from "lucide-react"; // ✅ added tick icons
+import { Forward, Check, CheckCheck, Clock, OctagonAlert } from "lucide-react"; // ✅ added tick icons
 import { useState } from "react";
 
 import type { ChatMessage } from "@/validations";
@@ -112,8 +112,11 @@ export function TextMessage({ message }: TextMessageProps) {
                     {/* ✅ WhatsApp-style ticks (only for admin-sent messages) */}
                     {message.sender === "admin" && (
                         <>
+                            {message.status === "failed" && (
+                                <OctagonAlert className="w-4 h-4 text-neutral-400 ml-1" /> // single gray tick
+                            )}
                             {message.status === "pending" && (
-                                <Check className="w-4 h-4 text-neutral-400 ml-1" /> // single gray tick
+                                <Clock className="w-4 h-4 text-neutral-400 ml-1" /> // single gray tick
                             )}
                             {message.status === "sent" && (
                                 <Check className="w-4 h-4 text-neutral-400 ml-1" /> // single gray tick (sent)
