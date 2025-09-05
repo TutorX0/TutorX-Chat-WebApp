@@ -57,6 +57,7 @@ export function MessageSection({ chatId }: MessageSectionProps) {
                             {messages[days].map((message) => {
                                 const component = {
                                     text: <TextMessage key={message.createdAt} message={message} />,
+                                    template: <TextMessage key={message.createdAt} message={message} />,
                                     image: <PhotoMessage key={message.createdAt} message={message} />,
                                     video: <PhotoMessage key={message.createdAt} message={message} />,
                                     document: <DocumentMessage key={message.createdAt} message={message} />,
