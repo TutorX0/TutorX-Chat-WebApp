@@ -37,9 +37,13 @@ export type MessageSlice = {
   pushMessage: (chatDetails: ChatDetails, newMessage: ChatMessage) => void;
   updateMessageStatus: (
     chatId: string,
-whatsappMessageId: string,
+    whatsappMessageId: string,
     newStatus: string
   ) => void;
+
+  // ⭐ added
+  getFirstUnreadId: (chatId: string) => string | null;
+  markAllAsRead: (chatId: string) => void;
 };
 
 export const createMessageSlice: StateCreator<
@@ -79,12 +83,28 @@ export const createMessageSlice: StateCreator<
         groupedMessages[groupKey] = groupedMessages[groupKey].map((msg) => ({
           ...msg,
           status: normalizeStatus(msg.status),
+          read: msg.read ?? false, // ⭐ keep backend `read`
         }));
       }
 
+      // ⭐ After fetching, mark everything as read immediately
+      const updatedGroups = Object.fromEntries(
+        Object.entries(groupedMessages).map(([groupKey, msgs]) => [
+          groupKey,
+          msgs.map((msg) => ({
+            ...msg,
+            read: true,
+            status: "read" as MessageStatus,
+          })),
+        ])
+      );
+
       set((state) => ({
-        messages: { ...state.messages, [chatId]: groupedMessages },
+        messages: { ...state.messages, [chatId]: updatedGroups },
         loading: { ...state.loading, [chatId]: false },
+        chats: state.chats.map((chat) =>
+          chat.chatId === chatId ? { ...chat, unreadCount: 0 } : chat // ⭐ reset unread badge
+        ),
       }));
     } catch (error) {
       let message = "An unexpected error was returned from the server";
@@ -112,7 +132,12 @@ export const createMessageSlice: StateCreator<
 
       const updatedGroup = [
         ...(existingMessages[groupKey] || []),
-        { ...newMessage, status: normalizeStatus(newMessage.status) }, // ✅ normalize
+        { 
+          ...newMessage, 
+          status: normalizeStatus(newMessage.status), // ✅ normalize
+        // ⭐ fix: outgoing messages are always "read"
+        read: newMessage.sender === "admin" ? true : newMessage.read ?? false,
+        },
       ];
 
       let updatedChats = state.chats;
@@ -150,7 +175,6 @@ export const createMessageSlice: StateCreator<
                   timestamp: newMessage.createdAt,
                   status: normalizeStatus(newMessage.status), // ✅ normalize
                 },
-                  
               }
             : chat
         );
@@ -169,34 +193,72 @@ export const createMessageSlice: StateCreator<
     });
   },
 
- 
-updateMessageStatus: (chatId, whatsappMessageId, newStatus) => // 👈 Match the parameter name
-  set((state) => {
-    const chatMessages = state.messages[chatId];
-    if (!chatMessages) return state;
- 
-    const updatedGroups = Object.fromEntries(
-      Object.entries(chatMessages).map(([groupKey, msgs]) => [
-        groupKey,
-        msgs.map((msg) =>
-          msg._id === whatsappMessageId // 👈 Use whatsappMessageId consistently
-            ? { ...msg, status: normalizeStatus(newStatus) }
-            : msg
+  updateMessageStatus: (chatId, whatsappMessageId, newStatus) =>
+    set((state) => {
+      const chatMessages = state.messages[chatId];
+      if (!chatMessages) return state;
+
+      const updatedGroups = Object.fromEntries(
+        Object.entries(chatMessages).map(([groupKey, msgs]) => [
+          groupKey,
+          msgs.map((msg) =>
+            msg._id === whatsappMessageId
+              ? { 
+                  ...msg, 
+                  status: normalizeStatus(newStatus),
+                  read: newStatus === "read" ? true : msg.read, // ⭐ flip read
+                }
+              : msg
+          ),
+        ])
+      );
+
+      console.log(
+        `🟢 Status updated → chatId:${chatId}, whatsappMsgId:${whatsappMessageId}, status:${normalizeStatus(
+          newStatus
+        )}`
+      );
+
+      return {
+        messages: {
+          ...state.messages,
+          [chatId]: updatedGroups,
+        },
+      };
+    }),
+
+  // ⭐ added → for divider
+  getFirstUnreadId: (chatId) => {
+    const messages = get().messages[chatId];
+    if (!messages) return null;
+
+    const flat = Object.values(messages).flat();
+    const unreadMsg = flat.find((msg) => !msg.read);
+
+    return unreadMsg?._id ?? null;
+  },
+
+  // ⭐ added → manual reset helper
+  markAllAsRead: (chatId) =>
+    set((state) => {
+      const chatMessages = state.messages[chatId];
+      if (!chatMessages) return state;
+
+      const updatedGroups = Object.fromEntries(
+        Object.entries(chatMessages).map(([groupKey, msgs]) => [
+          groupKey,
+          msgs.map((msg) => ({ ...msg, read: true, status: "read" as MessageStatus })),
+        ])
+      );
+
+      return {
+        messages: {
+          ...state.messages,
+          [chatId]: updatedGroups,
+        },
+        chats: state.chats.map((chat) =>
+          chat.chatId === chatId ? { ...chat, unreadCount: 0 } : chat
         ),
-      ])
-    );
-
-    console.log(
-      `🟢 Status updated → chatId:${chatId}, whatsappMsgId:${whatsappMessageId}, status:${normalizeStatus(
-        newStatus
-      )}`
-    );
-
-    return {
-      messages: {
-        ...state.messages,
-        [chatId]: updatedGroups,
-      },
-    };
-  }),
+      };
+    }),
 });

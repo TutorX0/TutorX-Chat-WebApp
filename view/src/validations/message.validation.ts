@@ -26,7 +26,8 @@ export const chatMessage = z.object({
   createdAt: z.string(),
   isForwarded: z.boolean(),
   replyTo: replySchema.nullable(),
-  status: z.enum(["pending", "sent", "delivered", "read", "failed"]).default("pending")
+  status: z.enum(["pending", "sent", "delivered", "read", "failed"]).default("pending"),
+  read: z.boolean().default(false)
 });
 
 // 🔹 ChatMessage Type
@@ -52,7 +53,8 @@ export const socketData = z.object({
   timestamp: z.string(),
   isForwarded: z.boolean(),
   replyTo: replySchema.nullable(),
-  status: z.enum(["pending", "sent", "delivered", "read", "failed"]).default("pending")
+  status: z.enum(["pending", "sent", "delivered", "read", "failed"]).default("pending"),
+   read: z.boolean().default(false)
 });
 export type SocketData = z.infer<typeof socketData>;
 
