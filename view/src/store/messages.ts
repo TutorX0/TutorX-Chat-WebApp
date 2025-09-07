@@ -41,9 +41,10 @@ export type MessageSlice = {
     newStatus: string
   ) => void;
 
-  // ⭐ added
+  // ⭐ helpers
   getFirstUnreadId: (chatId: string) => string | null;
   markAllAsRead: (chatId: string) => void;
+  getUnreadCount: (chatId: string) => number; // ⭐ NEW
 };
 
 export const createMessageSlice: StateCreator<
@@ -135,8 +136,8 @@ export const createMessageSlice: StateCreator<
         { 
           ...newMessage, 
           status: normalizeStatus(newMessage.status), // ✅ normalize
-        // ⭐ fix: outgoing messages are always "read"
-        read: newMessage.sender === "admin" ? true : newMessage.read ?? false,
+          // ⭐ fix: outgoing messages are always "read"
+          read: newMessage.sender === "admin" ? true : newMessage.read ?? false,
         },
       ];
 
@@ -261,4 +262,15 @@ export const createMessageSlice: StateCreator<
         ),
       };
     }),
+
+  // ⭐ new → unread count
+  getUnreadCount: (chatId) => {
+    const messages = get().messages[chatId];
+    if (!messages) return 0;
+
+    const flat = Object.values(messages).flat();
+
+    // only count messages that are unread AND not sent by admin
+    return flat.filter((msg) => !msg.read && msg.sender !== "admin").length;
+  },
 });

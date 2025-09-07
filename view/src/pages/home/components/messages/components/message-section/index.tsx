@@ -8,6 +8,7 @@ import { TextMessage } from "./message-box/text";
 import { useStore } from "@/store";
 import { cn } from "@/lib";
 
+
 type MessageSectionProps = {
   chatId: string;
 };
@@ -22,9 +23,11 @@ export function MessageSection({ chatId }: MessageSectionProps) {
   const replyMessage = useStore((state) => state.replyMessage);
   const messages = useStore((state) => state.messages)[chatId];
   const getFirstUnreadId = useStore((state) => state.getFirstUnreadId);
+  const getUnreadCount = useStore((state) => state.getUnreadCount);
 
   // ⭐ figure out where the divider goes
   const firstUnreadId = getFirstUnreadId(chatId);
+  const unreadCount = getUnreadCount(chatId);
 
   useEffect(() => {
     if (!scrollToBottomRef.current) return;
@@ -39,8 +42,8 @@ export function MessageSection({ chatId }: MessageSectionProps) {
   }, []);
 
   useEffect(() => {
-    fetchMessages(chatId);
-  }, [chatId]);
+  fetchMessages(chatId); // ✅ only fetch
+}, [chatId]);
 
   useEffect(() => {
     if (scrollToBottomRef.current)
@@ -97,14 +100,19 @@ export function MessageSection({ chatId }: MessageSectionProps) {
 
                   return (
                     <div key={message._id}>
-                      {/* ⭐ unread divider */}
-                      {firstUnreadId === message._id && message.sender !== "admin" && (
-  <div className="my-2 flex items-center justify-center">
-    <div className="bg-[#242626] text-white text-xs font-medium rounded-full px-3 py-1 shadow">
-      Unread Messages
-    </div>
-  </div>
-)}
+                      {/* ⭐ unread divider with count */}
+                      {firstUnreadId === message._id &&
+                        message.sender !== "admin" &&
+                        unreadCount > 0 && (
+                          <div className="my-2 flex items-center justify-center">
+                            <div className="bg-[#242626] text-white text-xs font-medium rounded-full px-3 py-1 shadow">
+                              {unreadCount}{" "}
+                              {unreadCount === 1
+                                ? "unread message"
+                                : "unread messages"}
+                            </div>
+                          </div>
+                        )}
                       {component[message.type as "text"]}
                     </div>
                   );
