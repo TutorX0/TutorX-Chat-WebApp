@@ -81,7 +81,7 @@ module.exports = (io) => {
                 });
 
                 await newMessage.save();
-
+                console.log("emit_6");
                 io.emit("newMessage", {
                     chatId: chat.chatId,
                     chatName: chat.name,

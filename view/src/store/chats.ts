@@ -81,6 +81,7 @@ incrementUnread: (chatId) => {
     resetUnread: (chatId) =>
         set((state) => {
             console.log(`👀 resetUnread for ${chatId}`);
+            console.log(state.chats, chatId)
             return {
                 chats: state.chats.map((chat) =>
                     chat.chatId === chatId ? { ...chat, unreadCount: 0 } : chat

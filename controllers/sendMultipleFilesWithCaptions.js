@@ -114,6 +114,7 @@ exports.sendMultipleFilesWithCaptions = async (req, res) => {
                 }
 
                 const io = getIO();
+                console.log("emit_3");
                 io.emit("newMessage", {
                     chatId: chat.chatId,
                     chatName: chat.name,

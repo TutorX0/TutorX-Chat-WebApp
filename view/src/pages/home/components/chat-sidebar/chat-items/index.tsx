@@ -63,6 +63,8 @@ export function ChatItems({ chats, loading, search }: ChatItemsProps) {
         if (groupLoading && hasResolvedInitialGroup) setGroupLoading(false);
     }, [filteredChats, groupLoading, hasResolvedInitialGroup]);
 
+    console.log("chat itesms: ", filteredChats)
+
     return (
         <ScrollArea className={cn("h-[70vh] grow px-5", chatType === "chats" ? "pb-4" : "")}>
             {groupLoading || loading ? (

@@ -45,6 +45,7 @@ export type MessageSlice = {
   getFirstUnreadId: (chatId: string) => string | null;
   markAllAsRead: (chatId: string) => void;
   getUnreadCount: (chatId: string) => number; // ⭐ NEW
+  resetUnreadMessage: (chatId: string) =>void
 };
 
 export const createMessageSlice: StateCreator<
@@ -181,16 +182,29 @@ export const createMessageSlice: StateCreator<
         );
       }
 
-      return {
-        messages: {
-          ...state.messages,
-          [chatDetails.chatId]: {
-            ...existingMessages,
-            [groupKey]: updatedGroup,
-          },
-        },
-        chats: updatedChats,
-      };
+      
+  const todayKey = "Today";
+
+// get the existing "Today" group if it exists
+const todayGroup = existingMessages[todayKey] || [];
+
+// append updatedGroup's content to Today
+const mergedTodayGroup = [
+  ...todayGroup,
+  ...updatedGroup,
+];
+
+return {
+  messages: {
+    ...state.messages,
+    [chatDetails.chatId]: {
+      ...existingMessages,
+      [todayKey]: mergedTodayGroup,
+    },
+  },
+  chats: updatedChats,
+};
+
     });
   },
 
@@ -267,10 +281,41 @@ export const createMessageSlice: StateCreator<
   getUnreadCount: (chatId) => {
     const messages = get().messages[chatId];
     if (!messages) return 0;
-
+    
     const flat = Object.values(messages).flat();
+    
 
     // only count messages that are unread AND not sent by admin
     return flat.filter((msg) => !msg.read && msg.sender !== "admin").length;
+
+ 
   },
+
+  resetUnreadMessage: (chatId: string) =>
+  set((state) => {
+    const chatMessages = state.messages[chatId];
+    if (!chatMessages) return state;
+
+    const updatedGroups: GroupedMessages = Object.fromEntries(
+      Object.entries(chatMessages).map(([groupKey, msgs]) => [
+        groupKey,
+        msgs.map((msg) => ({
+          ...msg,
+          read: true,
+          status: "read" as MessageStatus,
+        })),
+      ])
+    );
+
+    return {
+      messages: {
+        ...state.messages,
+        [chatId]: updatedGroups,
+      },
+      chats: state.chats.map((chat) =>
+        chat.chatId === chatId ? { ...chat, unreadCount: 0 } : chat
+      ),
+    };
+  }),
+
 });

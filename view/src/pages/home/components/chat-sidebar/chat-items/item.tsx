@@ -102,7 +102,7 @@ const handleClick = () => {
     axiosClient.patch(`/chat/${chatId}/reset-unread`); // 👈 Remove the extra "chat_" prefix
     updateSearchParam("open", _id);
 };
-                    console.log("unread count: ", unreadCount)
+
     return (
         <div
             className="data-[active=true]:bg-selected-chat hover:bg-chat-hover my-2 flex cursor-pointer items-center gap-4 rounded-md p-3"

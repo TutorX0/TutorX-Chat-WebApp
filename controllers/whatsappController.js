@@ -168,6 +168,7 @@ exports.receiveMessage = async (req, res) => {
             }
 
             const io = getIO();
+            console.log("emit_5");
             io?.emit("newMessage", {
                 chatId: chat.chatId,
                 chatName: chat.name,

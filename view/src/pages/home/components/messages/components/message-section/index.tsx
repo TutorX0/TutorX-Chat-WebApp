@@ -54,7 +54,7 @@ export function MessageSection({ chatId }: MessageSectionProps) {
     if (!scrollToBottomRef.current) return;
     scrollToBottomRef.current.scrollIntoView({ behavior: "smooth" });
   }
-
+console.log("messages: ", messages)
   return (
     <ScrollArea className="relative h-[70vh] grow px-4 pb-0">
       <section

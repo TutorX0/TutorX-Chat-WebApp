@@ -226,6 +226,7 @@ exports.sendMessage = async (req, res) => {
         const io = getIO();
         if (io) {
             for (let newMessage of savedMessages) {
+                console.log("emit_1");
                 io.emit("newMessage", {
                     chatId: chat.chatId,
                     chatName: chat.name,
@@ -362,6 +363,7 @@ exports.forwardMessage = async (req, res) => {
 
                 const io = getIO();
                 if (io) {
+                    console.log("emit_2");
                     io.emit("newMessage", {
                         chatId: chat.chatId,
                         chatName: chat.name,

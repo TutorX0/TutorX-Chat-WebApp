@@ -7,14 +7,19 @@ import { useStore } from "@/store";
 
 // 👇 imported the audio file 
 import notificationSound from "@/assets/incoming-message-online-whatsapp.mp3";
+import { axiosClient } from "@/lib";
 
-export function useAddRealtimeMessage() {
+export function useAddRealtimeMessage(openChatId?: string | null) {
     const { socket } = useSocket();
 
     const pushMessage = useStore((state) => state.pushMessage);
     const moveChatToTop = useStore((state) => state.moveChatToTop);
     const updateMessageStatus = useStore((state) => state.updateMessageStatus);
-        const incrementUnread = useStore((state) => state.incrementUnread);
+    const incrementUnread = useStore((state) => state.incrementUnread);
+    const resetUnreadMessage = useStore((state)=>state.resetUnreadMessage)
+         
+    const resetUnread = useStore((s) => s.resetUnread);
+        // const updateSearchParam = useUpdateSearchParam();
     const user = useStore((state) => state.user); // 👈 logged-in user info
 
     // 🔊 inline helper to play notification sound
@@ -34,9 +39,6 @@ useEffect(() => {
 
      socket.on("messageStatusUpdate", (data) => {
             console.log("📊 [SOCKET messageStatusUpdate RAW DATA]", data);
-
-         
-
             // Update message status using your existing method signature
             updateMessageStatus(data.chatId, data.whatsappMessageId, data.status);
         });
@@ -65,8 +67,19 @@ useEffect(() => {
       content: parsedResponse.data.content,
       replyTo: parsedResponse.data.replyTo,
       isForwarded: parsedResponse.data.isForwarded,
-      status: parsedResponse.data.status
+      status: parsedResponse.data.status,
+      read: false,
     };
+
+    console.log("chat details: ", chatDetails)
+    console.log("new Message: ", newMessage)
+    console.log(openChatId, chatDetails?.chat_id)
+if(openChatId===chatDetails?.chat_id){
+        console.log("Chat already openeed");
+    resetUnread(chatDetails?.chatId);
+    axiosClient.patch(`/chat/${chatDetails?.chatId}/reset-unread`); // 👈 Remove the extra "chat_" prefix
+resetUnreadMessage(chatDetails?.chatId)
+}
 
     pushMessage(chatDetails, newMessage);
     moveChatToTop(parsedResponse.data.phoneNumber);
@@ -78,7 +91,7 @@ useEffect(() => {
   if (!isOwnMessage) {
     console.log("not own message")
                 // 👈 Increment unread count for incoming messages
-                incrementUnread(parsedResponse.data.chatId);
+                if(openChatId!==chatDetails?.chat_id) incrementUnread(parsedResponse.data.chatId);
                 playNotification();
             }
   });
@@ -88,6 +101,6 @@ useEffect(() => {
     socket.off("newMessage");
     socket.off("messageStatusUpdate")
   };
-}, [socket, pushMessage, moveChatToTop, incrementUnread, updateMessageStatus, user]);
+}, [socket, pushMessage, moveChatToTop, openChatId, incrementUnread, updateMessageStatus,resetUnread, user]);
 
 }
