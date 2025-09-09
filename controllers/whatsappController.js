@@ -49,29 +49,38 @@ exports.receiveMessage = async (req, res) => {
         const body = req.body;
 
         // ✅ Handle delivery/read statuses
-        if (body.entry?.[0]?.changes?.[0]?.value?.statuses?.[0]) {
-            const statuses = body.entry[0].changes[0].value.statuses;
-            // console.log("statuses: ", statuses);
-            for (let status of statuses) {
-                const whatsappMessageId = status.id;
-                const statusValue = status.status; // "sent", "delivered", "read"
+       if (body.entry?.[0]?.changes?.[0]?.value?.statuses?.[0]) {
+    const statuses = body.entry[0].changes[0].value.statuses;
 
-                const message = await Message.findOneAndUpdate(
-                    { whatsappMessageId },
-                    { $set: { status: statusValue } },
-                    { new: true }
-                );
-                console.log("Updated message status:", message);
-                const io = getIO();
-                io?.emit("messageStatusUpdate", {
-                    whatsappMessageId: message?._id,
-                    status: statusValue,
-                    chatId: message?.chatId.toString()
-                });
-            }
+    for (let status of statuses) {
+        const whatsappMessageId = status.id;
+        const statusValue = status.status; // "sent", "delivered", "read"
 
-            return res.status(200).send("STATUS_RECEIVED");
+        // 🟢 If read, set read: true
+        const updateData = { status: statusValue };
+        if (statusValue === "read") {
+            updateData.read = true;
         }
+
+        const message = await Message.findOneAndUpdate(
+            { whatsappMessageId },
+            { $set: updateData },
+            { new: true }
+        );
+
+        console.log("Updated message status:", message);
+
+        const io = getIO();
+        io?.emit("messageStatusUpdate", {
+            whatsappMessageId: message?._id,
+            status: statusValue,
+            read: message?.read,
+            chatId: message?.chatId.toString()
+        });
+    }
+
+    return res.status(200).send("STATUS_RECEIVED");
+}
 
         // ✅ Handle new incoming messages
         if (body.object && body.entry?.[0]?.changes?.[0]?.value?.messages?.[0]) {
