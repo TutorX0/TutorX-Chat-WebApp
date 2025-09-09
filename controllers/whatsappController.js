@@ -121,10 +121,10 @@ exports.receiveMessage = async (req, res) => {
                 default:
                     content = "Unsupported message type";
             }
-
+            const profileName = body.entry[0].changes[0].value.contacts?.[0]?.profile?.name;
             let chat = await Chat.findOne({ phoneNumber });
             if (!chat) {
-                const name = await generateGuestName();
+                const name = profileName || await generateGuestName();
                 chat = new Chat({
                     chatId: generateChatId(phoneNumber),
                     phoneNumber,
