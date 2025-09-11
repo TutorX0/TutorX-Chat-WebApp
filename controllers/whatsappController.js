@@ -5,7 +5,6 @@ const Message = require("../models/messageModel");
 const { getIO } = require("../socket");
 const s3 = require("../utils/s3config");
 const mime = require("mime-types");
-
 const generateChatId = (phoneNumber) => `chat_${phoneNumber}`;
 const generateGuestName = async () => {
     const count = await Chat.countDocuments();
@@ -44,43 +43,41 @@ const uploadMediaToS3 = async (mediaId, token) => {
     return { s3Url: uploadRes.Location, fileName };
 };
 
+// ✅ Mark all messages in a chat as read
+
 exports.receiveMessage = async (req, res) => {
     try {
         const body = req.body;
 
         // ✅ Handle delivery/read statuses
-       if (body.entry?.[0]?.changes?.[0]?.value?.statuses?.[0]) {
-    const statuses = body.entry[0].changes[0].value.statuses;
+        if (body.entry?.[0]?.changes?.[0]?.value?.statuses?.[0]) {
+            const statuses = body.entry[0].changes[0].value.statuses;
 
-    for (let status of statuses) {
-        const whatsappMessageId = status.id;
-        const statusValue = status.status; // "sent", "delivered", "read"
+            for (let status of statuses) {
+                const whatsappMessageId = status.id;
+                const statusValue = status.status; // "sent", "delivered", "read"
 
-        // 🟢 If read, set read: true
-        const updateData = { status: statusValue };
-        if (statusValue === "read") {
-            updateData.read = true;
+                // 🟢 If read, set read: true
+                const updateData = { status: statusValue };
+                if (statusValue === "read") {
+                    updateData.read = true;
+                }
+
+                const message = await Message.findOneAndUpdate({ whatsappMessageId }, { $set: updateData }, { new: true });
+
+                console.log("Updated message status:", message);
+
+                const io = getIO();
+                io?.emit("messageStatusUpdate", {
+                    whatsappMessageId: message?._id,
+                    status: statusValue,
+                    read: message?.read,
+                    chatId: message?.chatId.toString()
+                });
+            }
+
+            return res.status(200).send("STATUS_RECEIVED");
         }
-
-        const message = await Message.findOneAndUpdate(
-            { whatsappMessageId },
-            { $set: updateData },
-            { new: true }
-        );
-
-        console.log("Updated message status:", message);
-
-        const io = getIO();
-        io?.emit("messageStatusUpdate", {
-            whatsappMessageId: message?._id,
-            status: statusValue,
-            read: message?.read,
-            chatId: message?.chatId.toString()
-        });
-    }
-
-    return res.status(200).send("STATUS_RECEIVED");
-}
 
         // ✅ Handle new incoming messages
         if (body.object && body.entry?.[0]?.changes?.[0]?.value?.messages?.[0]) {
@@ -133,7 +130,7 @@ exports.receiveMessage = async (req, res) => {
             const profileName = body.entry[0].changes[0].value.contacts?.[0]?.profile?.name;
             let chat = await Chat.findOne({ phoneNumber });
             if (!chat) {
-                const name = profileName || await generateGuestName();
+                const name = profileName || (await generateGuestName());
                 chat = new Chat({
                     chatId: generateChatId(phoneNumber),
                     phoneNumber,

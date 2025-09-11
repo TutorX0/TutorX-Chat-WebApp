@@ -89,6 +89,7 @@ function Item({ _id, name, lastMessage, chatId, unreadCount }: ChatItemProps) {
     const [searchParams] = useSearchParams();
     const resetUnread = useStore((s) => s.resetUnread);
 
+
     // 🔹 Fallback: if name is empty, show WhatsApp default username
     const displayName = name?.trim()
         ? name
@@ -99,8 +100,10 @@ function Item({ _id, name, lastMessage, chatId, unreadCount }: ChatItemProps) {
 const handleClick = () => {
     console.log(`[ChatItem] Opening chat: ${chatId} → resetting unread`);
     resetUnread(chatId);
-    axiosClient.patch(`/chat/${chatId}/reset-unread`); // 👈 Remove the extra "chat_" prefix
+    axiosClient.patch(`/chat/${chatId}/mark-read`);
+    updateSearchParam("chat_type", "chats");
     updateSearchParam("open", _id);
+  
 };
 
     return (

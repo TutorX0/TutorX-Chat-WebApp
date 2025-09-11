@@ -34,6 +34,7 @@ export type MessageSlice = {
   messages: MessageRecord;
   loading: Record<string, boolean>;
   fetchMessages: (chatId: string) => Promise<void>;
+  markChatAsRead: (chatId: string) => Promise<void>; // ⭐ new
   pushMessage: (chatDetails: ChatDetails, newMessage: ChatMessage) => void;
   updateMessageStatus: (
     chatId: string,
@@ -43,7 +44,6 @@ export type MessageSlice = {
 
   // ⭐ helpers
   getFirstUnreadId: (chatId: string) => string | null;
-  markAllAsRead: (chatId: string) => void;
   getUnreadCount: (chatId: string) => number; // ⭐ NEW
   resetUnreadMessage: (chatId: string) =>void
 };
@@ -61,7 +61,6 @@ export const createMessageSlice: StateCreator<
   fetchMessages: async (chatId) => {
     console.log(get()); // ✅ fix: call get()
 
-    if (get().messages[chatId]) return;
 
     set((state) => ({
       loading: { ...state.loading, [chatId]: true },
@@ -253,29 +252,6 @@ return {
     return unreadMsg?._id ?? null;
   },
 
-  // ⭐ added → manual reset helper
-  markAllAsRead: (chatId) =>
-    set((state) => {
-      const chatMessages = state.messages[chatId];
-      if (!chatMessages) return state;
-
-      const updatedGroups = Object.fromEntries(
-        Object.entries(chatMessages).map(([groupKey, msgs]) => [
-          groupKey,
-          msgs.map((msg) => ({ ...msg, read: true, status: "read" as MessageStatus })),
-        ])
-      );
-
-      return {
-        messages: {
-          ...state.messages,
-          [chatId]: updatedGroups,
-        },
-        chats: state.chats.map((chat) =>
-          chat.chatId === chatId ? { ...chat, unreadCount: 0 } : chat
-        ),
-      };
-    }),
 
   // ⭐ new → unread count
   getUnreadCount: (chatId) => {
@@ -290,6 +266,39 @@ return {
 
  
   },
+  markChatAsRead: async (chatId: string) => {
+  try {
+    // ✅ Call backend to mark all as read
+    await axiosClient.patch(`/chat/${chatId}/mark-read`);
+
+    // ✅ Optimistically update local state
+    set((state) => {
+      const chatMessages = state.messages[chatId];
+      if (!chatMessages) return state;
+
+      const updatedGroups = Object.fromEntries(
+        Object.entries(chatMessages).map(([groupKey, msgs]) => [
+          groupKey,
+          msgs.map((msg) =>
+            msg.sender === "admin"
+              ? msg // don't touch admin messages
+              : { ...msg, read: true, status: "read" as MessageStatus }
+          ),
+        ])
+      );
+
+      return {
+        messages: { ...state.messages, [chatId]: updatedGroups },
+        chats: state.chats.map((chat) =>
+          chat.chatId === chatId ? { ...chat, unreadCount: 0 } : chat
+        ),
+      };
+    });
+  } catch (err) {
+    console.error("❌ Failed to mark chat as read:", err);
+  }
+},
+
 
   resetUnreadMessage: (chatId: string) =>
   set((state) => {

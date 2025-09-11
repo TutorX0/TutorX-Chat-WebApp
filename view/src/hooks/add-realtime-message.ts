@@ -7,7 +7,7 @@ import { useStore } from "@/store";
 
 // 👇 imported the audio file 
 import notificationSound from "@/assets/incoming-message-online-whatsapp.mp3";
-import { axiosClient } from "@/lib";
+// import { axiosClient } from "@/lib";
 
 export function useAddRealtimeMessage(openChatId?: string | null) {
     const { socket } = useSocket();
@@ -17,6 +17,8 @@ export function useAddRealtimeMessage(openChatId?: string | null) {
     const updateMessageStatus = useStore((state) => state.updateMessageStatus);
     const incrementUnread = useStore((state) => state.incrementUnread);
     const resetUnreadMessage = useStore((state)=>state.resetUnreadMessage)
+    const markChatAsRead = useStore((state)=>state.markChatAsRead)
+
          
     const resetUnread = useStore((s) => s.resetUnread);
         // const updateSearchParam = useUpdateSearchParam();
@@ -76,10 +78,12 @@ useEffect(() => {
     console.log(openChatId, chatDetails?.chat_id)
 if(openChatId===chatDetails?.chat_id){
         console.log("Chat already openeed");
-    resetUnread(chatDetails?.chatId);
-    axiosClient.patch(`/chat/${chatDetails?.chatId}/reset-unread`); // 👈 Remove the extra "chat_" prefix
-resetUnreadMessage(chatDetails?.chatId)
+    // axiosClient.patch(`/chat/${chatDetails.chatId}/mark-read`);
+    markChatAsRead(chatDetails.chatId)
+  resetUnread(chatDetails.chatId);
+  resetUnreadMessage(chatDetails.chatId);
 }
+
 
     pushMessage(chatDetails, newMessage);
     moveChatToTop(parsedResponse.data.phoneNumber);

@@ -18,7 +18,6 @@ export function MessageSection({ chatId }: MessageSectionProps) {
 
   const scrollToBottomRef = useRef<HTMLDivElement>(null);
   const scrollSectionRef = useRef<HTMLElement>(null);
-
   const fetchMessages = useStore((state) => state.fetchMessages);
   const replyMessage = useStore((state) => state.replyMessage);
   const messages = useStore((state) => state.messages)[chatId];
@@ -28,6 +27,7 @@ export function MessageSection({ chatId }: MessageSectionProps) {
   // ⭐ figure out where the divider goes
   const firstUnreadId = getFirstUnreadId(chatId);
   const unreadCount = getUnreadCount(chatId);
+  console.log("unread count: ", unreadCount)
 
   useEffect(() => {
     if (!scrollToBottomRef.current) return;
@@ -54,6 +54,7 @@ export function MessageSection({ chatId }: MessageSectionProps) {
     if (!scrollToBottomRef.current) return;
     scrollToBottomRef.current.scrollIntoView({ behavior: "smooth" });
   }
+
 console.log("messages: ", messages)
   return (
     <ScrollArea className="relative h-[70vh] grow px-4 pb-0">
