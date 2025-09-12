@@ -5,10 +5,10 @@ export const replySchema = z.object({
   _id: z.string(),
   sender: z.string(),
   content: z.string().optional(),
-  type: z.string(),
-  mediaUrl: z.string().nullable(),
-  fileName: z.string().nullable(),
-  createdAt: z.string()
+  type: z.string().optional(),        // 👈 was required
+  mediaUrl: z.string().nullable().optional(), // 👈 safer
+  fileName: z.string().nullable().optional(),
+  createdAt: z.string().optional()    // 👈 was required
 });
 
 // 🔹 Export Reply type
