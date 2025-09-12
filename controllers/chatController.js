@@ -17,33 +17,6 @@ const generateGuestName = async () => {
     return `Guest ${count + 1}`;
 };
 
-exports.markMessagesAsRead = async (req, res) => {
-    try {
-        const { chatId } = req.params;
-
-        // Mark all unread messages as read (but skip admin messages)
-        await Message.updateMany(
-            { chatId, read: { $ne: true }, sender: { $ne: "admin" } },
-            { $set: { read: true, status: "read" } }
-        );
-
-        // Reset unread count (only counts user messages anyway)
-        await Chat.findOneAndUpdate({ chatId }, { $set: { unreadCount: 0 } });
-
-        // Return updated messages
-        const messages = await Message.find({ chatId }).sort({ createdAt: 1 });
-
-        return res.status(200).json({
-            success: true,
-            chatId,
-            messages
-        });
-    } catch (err) {
-        console.error("Mark-read error:", err.message || err);
-        return res.status(500).json({ success: false, error: "Internal server error" });
-    }
-};
-
 exports.sendMessage = async (req, res) => {
     const { message = "", type = "text" } = req.body;
     const phoneNumber = req.body.phoneNumber?.startsWith("+") ? req.body.phoneNumber.slice(1) : req.body.phoneNumber;

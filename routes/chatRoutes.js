@@ -8,8 +8,7 @@ const {
     getFilesByChatId,
     forwardMessage,
     incrementUnreadCount,
-    resetUnreadCount,
-    markMessagesAsRead
+    resetUnreadCount
 } = require("../controllers/chatController");
 const { sendMultipleFilesWithCaptions } = require("../controllers/sendMultipleFilesWithCaptions");
 const multer = require("multer");
@@ -27,5 +26,4 @@ router.get("/history/:chatId", getChatHistory);
 router.get("/files/:chatId", getFilesByChatId);
 router.patch("/:chatId/increment-unread", incrementUnreadCount);
 router.patch("/:chatId/reset-unread", resetUnreadCount);
-router.patch("/:chatId/mark-read", markMessagesAsRead);
 module.exports = router;
