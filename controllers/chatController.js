@@ -264,89 +264,103 @@ exports.sendMessage = async (req, res) => {
 
 exports.forwardMessage = async (req, res) => {
     const { phoneNumbers, messages } = req.body;
+    let responses = [];
 
-    for (const phoneNumber of phoneNumbers) {
-        for (const message of messages) {
-            let payload;
-            const { type } = message;
+    try {
+        for (const phoneNumber of phoneNumbers) {
+            for (const message of messages) {
+                let payload;
+                const { type } = message;
 
-            if (type === "template") {
-                payload = {
-                    messaging_product: "whatsapp",
-                    to: phoneNumber,
-                    type: "template",
-                    template: {
-                        name: "hello_world",
-                        language: { code: "en_US" }
+                if (type === "template") {
+                    payload = {
+                        messaging_product: "whatsapp",
+                        to: phoneNumber,
+                        type: "template",
+                        template: {
+                            name: "hello_world",
+                            language: { code: "en_US" }
+                        }
+                    };
+                } else if (type === "text") {
+                    if (!message.content || typeof message.content !== "string") {
+                        return res.status(400).json({ status: "error", message: "Message is required" });
                     }
-                };
-            } else if (type === "text") {
-                if (!message.content || typeof message.content !== "string") {
-                    return res.status(400).json({ status: "error", message: "Message is required" });
+                    payload = {
+                        messaging_product: "whatsapp",
+                        to: phoneNumber,
+                        type: "text",
+                        text: { body: message.content.trim() }
+                    };
+                } else if (type === "image") {
+                    if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Image URL is required" });
+
+                    const mediaId = await forwardDocumentToWhatsapp(message.mediaUrl);
+                    payload = {
+                        messaging_product: "whatsapp",
+                        to: phoneNumber,
+                        type: "image",
+                        image: { id: mediaId, caption: message.content || "" }
+                    };
+                } else if (type === "document") {
+                    if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Document URL is required" });
+
+                    const mediaId = await forwardDocumentToWhatsapp(message.mediaUrl);
+                    payload = {
+                        messaging_product: "whatsapp",
+                        to: phoneNumber,
+                        type: "document",
+                        document: { id: mediaId, caption: message.content || "" }
+                    };
+                } else if (type === "audio") {
+                    if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Audio URL is required" });
+
+                    const mediaId = await forwardDocumentToWhatsapp(message.mediaUrl);
+                    payload = {
+                        messaging_product: "whatsapp",
+                        to: phoneNumber,
+                        type: "audio",
+                        audio: { id: mediaId }
+                    };
+                } else if (type === "video") {
+                    if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Video URL is required" });
+
+                    const mediaId = await forwardDocumentToWhatsapp(message.mediaUrl);
+                    payload = {
+                        messaging_product: "whatsapp",
+                        to: phoneNumber,
+                        type: "video",
+                        video: { id: mediaId, caption: message.content || "" }
+                    };
+                } else {
+                    return res.status(400).json({ status: "error", message: "Unsupported message type" });
                 }
-                payload = {
-                    messaging_product: "whatsapp",
-                    to: phoneNumber,
-                    type: "text",
-                    text: { body: message.content.trim() }
-                };
-            } else if (type === "image") {
-                if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Image URL is required" });
 
-                const mediaId = await forwardDocumentToWhatsapp(message.mediaUrl);
-                payload = {
-                    messaging_product: "whatsapp",
-                    to: phoneNumber,
-                    type: "image",
-                    image: { id: mediaId, caption: message.content || "" }
-                };
-            } else if (type === "document") {
-                if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Document URL is required" });
+                // ✅ Send WhatsApp message
+                const response = await axios.post(
+                    `https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`,
+                    payload,
+                    { headers: { Authorization: `Bearer ${process.env.ACCESS_TOKEN}` } }
+                );
 
-                const mediaId = await forwardDocumentToWhatsapp(message.mediaUrl);
-                payload = {
-                    messaging_product: "whatsapp",
-                    to: phoneNumber,
-                    type: "document",
-                    document: { id: mediaId, caption: message.content || "" }
-                };
-            } else if (type === "audio") {
-                if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Audio URL is required" });
+                responses.push(response.data);
 
-                const mediaId = await forwardDocumentToWhatsapp(message.mediaUrl);
-                payload = {
-                    messaging_product: "whatsapp",
-                    to: phoneNumber,
-                    type: "audio",
-                    audio: { id: mediaId }
-                };
-            } else if (type === "video") {
-                if (!message.mediaUrl) return res.status(400).json({ status: "error", message: "Video URL is required" });
+                // ✅ Capture WhatsApp message ID
+                const waMsgId = response.data?.messages?.[0]?.id;
 
-                const mediaId = await forwardDocumentToWhatsapp(message.mediaUrl);
-                payload = {
-                    messaging_product: "whatsapp",
-                    to: phoneNumber,
-                    type: "video",
-                    video: { id: mediaId, caption: message.content || "" }
-                };
-            } else {
-                return res.status(400).json({ status: "error", message: "Unsupported message type" });
-            }
-
-            try {
-                // Send WhatsApp message
-                await axios.post(`https://graph.facebook.com/v17.0/${process.env.PHONE_NUMBER_ID}/messages`, payload, {
-                    headers: {
-                        Authorization: `Bearer ${process.env.ACCESS_TOKEN}`
-                    }
-                });
-
-                // Create Chat if not exist
+                // ✅ Ensure chat exists
                 let chat = await Chat.findOne({ phoneNumber });
-                if (!chat) return res.status(404).json({ status: "error", message: "Chat not found" });
+                if (!chat) {
+                    const name = await generateGuestName();
+                    chat = new Chat({
+                        chatId: generateChatId(phoneNumber),
+                        phoneNumber,
+                        name
+                    });
+                    await chat.save();
+                }
 
-                // Save message in DB
+                // ✅ Save forwarded message with waMsgId + status
                 const newMessage = new Message({
                     chatId: chat.chatId,
                     phoneNumber,
@@ -356,11 +370,14 @@ exports.forwardMessage = async (req, res) => {
                     messageType: type,
                     content: message.content || "",
                     mediaUrl: message.mediaUrl || null,
-                    fileName: null
+                    fileName: null,
+                    whatsappMessageId: waMsgId,   // 🟢 Added
+                    status: "sent"                // 🟢 Added
                 });
 
                 await newMessage.save();
 
+                // ✅ Emit via Socket.IO
                 const io = getIO();
                 if (io) {
                     console.log("emit_2");
@@ -378,24 +395,26 @@ exports.forwardMessage = async (req, res) => {
                         content: message.content || "",
                         mediaUrl: message.mediaUrl || null,
                         fileName: newMessage.fileName,
-                        timestamp: newMessage.createdAt
+                        timestamp: newMessage.createdAt,
+                        status: newMessage.status
                     });
                 } else {
                     console.log("Socket.IO not initialized");
                 }
-            } catch (error) {
-                // console.error("Error sending message:", error);
-                return res.status(500).json({
-                    status: "error",
-                    message: error.response?.data?.error?.message || error.message,
-                    details: error.response?.data || {}
-                });
             }
         }
-    }
 
-    res.status(200).json({ status: "success", message: "Messages forwarded successfully" });
+        res.status(200).json({ status: "success", message: "Messages forwarded successfully", responses });
+    } catch (error) {
+        console.error("Error forwarding message:", error);
+        return res.status(500).json({
+            status: "error",
+            message: error.response?.data?.error?.message || error.message,
+            details: error.response?.data || {}
+        });
+    }
 };
+
 
 exports.createChat = async (req, res) => {
     try {
