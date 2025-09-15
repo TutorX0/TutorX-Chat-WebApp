@@ -1,12 +1,13 @@
 export function whatsappTime(dateInput: string | number | Date) {
     const date = new Date(dateInput);
-
-    // Get today's UTC midnight
     const now = new Date();
-    const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
-    const targetUTC = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
 
-    const diffInDays = (todayUTC - targetUTC) / (1000 * 60 * 60 * 24);
+    // Strip time → local midnight
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfTarget = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+    const diffInMs = startOfToday.getTime() - startOfTarget.getTime();
+    const diffInDays = diffInMs / (1000 * 60 * 60 * 24);
 
     if (diffInDays === 0) {
         // Today → show time
@@ -22,9 +23,11 @@ export function whatsappTime(dateInput: string | number | Date) {
     }
 
     if (diffInDays < 7) {
-        return date.toLocaleDateString([], { weekday: "short" }); // Mon, Tue...
+        // Within the last week → weekday
+        return date.toLocaleDateString([], { weekday: "short" }); // e.g. Mon
     }
 
+    // Older → show full date
     return date.toLocaleDateString([], {
         day: "2-digit",
         month: "2-digit",
