@@ -5,3 +5,4 @@ export * from "./readable-time";
 export * from "./axios-client";
 export * from "./extension";
 export * from "./utils";
+export * from "./whatsapp-time";

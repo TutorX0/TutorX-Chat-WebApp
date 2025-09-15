@@ -1,5 +1,6 @@
 import { useSearchParams } from "react-router-dom";
-import { UserCircle } from "lucide-react";
+// import { UserCircle, Check, CheckCheck, Clock, OctagonAlert } from "lucide-react";
+import{UserCircle} from "lucide-react";
 import { AxiosError } from "axios";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -17,6 +18,7 @@ import {
 import { useUpdateSearchParam } from "@/hooks";
 import { axiosClient } from "@/lib";
 import { useStore } from "@/store";
+import { whatsappTime } from "@/lib";
 
 // ✅ extended type with unreadCount
 type ChatItemProps = Pick<ChatItemType, "_id" | "name" | "lastMessage" | "unreadCount"> & {
@@ -27,7 +29,6 @@ type ChatItemProps = Pick<ChatItemType, "_id" | "name" | "lastMessage" | "unread
 export function ChatItem({ _id, chatId, chatType, name, lastMessage, unreadCount }: ChatItemProps) {
     const [loading, setLoading] = useState(false);
     const addGroup = useStore((state) => state.addGroup);
-
 
     async function removeFromGroup() {
         if (loading) return;
@@ -96,12 +97,12 @@ function Item({ _id, name, lastMessage, chatId, unreadCount }: ChatItemProps) {
         ? `+${chatId.slice(-10)}`
         : "Unknown";
 
-const handleClick = () => {
-    console.log(`[ChatItem] Opening chat: ${chatId} → resetting unread`);
-    resetUnread(chatId);
-    axiosClient.patch(`/chat/${chatId}/reset-unread`); // 👈 Remove the extra "chat_" prefix
-    updateSearchParam("open", _id);
-};
+    const handleClick = () => {
+        console.log(`[ChatItem] Opening chat: ${chatId} → resetting unread`);
+        resetUnread(chatId);
+        axiosClient.patch(`/chat/${chatId}/reset-unread`); // 👈 Remove the extra "chat_" prefix
+        updateSearchParam("open", _id);
+    };
 
     return (
         <div
@@ -113,21 +114,56 @@ const handleClick = () => {
                 strokeWidth="1"
                 className="size-8 rounded-full text-neutral-500"
             />
+
             <div className="flex flex-col overflow-hidden flex-1">
+                {/* Top row: name + unread badge */}
                 <div className="flex justify-between items-center">
                     <p className="font-semibold truncate">{displayName}</p>
-                    {/* 🔥 Unread badge on right */}
 
-                {Number(unreadCount) > 0 && (
-    <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white">
-        {unreadCount} 
-    </span>
-)}
+                    {Number(unreadCount) > 0 && (
+                        <span className="ml-2 flex h-5 w-5 items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white">
+                            {unreadCount}
+                        </span>
+                    )}
                 </div>
+                    
+                {/* Bottom row: last message + time + ticks */}
                 {lastMessage && lastMessage.content !== null ? (
-                    <p className="text-sm text-neutral-500 truncate">
-                        {lastMessage.content || "[Media Message]"}
-                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                        {/* Message preview */}
+                        <p className="text-sm text-neutral-500 truncate flex-1">
+                            {lastMessage.content || "[Media Message]"}
+                        </p>
+
+                        {/* Time + status */}
+                        <div className="flex items-center gap-1 shrink-0">
+                            <p className="text-xs text-neutral-400">
+                                {lastMessage.timestamp
+                                    ? whatsappTime(lastMessage.timestamp)
+                                    : ""}
+                                   {/* {console.log(
+                                    "whatsappTime",whatsappTime(lastMessage.timestamp))}  */}
+                            </p>
+
+
+                            {/* ✅ WhatsApp-style ticks (based on status only)
+                            {lastMessage.status === "failed" && (
+                                <OctagonAlert className="w-4 h-4 text-neutral-400" />
+                            )}
+                            {lastMessage.status === "pending" && (
+                                <Clock className="w-4 h-4 text-neutral-400" />
+                            )}
+                            {lastMessage.status === "sent" && (
+                                <Check className="w-4 h-4 text-neutral-400" />
+                            )}
+                            {lastMessage.status === "delivered" && (
+                                <CheckCheck className="w-4 h-4 text-neutral-400" />
+                            )}
+                            {lastMessage.status === "read" && (
+                                <CheckCheck className="w-4 h-4 text-blue-500" />
+                            )} */}
+                        </div>
+                    </div>
                 ) : (
                     <p className="text-sm text-neutral-400 italic">
                         No messages yet
