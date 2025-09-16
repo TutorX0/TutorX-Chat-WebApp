@@ -66,7 +66,7 @@ export function ChatItem({
     }
   }
 
-  return chatType === "chats" ? (
+  return chatType === "chats" || chatType === "templates" ? (
     <Item
       name={name}
       _id={_id}
