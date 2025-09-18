@@ -18,8 +18,12 @@ type ChatItemsProps = {
 
 export function ChatItems({ chats, loading, search }: ChatItemsProps) {
     const [searchParams] = useSearchParams();
-    const chatType = searchParams.get("chat_type");
-    console.log("chat types: ", chatType)
+
+// ✅ normalize + fallback
+const searchChatType = searchParams.get("chat_type");
+const chatType = searchChatType ? searchChatType.toLowerCase() : "chats";
+console.log("chat type:", chatType);
+
 
     const groups = useStore((state) => state.groups);
 

@@ -66,16 +66,31 @@ export function ChatItem({
     }
   }
 
-  return chatType === "chats" || chatType === "templates" ? (
-    <Item
-      name={name}
-      _id={_id}
-      chatType={chatType}
-      chatId={chatId}
-      lastMessage={lastMessage}
-      unreadCount={unreadCount}
-    />
-  ) : (
+  // ✅ treat only group types as ContextMenu
+  const isGroup =
+    chatType !== null && chatType !== "chats" && chatType !== "templates";
+
+  // 🔍 Debug log
+  console.log(
+    `🔍 ChatItem Render → chatType: ${chatType}, isGroup: ${isGroup}, chatId: ${chatId}`
+  );
+
+  if (!isGroup) {
+    // ✅ home (null), chats, templates → normal item
+    return (
+      <Item
+        name={name}
+        _id={_id}
+        chatType={chatType}
+        chatId={chatId}
+        lastMessage={lastMessage}
+        unreadCount={unreadCount}
+      />
+    );
+  }
+
+  // ✅ only groups (like czsc) → context menu
+  return (
     <ContextMenu>
       <ContextMenuTrigger>
         <Item
