@@ -135,6 +135,12 @@
     scrollbar-color: #888 transparent;
 }
 
+@media (max-width: 770px), (max-height: 668px) {
+  .forward-text {
+    display: none;
+  }
+}
+
 .custom-scroll::-webkit-scrollbar {
     width: 6px;
     height: 6px;

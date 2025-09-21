@@ -132,22 +132,25 @@ export function TemplateList() {
                   {/* Forward Button */}
                   <div className="mt-auto">
                     <ForwardTemplate templateName={tpl.name} language={tpl.language}>
-                      <Button className="w-full flex flex-wrap items-center justify-center gap-2 bg-[#12382B] hover:bg-[#0f2d22] text-white font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border-0 break-words">
-                        <svg
-                          className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                          />
-                        </svg>
-                        Forward Template
-                      </Button>
+                      <Button className="w-full flex 
+                      flex-wrap overflow-hidden 
+                     items-center justify-center gap-2 bg-[#12382B] hover:bg-[#0f2d22] text-white font-medium py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 border-0">
+  <svg
+    className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth="2"
+      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+    />
+  </svg>
+  <span className="forward-text">Forward Template</span>
+</Button>
+
                     </ForwardTemplate>
                   </div>
                 </div>
