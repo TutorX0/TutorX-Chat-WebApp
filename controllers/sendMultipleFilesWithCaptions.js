@@ -44,10 +44,10 @@ exports.sendMultipleFilesWithCaptions = async (req, res) => {
 
             let mediaId, s3Url;
             try {
-                console.log("Uploading media to WhatsApp:", fileName);
-                console.log("File buffer size:", fileBuffer.length, "bytes");
+                //console.log("Uploading media to WhatsApp:", fileName);
+                //console.log("File buffer size:", fileBuffer.length, "bytes");
                 const uploadResult = await uploadImageToWhatsapp(fileBuffer, fileName);
-                console.log("Media uploaded successfully:", uploadResult);
+                //console.log("Media uploaded successfully:", uploadResult);
                 mediaId = uploadResult.mediaId;
                 s3Url = uploadResult.s3Url;
             } catch (err) {
@@ -114,7 +114,7 @@ exports.sendMultipleFilesWithCaptions = async (req, res) => {
                 }
 
                 const io = getIO();
-                console.log("emit_3");
+                //console.log("emit_3");
                 io.emit("newMessage", {
                     chatId: chat.chatId,
                     chatName: chat.name,

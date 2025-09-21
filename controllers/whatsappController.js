@@ -49,38 +49,36 @@ exports.receiveMessage = async (req, res) => {
         const body = req.body;
 
         // ✅ Handle delivery/read statuses
-       if (body.entry?.[0]?.changes?.[0]?.value?.statuses?.[0]) {
-    const statuses = body.entry[0].changes[0].value.statuses;
+        if (body.entry?.[0]?.changes?.[0]?.value?.statuses?.[0]) {
+            const statuses = body.entry[0].changes[0].value.statuses;
 
-    for (let status of statuses) {
-        const whatsappMessageId = status.id;
-        const statusValue = status.status; // "sent", "delivered", "read"
+            for (let status of statuses) {
+                const whatsappMessageId = status.id;
+                const statusValue = status.status; // "sent", "delivered", "read"
 
-        // 🟢 If read, set read: true
-        const updateData = { status: statusValue };
-        if (statusValue === "read") {
-            updateData.read = true;
+                // 🟢 If read, set read: true
+                const updateData = { status: statusValue };
+                if (statusValue === "read") {
+                    updateData.read = true;
+                }
+
+                const message = await Message.findOneAndUpdate(
+                    { whatsappMessageId },
+                    { $set: updateData },
+                    { new: true }
+                );
+
+                const io = getIO();
+                io?.emit("messageStatusUpdate", {
+                    whatsappMessageId: message?._id,
+                    status: statusValue,
+                    read: message?.read,
+                    chatId: message?.chatId.toString()
+                });
+            }
+
+            return res.status(200).send("STATUS_RECEIVED");
         }
-
-        const message = await Message.findOneAndUpdate(
-            { whatsappMessageId },
-            { $set: updateData },
-            { new: true }
-        );
-
-        console.log("Updated message status:", message);
-
-        const io = getIO();
-        io?.emit("messageStatusUpdate", {
-            whatsappMessageId: message?._id,
-            status: statusValue,
-            read: message?.read,
-            chatId: message?.chatId.toString()
-        });
-    }
-
-    return res.status(200).send("STATUS_RECEIVED");
-}
 
         // ✅ Handle new incoming messages
         if (body.object && body.entry?.[0]?.changes?.[0]?.value?.messages?.[0]) {
@@ -92,7 +90,6 @@ exports.receiveMessage = async (req, res) => {
             let mediaUrl = null;
             let fileName = null;
             const token = process.env.ACCESS_TOKEN;
-            const savedMessages = [];
 
             switch (type) {
                 case "text":
@@ -130,6 +127,7 @@ exports.receiveMessage = async (req, res) => {
                 default:
                     content = "Unsupported message type";
             }
+
             const profileName = body.entry[0].changes[0].value.contacts?.[0]?.profile?.name;
             let chat = await Chat.findOne({ phoneNumber });
             if (!chat) {
@@ -142,8 +140,7 @@ exports.receiveMessage = async (req, res) => {
                 await chat.save();
             }
 
-            // 🟢 FIX: Save whatsappMessageId so statuses can update later
-            // In the receiveMessage function, after saving the new message
+            // 🟢 Save message
             const newMessage = new Message({
                 chatId: chat.chatId,
                 phoneNumber,
@@ -158,26 +155,22 @@ exports.receiveMessage = async (req, res) => {
 
             await newMessage.save();
 
-            const last = savedMessages[savedMessages.length - 1];
-            if (last) {
-                // 👈 Increment unread count for incoming user messages
-                await Chat.findOneAndUpdate(
-                    { chatId: chat.chatId },
-                    {
-                        $inc: { unreadCount: 1 }, // Increment unread count
-                        $set: {
-                            lastMessage: {
-                                content: newMessage.content || newMessage.fileName || "Media",
-                                messageType: newMessage.messageType,
-                                timestamp: newMessage.createdAt
-                            }
+            // 🟢 Always increment unread count for new incoming user messages
+            await Chat.findOneAndUpdate(
+                { chatId: chat.chatId },
+                {
+                    $inc: { unreadCount: 1 },
+                    $set: {
+                        lastMessage: {
+                            content: newMessage.content || newMessage.fileName || "Media",
+                            messageType: newMessage.messageType,
+                            timestamp: newMessage.createdAt
                         }
                     }
-                );
-            }
+                }
+            );
 
             const io = getIO();
-            console.log("emit_5");
             io?.emit("newMessage", {
                 chatId: chat.chatId,
                 chatName: chat.name,
@@ -213,7 +206,6 @@ exports.verifyWebhook = (req, res) => {
     const challenge = req.query["hub.challenge"];
 
     if (mode === "subscribe" && token === VERIFY_TOKEN) {
-        console.log("Webhook verified successfully.");
         return res.status(200).send(challenge);
     } else {
         console.warn("Webhook verification failed.");

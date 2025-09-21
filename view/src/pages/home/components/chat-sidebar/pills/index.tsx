@@ -21,7 +21,7 @@ export function Pills({ pillTitles }: PillsProps) {
 
      
 
-console.log("showTemplate", searchParams.get("chat_type"), showTemplate);
+//console.log("showTemplate", searchParams.get("chat_type"), showTemplate);
 const handleClick = (title: string) => {
   if(searchParams.get("chat_type") !== "templates") {
     showTemplateTrue();

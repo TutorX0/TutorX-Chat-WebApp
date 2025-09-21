@@ -9,8 +9,7 @@ export function Protect() {
     const status = useFetchUser();
      const [searchParams] = useSearchParams();
      const [openedChat, setOpenedChat] = useState<string| null> (null)
- console.log("new chat opened: ", openedChat
- )
+  //console.log("new chat opened: ", openedChat)
   useAddRealtimeMessage(openedChat);
 useEffect(()=>{
     setOpenedChat(searchParams.get("open"))

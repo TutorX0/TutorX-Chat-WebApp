@@ -12,7 +12,7 @@ export function SocketProvider({ children }: PropsWithChildren) {
 
         // 🔍 Debug all incoming events
         newSocket.onAny((event, ...args) => {
-            console.log("📡 [SOCKET EVENT]", event, JSON.stringify(args, null, 2));
+            //console.log("📡 [SOCKET EVENT]", event, JSON.stringify(args, null, 2));
         });
 
         return () => {

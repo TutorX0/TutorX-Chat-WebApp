@@ -226,7 +226,7 @@ exports.sendMessage = async (req, res) => {
         const io = getIO();
         if (io) {
             for (let newMessage of savedMessages) {
-                console.log("emit_1");
+                //console.log("emit_1");
                 io.emit("newMessage", {
                     chatId: chat.chatId,
                     chatName: chat.name,
@@ -380,7 +380,7 @@ exports.forwardMessage = async (req, res) => {
                 // ✅ Emit via Socket.IO
                 const io = getIO();
                 if (io) {
-                    console.log("emit_2");
+                    //console.log("emit_2");
                     io.emit("newMessage", {
                         chatId: chat.chatId,
                         chatName: chat.name,
@@ -399,7 +399,7 @@ exports.forwardMessage = async (req, res) => {
                         status: newMessage.status
                     });
                 } else {
-                    console.log("Socket.IO not initialized");
+                    //console.log("Socket.IO not initialized");
                 }
             }
         }
@@ -456,7 +456,7 @@ exports.createChat = async (req, res) => {
 exports.incrementUnreadCount = async (req, res) => {
     try {
         const { chatId } = req.params;
-        console.log("incrementing undead for chatId:", chatId);
+        //console.log("incrementing undead for chatId:", chatId);
         if (!chatId) {
             return res.status(400).json({
                 status: "error",
@@ -590,7 +590,7 @@ exports.getChatHistory = async (req, res) => {
 
         const messages = await Message.find({ chatId }).sort({ createdAt: 1 }); // Oldest first
 
-        console.log(messages);
+        //console.log(messages);
 
         const groupedMessages = {};
 

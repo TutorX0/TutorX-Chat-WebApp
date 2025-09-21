@@ -32,17 +32,17 @@ useEffect(() => {
 
   // // 🔍 Debug: log every socket event
   socket.onAny((event, ...args) => {
-    console.log("📡 [SOCKET DEBUG] Event:", event, args);
+    //console.log("📡 [SOCKET DEBUG] Event:", event, args);
   });
 
      socket.on("messageStatusUpdate", (data) => {
-            console.log("📊 [SOCKET messageStatusUpdate RAW DATA]", data);
+            //console.log("📊 [SOCKET messageStatusUpdate RAW DATA]", data);
             // Update message status using your existing method signature
             updateMessageStatus(data.chatId, data.whatsappMessageId, data.status);
         });
 
   socket.on("newMessage", (data) => {
-    console.log("📥 [SOCKET newMessage RAW DATA]", data);
+    //console.log("📥 [SOCKET newMessage RAW DATA]", data);
 
     const parsedResponse = socketData.safeParse(data);
     if (!parsedResponse.success) return toast.error("Invalid data type sent from server");
@@ -69,9 +69,9 @@ useEffect(() => {
       read: false,
     };
 
-    console.log("chat details: ", chatDetails)
-    console.log("new Message: ", newMessage)
-    console.log(openChatId, chatDetails?.chat_id)
+    //console.log("chat details: ", chatDetails)
+    //console.log("new Message: ", newMessage)
+    //console.log(openChatId, chatDetails?.chat_id)
 
 
     pushMessage(chatDetails, newMessage);
@@ -82,7 +82,7 @@ useEffect(() => {
       newMessage.sender === user?.id;
 
   if (!isOwnMessage) {
-    console.log("not own message")
+    //console.log("not own message")
                 // 👈 Increment unread count for incoming messages
                 if(openChatId!==chatDetails?.chat_id) incrementUnread(parsedResponse.data.chatId);
                 playNotification();

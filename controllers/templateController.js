@@ -117,7 +117,7 @@ exports.sendTemplate = async (req, res) => {
             // 🔹 Emit via socket
             const io = getIO();
             if (io) {
-                console.log("emit_4");
+                //console.log("emit_4");
                 io.emit("newMessage", {
                     chatId: chat.chatId,
                     chatName: chat.name,

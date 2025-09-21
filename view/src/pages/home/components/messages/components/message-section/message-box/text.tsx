@@ -42,17 +42,17 @@ export function TextMessage({ message }: TextMessageProps) {
     }
 
     // // ✅ Full debug log for each message
-    // console.log("🔍 [Message Debug Log] =====================================");
-    // console.log("Sender     :", message.sender);
-    // console.log("ID         :", message._id);
-    // console.log("Chat ID    :", message.chatId);
-    // console.log("Type       :", message.type);
-    // console.log("Content    :", message.content);
-    // console.log("Media URL  :", message.mediaUrl);
-    // console.log("Reply To   :", message.replyTo);
-    // console.log("Status     :", message.status);
-    // console.log("Created At :", message.createdAt);
-    // console.log("============================================================");
+    // //console.log("🔍 [Message Debug Log] =====================================");
+    // //console.log("Sender     :", message.sender);
+    // //console.log("ID         :", message._id);
+    // //console.log("Chat ID    :", message.chatId);
+    // //console.log("Type       :", message.type);
+    // //console.log("Content    :", message.content);
+    // //console.log("Media URL  :", message.mediaUrl);
+    // //console.log("Reply To   :", message.replyTo);
+    // //console.log("Status     :", message.status);
+    // //console.log("Created At :", message.createdAt);
+    // //console.log("============================================================");
 
     return (
         <div

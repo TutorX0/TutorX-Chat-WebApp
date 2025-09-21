@@ -22,7 +22,7 @@ export function ChatItems({ chats, loading, search }: ChatItemsProps) {
 // ✅ normalize + fallback
 const searchChatType = searchParams.get("chat_type");
 const chatType = searchChatType ? searchChatType.toLowerCase() : "chats";
-console.log("chat type:", chatType);
+//console.log("chat type:", chatType);
 
 
     const groups = useStore((state) => state.groups);
@@ -67,7 +67,7 @@ console.log("chat type:", chatType);
         if (groupLoading && hasResolvedInitialGroup) setGroupLoading(false);
     }, [filteredChats, groupLoading, hasResolvedInitialGroup]);
 
-    console.log("chat itesms: ", filteredChats)
+    //console.log("chat itesms: ", filteredChats)
 
     return (
         <ScrollArea className={cn("h-[70vh] grow px-5", chatType === "chats" ? "pb-4" : "")}>

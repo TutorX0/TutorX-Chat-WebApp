@@ -59,7 +59,7 @@ export const createMessageSlice: StateCreator<
 
   // 🔥 Fetch messages from API
   fetchMessages: async (chatId) => {
-    console.log(get()); // ✅ fix: call get()
+    //console.log(get()); // ✅ fix: call get()
 
     if (get().messages[chatId]) return;
 
@@ -69,7 +69,7 @@ export const createMessageSlice: StateCreator<
 
     try {
       const response = await axiosClient(`/chat/history/${chatId}`);
-      console.log("📡 API /chat/history/:chatId raw:", response);
+      //console.log("📡 API /chat/history/:chatId raw:", response);
       const parsedResponse = fetchMessageResponseSchema.safeParse(response.data);
 
       if (!parsedResponse.success) {
@@ -228,11 +228,11 @@ return {
         ])
       );
 
-      console.log(
-        `🟢 Status updated → chatId:${chatId}, whatsappMsgId:${whatsappMessageId}, status:${normalizeStatus(
-          newStatus
-        )}`
-      );
+      // //console.log(
+      //   `🟢 Status updated → chatId:${chatId}, whatsappMsgId:${whatsappMessageId}, status:${normalizeStatus(
+      //     newStatus
+      //   )}`
+      // );
 
       return {
         messages: {

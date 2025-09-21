@@ -70,10 +70,10 @@ export function ChatItem({
   const isGroup =
     chatType !== null && chatType !== "chats" && chatType !== "templates";
 
-  // 🔍 Debug log
-  console.log(
-    `🔍 ChatItem Render → chatType: ${chatType}, isGroup: ${isGroup}, chatId: ${chatId}`
-  );
+  // // 🔍 Debug log
+  // //console.log(
+  //   `🔍 ChatItem Render → chatType: ${chatType}, isGroup: ${isGroup}, chatId: ${chatId}`
+  // // );
 
   if (!isGroup) {
     // ✅ home (null), chats, templates → normal item
