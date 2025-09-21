@@ -16,7 +16,7 @@ export function Pills({ pillTitles }: PillsProps) {
 
   const toggleShowTemplate = useStore((state) => state.toggleShowTemplate);
   const showTemplateTrue = useStore((state) => state.showTemplateTrue);
-  const showTemplate = useStore((state) => state.showTemplate);
+  // const showTemplate = useStore((state) => state.showTemplate);
   
 
      

@@ -31,9 +31,9 @@ useEffect(() => {
   if (!socket) return;
 
   // // 🔍 Debug: log every socket event
-  socket.onAny((event, ...args) => {
-    //console.log("📡 [SOCKET DEBUG] Event:", event, args);
-  });
+  // socket.onAny((event, ...args) => {
+  //   //console.log("📡 [SOCKET DEBUG] Event:", event, args);
+  // });
 
      socket.on("messageStatusUpdate", (data) => {
             //console.log("📊 [SOCKET messageStatusUpdate RAW DATA]", data);
