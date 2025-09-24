@@ -119,19 +119,22 @@ exports.sendTemplate = async (req, res) => {
             if (io) {
                 //console.log("emit_4");
                 io.emit("newMessage", {
-                    chatId: chat.chatId,
-                    chatName: chat.name,
-                    chat_id: chat._id,
-                    messageId: newMessage._id,
-                    phoneNumber,
-                    sender: "admin",
-                    messageType: newMessage.messageType,
-                    content: newMessage.content,
-                    mediaUrl: newMessage.mediaUrl,
-                    fileName: newMessage.fileName,
-                    timestamp: newMessage.createdAt,
-                    status: newMessage.status
-                });
+  chatId: chat.chatId,
+  chatName: chat.name,
+  chat_id: chat._id,
+  messageId: newMessage._id,
+  phoneNumber,
+  sender: "admin",
+  messageType: newMessage.messageType,
+  content: newMessage.content,
+  mediaUrl: newMessage.mediaUrl,
+  fileName: newMessage.fileName,
+  timestamp: newMessage.createdAt,
+  status: newMessage.status,
+  whatsappMessageId: newMessage.whatsappMessageId, // 👈 add
+  isForwarded: false,                              // 👈 add default
+  replyTo: null                                    // 👈 add default
+});
             }
 
             results.push({
