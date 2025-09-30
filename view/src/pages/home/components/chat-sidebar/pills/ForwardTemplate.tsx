@@ -18,11 +18,25 @@ export function ForwardTemplate({ templateName, language, children }: ForwardTem
 
   const chats = useStore((state) => state.chats);
 
+  const allPhoneNumbers = chats.map((chat) => chat.phoneNumber);
+  const isAllSelected = selectedPhoneNumbers.length === allPhoneNumbers.length;
+
   function handleSelectChat(currentChatPhoneNumber: string) {
     if (loading) return;
-    else if (selectedPhoneNumbers.includes(currentChatPhoneNumber))
+    if (selectedPhoneNumbers.includes(currentChatPhoneNumber)) {
       setSelectedPhoneNumbers((prev) => prev.filter((phoneNumber) => phoneNumber !== currentChatPhoneNumber));
-    else setSelectedPhoneNumbers((prev) => [...prev, currentChatPhoneNumber]);
+    } else {
+      setSelectedPhoneNumbers((prev) => [...prev, currentChatPhoneNumber]);
+    }
+  }
+
+  function handleSelectAll() {
+    if (loading) return;
+    if (isAllSelected) {
+      setSelectedPhoneNumbers([]); // unselect all
+    } else {
+      setSelectedPhoneNumbers(allPhoneNumbers); // select all
+    }
   }
 
   function resetForwarding() {
@@ -38,7 +52,7 @@ export function ForwardTemplate({ templateName, language, children }: ForwardTem
       await axiosClient.post("/whatsapp/send-template", {
         templateName,
         language,
-        contacts: selectedPhoneNumbers
+        contacts: selectedPhoneNumbers,
       });
       toast.success("Template sent successfully");
       setSelectedPhoneNumbers([]);
@@ -59,6 +73,16 @@ export function ForwardTemplate({ templateName, language, children }: ForwardTem
         <DialogHeader>
           <DialogTitle>Send template "{templateName}"</DialogTitle>
         </DialogHeader>
+
+        {/* ✅ Select All checkbox */}
+        <div
+          className="my-2 flex cursor-pointer items-center justify-between gap-x-4 rounded-md border px-4 py-3"
+          onClick={handleSelectAll}
+        >
+          <p className="font-medium">Select All</p>
+          <Checkbox checked={isAllSelected} />
+        </div>
+
         <ScrollArea className="h-full max-h-[40vh] pr-3">
           {chats.map((chat) => (
             <div
@@ -71,6 +95,7 @@ export function ForwardTemplate({ templateName, language, children }: ForwardTem
             </div>
           ))}
         </ScrollArea>
+
         <DialogFooter className="z-10 flex flex-row items-center justify-center gap-x-4 pr-3">
           <Button variant="outline" className="rounded-full" onClick={resetForwarding}>
             Cancel
